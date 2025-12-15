@@ -44,64 +44,10 @@ MainWindow::MainWindow(int userId, QWidget *parent)
     }
 
 
-/*
-    qDebug() << QSqlDatabase::drivers();
-
-    QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL"); //QSQLITE - да, QPSQL - нет
-
-    QString os = detectOS();
-    if (os == "Windows"){
-        //this->showFullScreen(); //на очень полный экран
-        db.setUserName("postgres");
-        db.setPassword("123");
-        db.setDatabaseName("newdb_");
-        db.setHostName("localhost");
-    }
-    else if (os == "Linux"){
-        this->showFullScreen(); //на очень полный экран
-        db.setUserName("postgres");
-        db.setPassword("postgres1");
-        db.setDatabaseName("newdb");
-        db.setHostName("localhost");
-    }
-    else { qDebug() << "Else operating system:" << os; }
-
-    /*QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
-    db.setHostName("localhost");
-    db.setPort(5432);
-    db.setUserName("postgres");
-    db.setPassword("123");
-    db.setDatabaseName("newdb");*/
-/*
-    //db.setConnectOptions("client_encoding=UTF8");  // Указываем кодировку
-    if (db.open()) {
-        // Установите кодировку UTF-8 после подключения
-        QSqlQuery query("SET CLIENT_ENCODING TO 'UTF8'");
-        query.exec();
-
-        qDebug() << "open можем идти вперёд";
-    }else{
-        qDebug() << "не no no open";// << db.lastError().text();
-    }
-    //db.close();
-
-*/
-
-
-    //скрыть часть виджета
-    // ui->tabWidget->setTabVisible(2, false);
-    //ui->tabWidget->setTabVisible(3, false);
-    //ui->tabWidget->setTabVisible(2, false);
-
     ui->tabWidget_3->setTabVisible(2, false);
-
-    //ui->tabWidget->setTabVisible(5, false); //скрыть отчёты
 
     ui->spinUserDoseYear->setValue(5);
     ui->tabWidget_4->setTabVisible(3, false); //скрыть вкладку история комплектов kid
-
-
-    //ui->tabWidget_4->setTabVisible(2, false);
 
     //скрыть кнопк и выпадающий список
     ui->combobox_createReport->hide();
@@ -109,17 +55,11 @@ MainWindow::MainWindow(int userId, QWidget *parent)
 
 
     //для пользоватлей и их прокрток
-    // Îòêëþ÷àåì ãîðèçîíòàëüíóþ ïðîêðóòêó
     ui->scrollArea_5->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    // Âêëþ÷àåì âåðòèêàëüíóþ ïðîêðóòêó òîëüêî ïðè íåîáõîäèìîñòè
     ui->scrollArea_5->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    // Ðàçðåøàåì ðàñòÿãèâàíèå ñîäåðæèìîãî ïî øèðèíå
-    ui->scrollArea_5->setWidgetResizable(true);  // Âàæíî!
+    ui->scrollArea_5->setWidgetResizable(true);
 
     ui->scrollAreaWidgetContents_5->setMinimumWidth(300);
-
-
-
 
     // Настройка таймера (300ms - время ожидания второго нажатия)
     m_doubleClickTimer.setSingleShot(true);
@@ -232,11 +172,6 @@ MainWindow::MainWindow(int userId, QWidget *parent)
         ui->label_userId->setText("Ошибка загрузки данных currentUserId");
     }
 
-
-
-
-    //значения по умолчанию для нарядов
-    //doubleSpinBox->setValue(0.33333);
     ui->spinBox_time->setValue(43200);
     ui->spinUserDoseYear->setValue(5);
 
@@ -268,43 +203,8 @@ MainWindow::MainWindow(int userId, QWidget *parent)
 //обновление таблицы нарядов
     refresh_duty_table();
     tableUsersDutyUpd();
-
-
-    /*//настройки ini
-    //qDebug() << "Òåêóùàÿ ðàáî÷àÿ äèðåêòîðèÿ:" << QDir::currentPath();
-    //QString name_settings = "../kdd_26,03,25/settings.ini";
-    QString name_settings = "settings.ini";
-    // сществование файла
-    if (QFile::exists(name_settings))
-    {
-        //счтение настроей
-        QSettings settings ("settings.ini",QSettings::IniFormat);
-        settings.beginGroup("Settings");
-        // сществование секции
-        // if ( sections.contains("Settings", Qt::CaseInsensitive) ){ ... }
-        // проверка сществования ключа
-        // if (settings.contains("SERVICE_SDS_ASIDK") ){ ... }
-        // задание ключей не найдено, использовать значение по молчанию
-        QString G_ip_database = settings.value("ip_database",QString("127.0.0.1")).toString();
-        QString G_DatabaseName = settings.value("DatabaseName",QString("kdd")).toString();
-        QString G_UserName = settings.value("UserName",QString("postgres")).toString();
-        QString G_Password = settings.value("Password",QString("postgres1")).toString();
-
-        settings.endGroup();
-
-        //qDebug() << "настройки подключены";
-        QMessageBox::information(this, "Успех", "Настройки подключены");
-
-    }
-    else
-    {
-        QMessageBox::information(this, "Ошибка01", "Настройки не подключены");
-    }*/
-
-
 }
 
-/*-----------------*/
 
 void MainWindow::on_btnSetChange_pressed(){
 
@@ -518,10 +418,6 @@ void MainWindow::updateDataFromDatabase() {
 
     QSqlQuery query;
     query.prepare("SELECT user_id, name_0, name_1, name_2 login FROM users");
-    //query.prepare("SELECT user_id, login, password, name_0, name_1, name_2, gender, birthday, tab_num, department, card_id, set_ID, kas_ID, mesh_ID, doz_tld_id, cell_date, dose_year, dose_year_now, dose_year_now_ppd, code, block, last_update, role FROM users");// WHERE user_id = :user");
-
-    //очистить verticalUsersList
-    //ui->verticalUsersList->clear();
 
     while (query.next()) {
         QString name0 = query.value("name_0").toString();
@@ -538,41 +434,11 @@ void MainWindow::updateDataFromDatabase() {
         ui->verticalUsersList->addWidget(button);
     }
 
-    //qDebug() << "Data updated successfully!";
-
-
-
-    //обновление данных
-
-
 }
 
 
 void MainWindow::on_btnAddPhoto_pressed() //добавили фоточку
 {
-    /*
-    //добавить в бд
-
-    QString filePath = QFileDialog::getOpenFileName(this, "Выберите фото", "", "Images (*.png *.jpg *.jpeg)");
-
-    if (filePath.isEmpty()) {
-        return;
-    }
-
-    QPixmap pixmap(filePath);
-
-    if (pixmap.isNull()) {
-        QMessageBox::warning(this, "Ошибка", "Не удалось загрузить изображение!");
-        return;
-    }
-
-    ui->labelPhoto->setPixmap(pixmap.scaled(150, 150, Qt::KeepAspectRatio));
-    QFile file(filePath);
-
-    if (file.open(QIODevice::ReadOnly)) {
-        photoData = file.readAll();
-        file.close();
-    }*/
 
     QSqlQuery query;
     int user_id = 1; // Объявляем переменную до условий
@@ -593,11 +459,6 @@ void MainWindow::on_btnAddPhoto_pressed() //добавили фоточку
     else {
         user_id = ui->label_51->text().toInt(); // Преобразуем текст в число
     }
-
-    //query.prepare("CREATE TABLE user_photo(user_id bigint, user_photo bytea);");
-
-
-
     QString filePath;
 
     QString os = detectOS();
@@ -630,31 +491,6 @@ void MainWindow::on_btnAddPhoto_pressed() //добавили фоточку
     file.open(QIODevice::ReadOnly);
     QByteArray baToSend = file.readAll();
 
-    /**/
-    /*
-    //QByteArray imageData = file.readAll();
-    //file.close();
-    QFile filePath = file;
-    // Загружаем файл как бинарные данные
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly)) {
-        QMessageBox::critical(this, "Ошибка", "Не удалось открыть файл");
-        return;
-    }
-
-    // Создаем превью (QPixmap из файла)
-    QPixmap preview;
-    if (!preview.load(filePath)) {
-        QMessageBox::warning(this, "Ошибка", "Неверный формат изображения");
-        return;
-    }
-
-    // Отображаем превью
-    ui->labelPhoto->setPixmap(preview.scaled(200, 200, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    ui->labelPhoto->setAlignment(Qt::AlignCenter);
-
-    /**/
-
     QString rez = "";
     //query.prepare("insert into user_photo values (8,:img)");
     query.prepare("INSERT INTO user_photo (user_id, user_photo) VALUES (:user_id, :photo_data)");
@@ -684,7 +520,6 @@ void MainWindow::on_btnAddPhoto_pressed() //добавили фоточку
     } else {
         qDebug() << "Не удалось загрузить фото";
     }
-    //btnAddPhoto - заменить кнопку на btnChangePhoto
     file.close();
 
     updateUsersDatabase();
@@ -765,10 +600,7 @@ void MainWindow::on_btnCreateNewUser_pressed() //создаём нового п�
     int user_id = 1; // Значение по умолчанию, если таблица пуста
     if (query.exec("SELECT MAX(user_id) AS max_id FROM users;")) {
         if (query.next()) {
-            // Если в таблице есть записи, берём максимальный ID + 1
             user_id = query.value("max_id").toInt() + 1;
-            //qDebug() << "Максимальный user_id:" << user_id - 1;
-            //qDebug() << "Новый user_id:" << user_id;
         } else {
             //qDebug() << "Таблица пуста, используем user_id = 1";
         }
@@ -926,28 +758,8 @@ void MainWindow::on_btnCreateNewUser_pressed() //создаём нового п�
     query.bindValue(":doz_tld_id", IntDoz);
     if (!query.exec()) {
         qDebug() << "Ошибка при вставке в mesh:" << query.lastError().text();
-        //QSqlDatabase::database().rollback();  // Откатываем транзакцию
         return;
     }
-
-    //фотки
-    /*
-    //CREATE TABLE user_photo( user_id bigint, user_photo bytea)
-    //QSqlQuery query;
-    QString user_photo_history = R"(
-        CREATE TABLE user_photo_history(
-            user_id bigint,
-            user_photo bytea
-        );
-    )";
-
-    if (!query.exec()) {
-        qDebug() << "Ошибка при добавлении фото в базу данных:" << query.lastError().text();
-        //QMessageBox::information(this, "Ошибка4 фото", query.lastError().text());
-    }
-*/
-    //query.prepare("CREATE TABLE user_photo( user_id bigint, user_photo bytea)");
-
     // Получаем изображение из QLabel
     QPixmap pixmap = ui->labelPhoto->pixmap(Qt::ReturnByValue);
 
@@ -1476,85 +1288,8 @@ void MainWindow::updateUsersDatabase(){
             checkRole();
         });
     }
-/*
-    // Обновление выпадающих списков
-    QSqlQuery setQuery;
-    setQuery.prepare("SELECT DISTINCT set_id FROM mesh WHERE doz_tld_id IS NULL AND user_id IS NULL ORDER BY set_id");
-    if (setQuery.exec()) {
-        ui->selectSet->clear();
-        ui->selectSet->addItem("");
-        while (setQuery.next()) {
-            ui->selectSet->addItem(setQuery.value("set_id").toString());
-        }
-    }
 
-    // Очистка зависимых списков
-    ui->selectKas->clear();
-    ui->selectKas->addItem("");
-    ui->selectMesh->clear();
-    ui->selectMesh->addItem("");
 
-    // обновление списков
-    auto updateKasList = [this]() {
-        QString currentSet = ui->selectSet->currentText();
-        ui->selectKas->clear();
-        ui->selectMesh->clear();
-        ui->selectMesh->addItem("");
-
-        if (!currentSet.isEmpty()) {
-            QSqlQuery kasQuery;
-            kasQuery.prepare("SELECT DISTINCT kas_id FROM mesh WHERE set_id = ? AND doz_tld_id IS NULL AND user_id IS NULL ORDER BY kas_id");
-            kasQuery.addBindValue(currentSet);
-
-            if (kasQuery.exec()) {
-                ui->selectKas->addItem("");
-                while (kasQuery.next()) {
-                    ui->selectKas->addItem(kasQuery.value("kas_id").toString());
-                }
-            }
-        } else {
-            ui->selectKas->addItem("");
-        }
-    };
-
-    auto updateMeshList = [this]() {
-        QString currentSet = ui->selectSet->currentText();
-        QString currentKas = ui->selectKas->currentText();
-        ui->selectMesh->clear();
-
-        if (!currentSet.isEmpty() && !currentKas.isEmpty()) {
-            QSqlQuery meshQuery;
-            meshQuery.prepare("SELECT DISTINCT mesh_id FROM mesh WHERE set_id = ? AND kas_id = ? AND doz_tld_id IS NULL AND user_id IS NULL ORDER BY mesh_id");
-            meshQuery.addBindValue(currentSet);
-            meshQuery.addBindValue(currentKas);
-
-            if (meshQuery.exec()) {
-                ui->selectMesh->addItem("");
-                while (meshQuery.next()) {
-                    ui->selectMesh->addItem(meshQuery.value("mesh_id").toString());
-                }
-            }
-        } else {
-            ui->selectMesh->addItem("");
-        }
-    };
-
-    // Подключаем сигналы
-    disconnect(ui->selectSet, nullptr, nullptr, nullptr);
-    disconnect(ui->selectKas, nullptr, nullptr, nullptr);
-
-    connect(ui->selectSet, &QComboBox::currentTextChanged, this, [updateKasList, updateMeshList](const QString&) {
-        updateKasList();
-        updateMeshList();
-    });
-
-    connect(ui->selectKas, &QComboBox::currentTextChanged, this, [updateMeshList](const QString&) {
-        updateMeshList();
-    });
-
-    // Первоначальное обновление
-    updateKasList();
-    updateMeshList();*/
 
     updateDataFromDatabase();
     comboboxUpdateAll();
@@ -1928,7 +1663,6 @@ void MainWindow::on_btnCreateUser_pressed()
     }
 }
 
-/*--------------------*/
 
 void MainWindow::on_btnSetSave_pressed() //новый set
 {
@@ -2301,13 +2035,6 @@ void MainWindow::on_btnKasSave_pressed()
 
     query.prepare("UPDATE set SET set_quantity = set_quantity+1 WHERE set_id = :set_id;");//last_update = :last_update
     query.bindValue(":set_id", set_id);
-    /*if (query.exec()) {
-        QMessageBox::information(this, "Успех", "успешно set_quantity!");
-    } else {
-        QMessageBox::critical(this, "Ошибка", "Не удалось set_quantity!", query.lastError().text());
-        qDebug() << query.lastError().text();
-    }*/
-
 
     // Подготавливаем запрос для mesh
 
@@ -2569,7 +2296,6 @@ void MainWindow::kasHistoryToTable()
     ui->tableWidget_historyKas->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
-/*-------------------*/
 
 void MainWindow::on_btn_saveNewDuty_pressed()
 {
@@ -4021,14 +3747,6 @@ MainWindow::~MainWindow()
 }
 
 
-/*
-void MainWindow::on_label_51_linkActivated(const QString &link)
-{
-
-}*/
-
-
-
 
 // Cохранить отчет
 //
@@ -4037,385 +3755,8 @@ void MainWindow::on_btnKddFilterGo_clicked()
 
 
 }
-
-// Вкладка Эксплуатация
-//
-// пользователь - выпадающий список ; завершить работы с дозиметром - кнопка
-// lable_work - список активных работ
-// Нужно завершить все сеансы пользователя
-
 // завершить эксплуатацию
 void MainWindow::on_btn_createReport_pressed(){}
-
-
-/*
-// клик на вкладку загрузка пользователей не сдавших дозиметры
-void MainWindow::on_tabWidget_currentChanged(int index)
-{
-    //qDebug() << "сейчас бдт настроки";
-    // эксплуатация
-    if (index ==5)
-    {
-        qDebug() << "клик на вкладку";
-        ui->comboBox->clear();
-
-        QString os = detectOS();
-        if (os == "Windows"){
-            db.setUserName("postgres");
-            db.setPassword("123");
-            db.setDatabaseName("newdb");
-            db.setHostName("localhost");
-        }
-        else if (os == "Linux"){
-            db.setUserName("postgres");
-            db.setPassword("postgres1");
-            db.setDatabaseName("newdb");
-            db.setHostName("localhost");
-        }
-        else { qDebug() << "Else operating system:" << os; }
-
-        // чтение файла настроек
-        QString name_settings = "settings.ini";
-        // Существование файkа
-        if (QFile::exists(name_settings))
-        {
-            // чтение файла настроек
-            QSettings settings ("settings.ini",QSettings::IniFormat);
-            settings.beginGroup("Settings");
-
-
-            QString os = detectOS();
-            if (os == "Windows"){
-                G_ip_database_cell = settings.value("ip_database",QString("localhost")).toString();
-                G_DatabaseName_cell = settings.value("DatabaseName",QString("postgres")).toString();
-                G_UserName_cell = settings.value("UserName",QString("postgres")).toString();
-                G_Password_cell = settings.value("Password",QString("123")).toString();
-            }
-            else if (os == "Linux"){
-                G_ip_database_cell = settings.value("ip_database",QString("127.0.0.1")).toString();
-                G_DatabaseName_cell = settings.value("DatabaseName",QString("kdd")).toString();
-                G_UserName_cell = settings.value("UserName",QString("postgres")).toString();
-                G_Password_cell = settings.value("Password",QString("postgres1")).toString();
-            }
-            else { qDebug() << "Else operating system:" << os; }
-
-
-            settings.endGroup();
-
-        }
-        else
-        {
-            ;
-        }
-
-        {
-            QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", G_DatabaseName_cell);;
-            db.setHostName(G_ip_database_cell); //("localhost");
-            db.setDatabaseName(G_DatabaseName_cell);
-            db.setUserName(G_UserName_cell);
-            db.setPassword(G_Password_cell);
-            if (!db.open()) {
-                //      ui->label->setText("bad");
-                //      cout«"Crash "«endl;
-            }
-            else
-            {
-                // файл должен существовать
-                QFile file("dose.csv");
-
-                QString rez = "";
-                QSqlQuery query(db);
-
-                //    query.prepare("SELECT u.user_id, u.name_1, u.name_0, u.name_2, dp.type_ppd, dp.nomer_pdd, start_work FROM dose_ppd AS dp LEFT JOIN users AS u ON u.user_id = dp.user_id WHERE dp.finish_work is null ");
-                query.prepare("SELECT u.user_id, u.name_1, u.name_0, u.name_2, max(dp.type_ppd), dp.nomer_pdd, max(start_work) FROM dose_ppd AS dp LEFT JOIN users AS u ON u.user_id = dp.user_id WHERE dp.finish_work is null group by u.user_id, dp.nomer_pdd order by u.user_id ");
-
-                if (file.open( QIODevice::WriteOnly ))
-                {
-                    // QTextStream stream(&file);
-                    // file.write("№; Фамилия; Имя; Отчество; Дата рождения; Снилс; Эквивалентная доза, Зв; Максимальная эквивалентная доза, Зв; \n");
-                    //  query.bindValue(":img",baToSend);
-                    if (query.exec())
-                    {
-                        // if(query.first())
-                        {
-                            // dose_ppd_id = query.value(0).toInt();;
-                        }
-
-
-                        while (query.next()) {
-                            ui->comboBox->addItem(query.value(0).toString() + " " + query.value(1).toString() + " " + query.value(2).toString() + " " + query.value(3).toString() + " Тип детектора " + query.value(4).toString() + " №" + query.value(5).toString()+ " \nначало работ" + query.value(6).toString()); //+ "; " + query.value(7).toString()+ "; \n";
-                        }
-                    }
-
-                }
-                query.clear();
-            }
-            db.close();
-
-        }
-        QSqlDatabase::removeDatabase(G_DatabaseName_cell);
-
-        ;
-    }
-}
-
-
-
-// отчет
-void MainWindow::on_btn_createReport_clicked()
-{
-    qDebug() << "!243";
-        //
-        // Отчет по накопленным дозам персонала
-
-    QString os = detectOS();
-    if (os == "Windows"){
-        db.setUserName("postgres");
-        db.setPassword("123");
-        db.setDatabaseName("newdb");
-        db.setHostName("localhost");
-    }
-    else if (os == "Linux"){
-        db.setUserName("postgres");
-        db.setPassword("postgres1");
-        db.setDatabaseName("newdb");
-        db.setHostName("localhost");
-    }
-    else { qDebug() << "Else operating system:" << os; }
-
-    // чтение файла настроек
-    QString name_settings = "settings.ini";
-    // Существование файkа
-    if (QFile::exists(name_settings))
-    {
-        // чтение файла настроек
-        QSettings settings ("settings.ini",QSettings::IniFormat);
-        settings.beginGroup("Settings");
-
-
-        QString os = detectOS();
-        if (os == "Windows"){
-            G_ip_database_cell = settings.value("ip_database",QString("localhost")).toString();
-            G_DatabaseName_cell = settings.value("DatabaseName",QString("postgres")).toString();
-            G_UserName_cell = settings.value("UserName",QString("postgres")).toString();
-            G_Password_cell = settings.value("Password",QString("123")).toString();
-        }
-        else if (os == "Linux"){
-            G_ip_database_cell = settings.value("ip_database",QString("127.0.0.1")).toString();
-            G_DatabaseName_cell = settings.value("DatabaseName",QString("kdd")).toString();
-            G_UserName_cell = settings.value("UserName",QString("postgres")).toString();
-            G_Password_cell = settings.value("Password",QString("postgres1")).toString();
-        }
-        else { qDebug() << "Else operating system:" << os; }
-
-        settings.endGroup();
-
-    }
-    else
-    {
-        ;
-    }
-
-    {
-        QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", G_DatabaseName_cell);;
-        db.setHostName(G_ip_database_cell); //("localhost");
-        db.setDatabaseName(G_DatabaseName_cell);
-        db.setUserName(G_UserName_cell);
-        db.setPassword(G_Password_cell);
-        if (!db.open()) {
-            //      ui->label->setText("bad");
-            //      cout«"Crash "«endl;
-        }
-        else
-        {
-            // файл должен существовать
-            QFile file("dose.csv");
-
-            QString rez = "";
-            QSqlQuery query(db);
-
-            query.prepare("SELECT u.user_id, name_1, name_0, name_2, birthday, COALESCE(snils, '-') as snils, COALESCE(SUM(dp.dose), 0) as sum, COALESCE(max(dp.rate_max), 0) AS max FROM users AS u LEFT JOIN dose_ppd AS dp ON u.user_id = dp.user_id GROUP BY u.user_id order by u.user_id");
-            qDebug() << "!243";
-            if (file.open( QIODevice::WriteOnly ))
-            {
-                QTextStream stream(&file);
-                file.write("№; Фамилия; Имя; Отчество; Дата рождения; Снилс; Эквивалентная доза, Зв; Максимальная эквивалентная доза, Зв; \n");
-                //  query.bindValue(":img",baToSend);
-                if (query.exec())
-                {
-                    // if(query.first())
-                    {
-                        // dose_ppd_id = query.value(0).toInt();;
-                    }
-
-
-                    while (query.next()) {
-                        stream << query.value(0).toString() + "; " + query.value(1).toString() + "; " + query.value(2).toString() + "; " + query.value(3).toString() + "; " + query.value(4).toString() + "; " + query.value(5).toString()+ "; " + query.value(6).toString() + "; " + query.value(7).toString()+ "; \n";
-                        qDebug() << query.value(0).toString() + "; " + query.value(1).toString() + "; " + query.value(2).toString() + "; " + query.value(3).toString() + "; " + query.value(4).toString() + "; " + query.value(5).toString()+ "; " + query.value(6).toString() + "; " + query.value(7).toString()+ "; \n";
-
-                    }
-                }
-                file.close();
-            }
-            query.clear();
-        }
-        db.close();
-
-    }
-    QSqlDatabase::removeDatabase(G_DatabaseName_cell);
-
-
-
-
-
-
-
-
-
-
-}
-
-// завершить эксплатацию
-void MainWindow::on_pushButton_clicked()
-{
-    //combobox_createReport
-
-    qDebug() << "клик завершить эксплуатацию";;
-    //QString s = "hallo";;
-    //ui->comboBox->addItem(s);                   //
-
-    QString str = ui->comboBox->currentText(); // ui->comboBox->itemData(ui->comboBox->currentIndex()).toString();
-    ;
-    if (str =="")
-    {
-        ui->label_57->setText("-");
-        return;
-    }
-    ui->label_57->setText("завершены работы сотрудника: "+str);
-
-    //QStringList list = str.split(" ",QString::SkipEmptyParts); // строку в массив
-    QStringList list = str.split(" ", Qt::SplitBehaviorFlags::SkipEmptyParts);
-    // обновить данные
-
-
-    {
-        //     qDebug() << "клик на вкладку";
-        ui->comboBox->clear();
-
-
-        QString os = detectOS();
-        if (os == "Windows"){
-            db.setUserName("postgres");
-            db.setPassword("123");
-            db.setDatabaseName("newdb");
-            db.setHostName("localhost");
-        }
-        else if (os == "Linux"){
-            db.setUserName("postgres");
-            db.setPassword("postgres1");
-            db.setDatabaseName("newdb");
-            db.setHostName("localhost");
-        }
-        else { qDebug() << "Else operating system:" << os; }
-
-        // чтение файла настроек
-        QString name_settings = "settings.ini";
-        // Существование файkа
-        if (QFile::exists(name_settings))
-        {
-            // чтение файла настроек
-            QSettings settings ("settings.ini",QSettings::IniFormat);
-            settings.beginGroup("Settings");
-
-            QString os = detectOS();
-            if (os == "Windows"){
-                G_ip_database_cell = settings.value("ip_database",QString("localhost")).toString();
-                G_DatabaseName_cell = settings.value("DatabaseName",QString("postgres")).toString();
-                G_UserName_cell = settings.value("UserName",QString("postgres")).toString();
-                G_Password_cell = settings.value("Password",QString("123")).toString();
-            }
-            else if (os == "Linux"){
-                G_ip_database_cell = settings.value("ip_database",QString("127.0.0.1")).toString();
-                G_DatabaseName_cell = settings.value("DatabaseName",QString("kdd")).toString();
-                G_UserName_cell = settings.value("UserName",QString("postgres")).toString();
-                G_Password_cell = settings.value("Password",QString("postgres1")).toString();
-            }
-            else { qDebug() << "Else operating system:" << os; }
-
-            settings.endGroup();
-
-        }
-        else
-        {
-            ;
-        }
-
-        {
-            QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", G_DatabaseName_cell);;
-            db.setHostName(G_ip_database_cell); //("localhost");
-            db.setDatabaseName(G_DatabaseName_cell);
-            db.setUserName(G_UserName_cell);
-            db.setPassword(G_Password_cell);
-            if (!db.open()) {
-                //      ui->label->setText("bad");
-                //      cout«"Crash "«endl;
-            }
-            else
-            {
-                // файл должен существовать
-                QFile file("dose.csv");
-
-                QString rez = "";
-                QSqlQuery query(db);
-
-                //    query.prepare("SELECT u.user_id, u.name_1, u.name_0, u.name_2, dp.type_ppd, dp.nomer_pdd, start_work FROM dose_ppd AS dp LEFT JOIN users AS u ON u.user_id = dp.user_id WHERE dp.finish_work is null ");
-                //  QString SQL_db = "update dose_ppd set time_max = TO_TIMESTAMP(" + maxtime + "), rate_max = " + rate + ", dose = " + dose + ", finish_work  = current_timestamp, last_update  = current_timestamp " + "where user_id = "+ user_id +" and users_duty_id = "+duty_user_id+" and nomer_pdd = '"+ nomer_pdd + "' and type_ppd = 2 and finish_work is null";
-                // list[0];
-
-                // QString SQL_db = "update dose_ppd set time_max = current_timestamp, rate_max = 0, dose = 0, finish_work  = current_timestamp, last_update  = current_timestamp " + "where user_id = "+ list[0] +" and users_duty_id = "+duty_user_id+" and nomer_pdd = '"+ nomer_pdd + "' and type_ppd = 2 and finish_work is null";
-                QString SQL_db = "update dose_ppd set time_max = current_timestamp, rate_max = 0, dose = 0, finish_work  = current_timestamp, last_update  = current_timestamp where user_id = "+ list[0] +" and finish_work is null";
-
-                qDebug() << SQL_db;
-
-                query.prepare(SQL_db);
-
-                if (file.open( QIODevice::WriteOnly ))
-                {
-                    // QTextStream stream(&file);
-                    // file.write("№; Фамилия; Имя; Отчество; Дата рождения; Снилс; Эквивалентная доза, Зв; Максимальная эквивалентная доза, Зв; \n");
-                    //  query.bindValue(":img",baToSend);
-                    if (query.exec())
-                    {
-                        // if(query.first())
-                        {
-                            // dose_ppd_id = query.value(0).toInt();;
-                        }
-
-
-                        while (query.next()) {
-                            ui->comboBox->addItem(query.value(0).toString() + " " + query.value(1).toString() + " " + query.value(2).toString() + " " + query.value(3).toString() + "Тип детектора " + query.value(4).toString() + " №" + query.value(5).toString()+ " начало работ" + query.value(6).toString()); //+ "; " + query.value(7).toString()+ "; \n";
-                        }
-                    }
-
-                }
-                query.clear();
-            }
-            db.close();
-
-        }
-        QSqlDatabase::removeDatabase(G_DatabaseName_cell);
-
-        ;
-    }
-
-
-
-    on_tabWidget_currentChanged(5);
-
-
-
-
-}*/
 
 
 void MainWindow::on_pushButton_3_clicked()
@@ -4592,7 +3933,6 @@ void MainWindow::onUserDutySearchTextChanged(const QString &text)
     if (text.isEmpty()) showAllUserDuties();
 }
 
-/*-----------------------------------------------*/
 void MainWindow::on_btnSetCreateNew_pressed()
 {
 
@@ -5280,9 +4620,6 @@ void MainWindow::setupSearchDutyComboBox(QComboBox* comboBox)
         //qDebug() << "Принудительное обновление comboBox нарядов, элементов:" << comboBox->count();
     });
 }
-
-
-/*--------------------------------------------------------------------------------------*/
 
 // Функция для загрузки и отображения данных в tableView_set
 void MainWindow::loadSetData(){
@@ -6081,8 +5418,6 @@ void MainWindow::on_btn_userDutySearch_pressed()
 }
 
 
-
-//
 void MainWindow::on_btnUserFilterGo_2_pressed()
 {
     // Получаем значения из фильтров
@@ -7212,77 +6547,6 @@ void MainWindow::on_btn_MeshFilterGo_pressed()
              << "ID ячейки:" << meshId
              << "ID изменившего:" << userChangeId;
 }
-
-/*
-void MainWindow::on_pushButton_4_pressed()
-{
-    QSqlQuery query;
-
-        QString sql = R"(
-            -- Óäàëÿåì ñóùåñòâóþùèå òàáëèöû
-            DROP TABLE IF EXISTS mesh_history CASCADE;
-            DROP TABLE IF EXISTS kas_history CASCADE;
-            DROP TABLE IF EXISTS set_history CASCADE;
-
-            -- Ñîçäàåì òàáëèöó set_history
-            CREATE TABLE set_history (
-                set_id INTEGER,
-                set_name VARCHAR(30),
-                ip_set INET,
-                set_quantity INTEGER,
-                set_block VARCHAR(30),
-                set_note VARCHAR(30),
-                last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                user_id_change INTEGER NOT NULL,
-                last_update_change TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                type_edit VARCHAR(30) DEFAULT 'create'
-            );
-
-            -- Ñîçäàåì òàáëèöó kas_history
-            CREATE TABLE kas_history (
-                kas_id INTEGER,
-                set_id INTEGER,
-                kas_name VARCHAR(30),
-                kas_height INTEGER,
-                kas_width INTEGER,
-                kas_block VARCHAR(30),
-                kas_note VARCHAR(30),
-                last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                user_id_change INTEGER NOT NULL,
-                last_update_change TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                type_edit VARCHAR(30) DEFAULT 'create'
-            );
-
-            -- Ñîçäàåì òàáëèöó mesh_history
-            CREATE TABLE mesh_history (
-                mesh_id INTEGER,
-                set_id INTEGER,
-                kas_id INTEGER,
-                user_id INTEGER,
-                doz_tld_id VARCHAR(30),
-                mesh_status INTEGER DEFAULT 0,
-                mesh_note VARCHAR(30),
-                last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                user_id_change INTEGER NOT NULL,
-                last_update_change TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                type_edit VARCHAR(30) DEFAULT 'create'
-            );
-        )";
-
-        // Âûïîëíÿåì çàïðîñ â òðàíçàêöèè
-        //QSqlDatabase::database().transaction();
-
-        if (!query.exec(sql)) {
-            qDebug() << "Îøèáêà ñîçäàíèÿ òàáëèö:" << query.lastError().text();
-            //QSqlDatabase::database().rollback();
-            //return false;
-        }
-
-        //QSqlDatabase::database().commit();
-        qDebug() << "Òàáëèöû óñïåøíî ïåðåñîçäàíû";
-        //return true;
-}*/
-
 
 void MainWindow::on_pushButton_onSet_pressed()
 {
@@ -8628,15 +7892,6 @@ void MainWindow::checkRole(){
                 }
             }
 
-            /*ui->btn_createNewDutyUser->hide();
-            for (int i = 0; i < ui->horizontalLayout_btnUserDuty->count(); ++i) {
-                QLayoutItem* item = ui->horizontalLayout_btnUserDuty->itemAt(i);
-                if (item && item->widget()) {
-                    item->widget()->hide();
-                }
-            }*/
-
-
             ui->pushButton_DoseCleanInput->hide();
             for (int i = 0; i < ui->verticalLayout_ForDoseBtn->count(); ++i) {
                 QLayoutItem* item = ui->verticalLayout_ForDoseBtn->itemAt(i);
@@ -9001,20 +8256,6 @@ void MainWindow::setupAllUserComboBoxes()
     }
     qDebug() << "Обновление всех списков пользователей";
 }
-/*
-void MainWindow::updateSetComboBox(QComboBox* comboBox)
-{
-    if (!comboBox) return;
-
-    comboBox->clear();
-    comboBox->addItem("");
-
-    QSqlQuery query("SELECT DISTINCT set_id FROM set ORDER BY set_id");
-    while (query.next()) {
-        comboBox->addItem(query.value(0).toString());
-    }
-}*/
-
 
 void MainWindow::on_pushButton_help_pressed()
 {
@@ -9078,7 +8319,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     return QMainWindow::eventFilter(obj, event);
 }
 
-/*-------------------------------------------------------------------------------------------*/
 void MainWindow::loadSetData_kid(){
     ui->inputIntSetQuantity_kid->setValue(1);
     QSqlQueryModel *model = new QSqlQueryModel(this);
@@ -11895,9 +11135,4 @@ void MainWindow::onKasKidComboBoxChanged()
     }
 }
 
-
-void MainWindow::on_pushButton_userUpdate_pressed()
-{
-
-}
 
