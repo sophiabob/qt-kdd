@@ -1,0 +1,29 @@
+# Большой GIF файл (основная проблема)
+img/help.gif
+
+# Файлы Qt
+*.pro.user
+*.pro.user.*
+*.qmake.stash
+build-*/
+release/
+debug/
+*.exe
+*.app
+*.dll
+
+# Сгенерированные файлы
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+
+# Настройки IDE
+.vscode/
+.idea/
+*.swp
+*.swo
