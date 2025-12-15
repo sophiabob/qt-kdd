@@ -9935,7 +9935,7 @@ void MainWindow::on_btnSetSave_kid_pressed()
         query.bindValue(":kas_height", 1);
         query.bindValue(":kas_width", 1);
         query.bindValue(":kas_block", "Разблокирована");
-        query.bindValue(":kas_note", "");
+        query.bindValue(":kas_note", "");//
         query.bindValue(":last_update", QDateTime::currentDateTime());
 
         if (!query.exec()) {
