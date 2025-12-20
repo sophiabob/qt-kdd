@@ -23,6 +23,7 @@
 #include <QSqlError>
 #include <QDebug>
 #include <QStringList>
+#include <QSettings>
 
 #include <QMessageBox>
 #include <QSqlDatabase>

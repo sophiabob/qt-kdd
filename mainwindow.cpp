@@ -121,6 +121,7 @@ MainWindow::MainWindow(int userId, QWidget *parent)
 
 
     loadSetData_kid();
+    comboboxExploitation();
     //loadListOfKas_kid(); - ?
 
     updateSetComboBox(ui->select_kdd_set_1);
@@ -261,8 +262,13 @@ void MainWindow::on_btnSetChange_pressed(){
             //:set_id, :kas_id, :kas_name, :kas_height, :kas_width, :kas_block, :kas_note, :last_update
             query.prepare("INSERT INTO kas (set_id, kas_id, kas_height, kas_width, kas_block, last_update) VALUES (:set_id, :kas_id, 1, 1, :kas_block, :last_update)");
             query.bindValue(":set_id", set_id);
+            query.bindValue(":kas_id", i);
+            query.bindValue(":kas_name", QString("Кассетница %1").arg(i));
+            query.bindValue(":kas_height", 1);
+            query.bindValue(":kas_width", 1);
             query.bindValue(":kas_block", "Разблокирована");
-            query.bindValue(":kas_id", maxKasNumber + i);
+            query.bindValue(":kas_note", "");//
+            query.bindValue(":last_update", QDateTime::currentDateTime());
 
             if (!query.exec()) {
                 qCritical() << "Ошибка при создании кассеты" << i << ":" << query.lastError().text();
@@ -392,7 +398,7 @@ void MainWindow::on_btnSetChange_pressed(){
     );
 
     if (success) {
-        qDebug() << "Данные успешно сохранены в таблицу set_history";
+        //qDebug() << "Данные успешно сохранены в таблицу set_history";
         setHistoryToTable(); // Обновляем таблицу истории
     } else {
         qDebug() << "Ошибка при сохранении истории комплекта";
@@ -1581,8 +1587,8 @@ bool success = addUserHistory(
 
     // Проверка результата
     if (success) {
-        qDebug() << "Данные успешно сохранены в таблицу users_history";
-        qDebug() << "Время последнего обновления:" << UserLastUpdate;//.toString("dd.MM.yyyy hh:mm:ss");
+        //qDebug() << "Данные успешно сохранены в таблицу users_history";
+        //qDebug() << "Время последнего обновления:" << UserLastUpdate;//.toString("dd.MM.yyyy hh:mm:ss");
     } else {
         qDebug() << "Ошибка при сохранении истории пользователя";
     }
@@ -1771,8 +1777,17 @@ void MainWindow::on_btnSetSave_pressed() //новый set
 
 
         // Подготавливаем запрос для mesh
+        query.prepare("SELECT COALESCE(MAX(mesh_id), 0) + 1 FROM mesh WHERE set_id = ? AND kas_id = ?");
+        query.addBindValue(set_id);
+        query.addBindValue(i);
+        int mesh_counter = 1;
+        if (query.exec()) {
+            if (query.next()) {
+                mesh_counter = query.value(0).toInt();
+            }
+        }
 
-        int mesh_counter = 1; // Счетчик ячеек
+        //int mesh_counter = 1; // Счетчик ячеек
         int all_mesh = 1;
 
 
@@ -1838,7 +1853,7 @@ void MainWindow::on_btnSetSave_pressed() //новый set
     );
 
     if (success) {
-        qDebug() << "Данные успешно сохранены в таблицу set_history";
+        //qDebug() << "Данные успешно сохранены в таблицу set_history";
         setHistoryToTable(); // Обновляем таблицу истории
     } else {
         qDebug() << "Ошибка при сохранении истории комплекта";
@@ -2032,13 +2047,15 @@ void MainWindow::on_btnKasSave_pressed()
         qDebug() << query.lastError().text();
     }
 
-
-    query.prepare("UPDATE set SET set_quantity = set_quantity+1 WHERE set_id = :set_id;");//last_update = :last_update
-    query.bindValue(":set_id", set_id);
-
-    // Подготавливаем запрос для mesh
-
-    int mesh_counter = 1; // Счетчик ячеек
+    query.prepare("SELECT COALESCE(MAX(mesh_id), 0) + 1 FROM mesh WHERE set_id = ? AND kas_id = ?");
+    query.addBindValue(set_id);
+    query.addBindValue(kas_id);
+    int mesh_counter = 1;
+    if (query.exec()) {
+        if (query.next()) {
+            mesh_counter = query.value(0).toInt();
+        }
+    }
     int all_mesh = KasLenght*KasWidth;
 
     // Создаем ячейки сетки по строкам и столбцам
@@ -2101,7 +2118,7 @@ void MainWindow::on_btnKasSave_pressed()
         );
 
         if (success) {
-            qDebug() << "Данные успешно сохранены в таблицу mesh_history";
+            //qDebug() << "Данные успешно сохранены в таблицу mesh_history";
             meshHistoryToTable(); // Обновляем таблицу истории
         } else {
             qDebug() << "Ошибка при сохранении истории ячейки";
@@ -2166,7 +2183,7 @@ void MainWindow::on_btnKasSave_pressed()
     );
 
     if (success) {
-        qDebug() << "Данные успешно сохранены в таблицу kas_history";
+        //qDebug() << "Данные успешно сохранены в таблицу kas_history";
         kasHistoryToTable(); // Обновляем таблицу истории
     } else {
         qDebug() << "Ошибка при сохранении истории кассетницы";
@@ -4283,11 +4300,13 @@ void MainWindow::on_btnMeshChange_pressed() {
     query.bindValue(":user_id", MeshUser > 0 ? MeshUser : QVariant());
     query.bindValue(":doz_tld_id", !MeshDoz.isEmpty() ? MeshDoz : QVariant());
     query.bindValue(":mesh_status", MeshStatus);
+    qDebug() << ":mesh_status" << MeshStatus;
     query.bindValue(":mesh_note", MeshNote);
     query.bindValue(":last_update", label_MeshUpdate);
 
     if (!query.exec()) {
-        QMessageBox::critical(this, "Ошибка043", "Не удалось изменить ячейку!\n" + query.lastError().text());
+        QMessageBox::critical(this, "Ошибка043_1", "Не удалось изменить ячейку!");
+        qDebug() << query.lastError().text();
         return;
     }
 
@@ -4922,6 +4941,8 @@ void MainWindow::onKasSelectionChanged(const QItemSelection &selected, const QIt
         ui->comboKasStatus->setCurrentIndex(0);
     }
 
+
+    ui->tabWidget_kas->setTabText(1, "Кассетница: "+kas_name);
 
     QLayoutItem *item;
     while ((item = ui->gridLayout_21->takeAt(0))) {
@@ -8403,7 +8424,7 @@ void MainWindow::onSetSelectionChanged_kid(const QItemSelection &selected, const
         delete item;
     }
 
-    ui->tabWidget_kas_kid->setTabText(0, "Комплект: "+set_name);
+    ui->tabWidget_kas_kid->setTabText(0, "Комплект кид: "+set_name);
 
     QPushButton *btnSetChange_kid = new QPushButton("Сохранить изменения комплекта", this);
     ui->gridLayout_set_kid->addWidget(btnSetChange_kid);
@@ -8416,6 +8437,7 @@ void MainWindow::onSetSelectionChanged_kid(const QItemSelection &selected, const
 }
 
 void MainWindow::loadListOfKas_kid(){
+    //QMessageBox::critical(this, "!", "loadListOfKas_kid");
     ui->comboBox_listOfKas_kid->clear();
 
     QString set_id = ui->textSetId_kid->text().trimmed();
@@ -8553,6 +8575,8 @@ void MainWindow::onKasSelectionChanged_kid(const QItemSelection &selected, const
     else {
         ui->comboKasStatus_kid->setCurrentIndex(0);
     }
+
+    ui->tabWidget_kas_kid->setTabText(1, "Кассетница кид: "+kas_name);
 
     QLayoutItem *item;
     while ((item = ui->gridLayout_kas_kid->takeAt(0))) {
@@ -8983,9 +9007,18 @@ void MainWindow::on_btnSetChange_kid_pressed(){
 
         for (int i = 1; i <= newKas; ++i) {
             query.prepare("INSERT INTO kas_kid (set_id, kas_id, kas_height, kas_width, kas_block, last_update) VALUES (:set_id, :kas_id, 1, 1, :kas_block, :last_update)");
-            query.bindValue(":set_id", set_id);
+            /*query.bindValue(":set_id", set_id);
             query.bindValue(":kas_block", "Разблокирована");
-            query.bindValue(":kas_id", maxKasNumber + i);
+            query.bindValue(":kas_id", maxKasNumber + i);*/
+
+            query.bindValue(":set_id", set_id);
+            query.bindValue(":kas_id", i);
+            query.bindValue(":kas_name", QString("Кассетница %1").arg(i));
+            query.bindValue(":kas_height", 1);
+            query.bindValue(":kas_width", 1);
+            query.bindValue(":kas_block", "Разблокирована");
+            query.bindValue(":kas_note", "");//
+            query.bindValue(":last_update", QDateTime::currentDateTime());
 
             if (!query.exec()) {
                 qCritical() << "Ошибка при создании кассеты" << i << ":" << query.lastError().text();
@@ -9093,7 +9126,7 @@ void MainWindow::on_btnSetChange_kid_pressed(){
     );
 
     if (success) {
-        qDebug() << "Данные успешно сохранены в таблицу set_kid_history";
+        //qDebug() << "Данные успешно сохранены в таблицу set_kid_history";
         setHistoryToTable_kid();
     } else {
         qDebug() << "Ошибка при сохранении истории комплекта";
@@ -9182,8 +9215,15 @@ void MainWindow::on_btnSetSave_kid_pressed()
             qDebug() << "Ошибка при вставке кассетницы" << i << ":" << query.lastError().text();
             break;
         }
-
+        query.prepare("SELECT COALESCE(MAX(mesh_id), 0) + 1 FROM mesh_kid WHERE set_id = ? AND kas_id = ?");
+        query.addBindValue(set_id);
+        query.addBindValue(i);
         int mesh_counter = 1;
+        if (query.exec()) {
+            if (query.next()) {
+                mesh_counter = query.value(0).toInt();
+            }
+        }
         int all_mesh = 1;
 
         for (int row = 1; row <= all_mesh; ++row) {
@@ -9242,7 +9282,7 @@ void MainWindow::on_btnSetSave_kid_pressed()
     );
 
     if (success) {
-        qDebug() << "Данные успешно сохранены в таблицу set_kid_history";
+        //qDebug() << "Данные успешно сохранены в таблицу set_kid_history";
         setHistoryToTable_kid();
     } else {
         qDebug() << "Ошибка при сохранении истории комплекта";
@@ -9402,76 +9442,85 @@ void MainWindow::on_btnKasSave_kid_pressed()
         qDebug() << query.lastError().text();
     }
 
-    query.prepare("UPDATE set_kid SET set_quantity = set_quantity+1 WHERE set_id = :set_id;");
-    query.bindValue(":set_id", set_id);
-
+    query.prepare("SELECT COALESCE(MAX(mesh_id), 0) + 1 FROM mesh_kid WHERE set_id = ? AND kas_id = ?");
+    query.addBindValue(set_id);
+    query.addBindValue(kas_id);
     int mesh_counter = 1;
+    if (query.exec()) {
+        if (query.next()) {
+            mesh_counter = query.value(0).toInt();
+        }
+    }
+
     int all_mesh = KasLenght*KasWidth;
 
-    for (int row = 1; row <= all_mesh; ++row) {
-        query.prepare("INSERT INTO mesh_kid (set_id, kas_id, mesh_id, user_id, doz_tld_id, mesh_status, mesh_note, last_update) VALUES (:set_id, :kas_id, :mesh_id, :user_id, :doz_tld_id, :mesh_status, :mesh_note, :last_update)");
-        query.bindValue(":set_id", set_id);
-        query.bindValue(":kas_id", kas_id);
-        query.bindValue(":mesh_id", mesh_counter);
-        query.bindValue(":user_id", QVariant(QVariant::Int));
-        query.bindValue(":doz_tld_id", QVariant(QVariant::Int));
-        query.bindValue(":mesh_status", "0");
-        query.bindValue(":mesh_note", "");
-        query.bindValue(":last_update", QDateTime::currentDateTime());
+    //QMessageBox::information(this, "Информация", "кид шоколадки");
+    if (all_mesh > 0){
+        for (int row = 1; row <= all_mesh; ++row) {
+            query.prepare("INSERT INTO mesh_kid (set_id, kas_id, mesh_id, user_id, doz_tld_id, mesh_status, mesh_note, last_update) VALUES (:set_id, :kas_id, :mesh_id, :user_id, :doz_tld_id, :mesh_status, :mesh_note, :last_update)");
+            query.bindValue(":set_id", set_id);
+            query.bindValue(":kas_id", kas_id);
+            query.bindValue(":mesh_id", row);
+            query.bindValue(":user_id", QVariant(QVariant::Int));
+            query.bindValue(":doz_tld_id", QVariant(QVariant::Int));
+            query.bindValue(":mesh_status", "0");
+            query.bindValue(":mesh_note", "");
+            query.bindValue(":last_update", QDateTime::currentDateTime());
 
-        if (!query.exec()) {
-            qDebug() << "Ошибка при вставке ячейки" << mesh_counter << ":" << query.lastError().text();
-            return;
-        }
+            if (!query.exec()) {
+                qDebug() << "Ошибка при вставке ячейки =" << row << ":" << query.lastError().text();
+                return;
+            }
 
-        QString for_user_id = ui->label_userId->text();
-        QString changing_user_id;
-        QStringList parts = for_user_id.split(' ', Qt::SkipEmptyParts);
-        QString name_0 = parts[0];
-        QString name_1 = parts[1];
-        QString name_2 = parts[2];
+            QString for_user_id = ui->label_userId->text();
+            QString changing_user_id;
+            QStringList parts = for_user_id.split(' ', Qt::SkipEmptyParts);
+            QString name_0 = parts[0];
+            QString name_1 = parts[1];
+            QString name_2 = parts[2];
 
-        query.prepare("SELECT user_id FROM users WHERE name_0 = :name_0 AND name_1 = :name_1 AND name_2 = :name_2");
-        query.bindValue(":name_0", name_0);
-        query.bindValue(":name_1", name_1);
-        query.bindValue(":name_2", name_2);
+            query.prepare("SELECT user_id FROM users WHERE name_0 = :name_0 AND name_1 = :name_1 AND name_2 = :name_2");
+            query.bindValue(":name_0", name_0);
+            query.bindValue(":name_1", name_1);
+            query.bindValue(":name_2", name_2);
 
-        if (!query.exec()) {
-            QMessageBox::critical(this, "Ошибка025", "Не удалось выполнить запрос: " + query.lastError().text());
-            return;
-        }
+            if (!query.exec()) {
+                QMessageBox::critical(this, "Ошибка025", "Не удалось выполнить запрос: " + query.lastError().text());
+                return;
+            }
 
-        if (query.next()) {
-            changing_user_id = query.value("user_id").toString();
-        } else {
-            QMessageBox::information(this, "Информация", "Пользователь не найден");
-            return;
-        }
+            if (query.next()) {
+                changing_user_id = query.value("user_id").toString();
+            } else {
+                QMessageBox::information(this, "Информация", "Пользователь не найден");
+                return;
+            }
 
-        QString type_edit = "create";
+            QString type_edit = "create";
 
-        bool success = addMeshHistory_kid(
-            set_id,
-            kas_id,
-            mesh_counter,
-            0,
-            "",
-            0,
-            "",
-            changing_user_id,
-            type_edit
-        );
+            bool success = addMeshHistory_kid(
+                set_id,
+                kas_id,
+                row,
+                0,
+                "",
+                0,
+                "",
+                changing_user_id,
+                type_edit
+            );
 
-        if (success) {
-            qDebug() << "Данные успешно сохранены в таблицу mesh_kid_history";
-            meshHistoryToTable_kid();
+            if (success) {
+                //qDebug() << "Данные успешно сохранены в таблицу mesh_kid_history";
+                meshHistoryToTable_kid();
+            }
         }
     }
 
     query.prepare("UPDATE set_kid SET set_quantity = (SELECT MAX(set_quantity) FROM set_kid) + 1 WHERE set_id = ?");
     query.addBindValue(set_id);
     if (query.exec()) {
-        qDebug() << "Количество кассетниц в комплекте увеличено на 1";
+        //qDebug() << "Количество кассетниц в комплекте увеличено на 1";
     } else {
         qDebug() << "Ошибка при увеличении количества кассетниц в комплекте:" << query.lastError().text();
     }
@@ -9519,7 +9568,7 @@ void MainWindow::on_btnKasSave_kid_pressed()
     );
 
     if (success) {
-        qDebug() << "Данные успешно сохранены в таблицу kas_kid_history";
+        //qDebug() << "Данные успешно сохранены в таблицу kas_kid_history";
         kasHistoryToTable_kid();
     } else {
         qDebug() << "Ошибка при сохранении истории кассетницы";
@@ -9904,7 +9953,8 @@ void MainWindow::on_btnMeshChange_kid_pressed() {
     query.bindValue(":last_update", label_MeshUpdate);
 
     if (!query.exec()) {
-        QMessageBox::critical(this, "Ошибка043", "Не удалось изменить ячейку!\n" + query.lastError().text());
+        QMessageBox::critical(this, "Ошибка043_2", "Не удалось изменить ячейку!");
+        qDebug() << query.lastError().text();
         return;
     }
 
@@ -11139,6 +11189,242 @@ void MainWindow::onKasKidComboBoxChanged()
 
 void MainWindow::on_pushButton_userUpdate_pressed()
 {
+    QString currentUserId = ui->label_51->text();
 
+    if (currentUserId.isEmpty() || currentUserId == "0") {
+        QMessageBox::information(this, "Информация", "Сначала выберите пользователя из списка");
+        return;
+    }
+
+    // Обновляем данные для конкретного пользователя
+    updateCurrentUserFromDatabase(currentUserId.toInt());
 }
 
+void MainWindow::updateCurrentUserFromDatabase(int userId)
+{
+    // Выполняем запрос для получения данных конкретного пользователя
+    QSqlQuery query;
+    query.prepare("SELECT set_ID, kas_ID, mesh_ID, user_id, login, password, name_0, name_1, name_2, snils, gender, birthday, tab_num, department, card_id, doz_tld_id, cell_date, dose_year, dose_year_now, dose_year_now_ppd, code, block, last_update, role FROM users WHERE user_id = ?");
+    query.addBindValue(userId);
+
+    if (!query.exec() || !query.next()) {
+        QMessageBox::warning(this, "Ошибка", "Не удалось получить данные пользователя: " + query.lastError().text());
+        return;
+    }
+
+    // Получаем данные (аналогично вашему коду в updateUsersDatabase)
+    QString name0 = query.value("name_0").toString();
+    QString name1 = query.value("name_1").toString();
+    QString name2 = query.value("name_2").toString();
+    QString login = query.value("login").toString();
+    QString password = query.value("password").toString();
+    QString snils = query.value("snils").toString();
+    QString code = query.value("code").toString();
+    int tabNum = query.value("tab_num").toInt();
+    QString cardId = query.value("card_id").toString();
+    QString dozTldId = query.value("doz_tld_id").toString();
+    int startDoz = query.value("start_doz").toInt();
+    int finishDoz = query.value("finish_doz").toInt();
+    int doseYear = query.value("dose_year").toInt();
+    int doseYearNow = query.value("dose_year_now").toInt();
+    int doseYearPpd = query.value("dose_year_now_ppd").toInt();
+    QDate cellDate = query.value("cell_date").toDate();
+    QDate birthday = query.value("birthday").toDate();
+    QString lastUpdate = query.value("last_update").toString();
+    QDate startUsed = query.value("start_used_date").toDate();
+    QDate finishUsed = query.value("finish_used_date").toDate();
+    QString role = query.value("role").toString();
+    QString gender = query.value("gender").toString();
+    QString department = query.value("department").toString();
+    QString block = query.value("block").toString();
+    QString set = query.value("set_ID").toString();
+    QString kas = query.value("kas_ID").toString();
+    QString mesh = query.value("mesh_ID").toString();
+
+    // Заполняем поля формы (аналогично вашему коду)
+    ui->label_51->setText(QString::number(userId));
+    ui->inputName0->setText(name0);
+    ui->inputName1->setText(name1);
+    ui->inputName2->setText(name2);
+    ui->inputLogin->setText(login);
+    ui->inputPassword->setText(password);
+    ui->inputCode->setText(code);
+    ui->inputSnils->setText(snils);
+    ui->selectUserBlock->setText(block);
+
+    ui->inputIntTab->setValue(tabNum);
+    ui->inputCardId->setText(cardId);
+    ui->inputIntDoz->setText(dozTldId);
+    ui->inputUserStartDoz->setValue(startDoz);
+    ui->inputUserFinishDoz->setValue(finishDoz);
+    ui->spinUserDoseYear->setValue(doseYear);
+    ui->spinUserDoseYearNow->setValue(doseYearNow);
+    ui->spinUserDoseYearPpd->setValue(doseYearPpd);
+
+    ui->inputDateCellDate->setDate(cellDate);
+    ui->dateUserBirthday->setDate(birthday);
+    ui->dateUserLastUpdate->setText(lastUpdate);
+    ui->dateUserSrart->setDate(startUsed);
+    ui->dateUserFinish->setDate(finishUsed);
+
+    // Установка значений в комбобоксы
+    ui->selectRole->setCurrentText(role);
+    ui->selectGender->setCurrentText(gender);
+    ui->selectDepartment->setCurrentText(department);
+
+    // Установка значений сет/кас/меш
+    auto setComboBoxValue = [](QComboBox* combo, const QString& value) {
+        int index = combo->findText(value);
+        if (index == -1 && !value.isEmpty()) {
+            combo->addItem(value);
+            index = combo->count() - 1;
+        }
+        combo->setCurrentIndex(index);
+    };
+
+    setComboBoxValue(ui->selectSet, set);
+    setComboBoxValue(ui->selectKas, kas);
+    setComboBoxValue(ui->selectMesh, mesh);
+
+    // Загрузка фотографии
+    QSqlQuery photoQuery;
+    photoQuery.prepare("SELECT user_photo FROM user_photo WHERE user_id = ?");
+    photoQuery.addBindValue(userId);
+
+    if (photoQuery.exec() && photoQuery.next()) {
+        QByteArray photoData = photoQuery.value("user_photo").toByteArray();
+        QPixmap pixmap;
+        if (pixmap.loadFromData(photoData)) {
+            ui->labelPhoto->setPixmap(pixmap.scaled(150, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+            // Создание кнопки изменения фото
+            QLayoutItem *photoItem;
+            while ((photoItem = ui->horizontalLayout_24->takeAt(0))) {
+                if (photoItem->widget()) {
+                    delete photoItem->widget();
+                }
+                delete photoItem;
+            }
+            QPushButton *btnChangePhoto = new QPushButton("Изменить фото", this);
+            ui->horizontalLayout_24->addWidget(btnChangePhoto);
+            connect(btnChangePhoto, &QPushButton::pressed, this, &MainWindow::on_btnChangePhoto_pressed);
+        }
+    } else {
+        ui->labelPhoto->clear();
+    }
+
+    QMessageBox::information(this, "Успех", "Данные пользователя обновлены из БД");
+}
+
+
+
+// клик на вкладку загрузка пользователей не сдавших дозиметры
+void MainWindow::comboboxExploitation()
+{
+    Welcome welcome;
+    welcome.createConnection();
+        {
+            QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", G_DatabaseName_cell);;
+            db.setHostName(G_ip_database_cell); //("localhost");
+            db.setDatabaseName(G_DatabaseName_cell);
+            db.setUserName(G_UserName_cell);
+            db.setPassword(G_Password_cell);
+            if (!db.open()) {
+                //      ui->label->setText("bad");
+                //      cout«"Crash "«endl;
+            }
+            else
+            {
+                // файл должен существовать
+                QFile file("dose.csv");
+
+                QString rez = "";
+                QSqlQuery query(db);
+
+                //    query.prepare("SELECT u.user_id, u.name_1, u.name_0, u.name_2, dp.type_ppd, dp.nomer_pdd, start_work FROM dose_ppd AS dp LEFT JOIN users AS u ON u.user_id = dp.user_id WHERE dp.finish_work is null ");
+                query.prepare("SELECT u.user_id, u.name_1, u.name_0, u.name_2, max(dp.type_ppd), dp.nomer_pdd, max(start_work) FROM dose_ppd AS dp LEFT JOIN users AS u ON u.user_id = dp.user_id WHERE dp.finish_work is null group by u.user_id, dp.nomer_pdd order by u.user_id ");
+
+                if (file.open( QIODevice::WriteOnly ))
+                {
+                    // QTextStream stream(&file);
+                    // file.write("№; Фамилия; Имя; Отчество; Дата рождения; Снилс; Эквивалентная доза, Зв; Максимальная эквивалентная доза, Зв; \n");
+                    //  query.bindValue(":img",baToSend);
+                    if (query.exec())
+                    {
+                        // if(query.first())
+                        {
+                            // dose_ppd_id = query.value(0).toInt();;
+                        }
+
+
+                        while (query.next()) {
+                            ui->comboBox->addItem(query.value(0).toString() + " " + query.value(1).toString() + " " + query.value(2).toString() + " " + query.value(3).toString() + " Тип детектора " + query.value(4).toString() + " №" + query.value(5).toString()+ " \nначало работ" + query.value(6).toString()); //+ "; " + query.value(7).toString()+ "; \n";
+                        }
+                    }
+
+                }
+                query.clear();
+            }
+            db.close();
+
+        }
+        QSqlDatabase::removeDatabase(G_DatabaseName_cell);
+}
+
+
+
+// отчет
+void MainWindow::on_btn_createReport_clicked()
+{
+    Welcome welcome;
+    welcome.createConnection();
+
+    {
+        QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", G_DatabaseName_cell);;
+        db.setHostName(G_ip_database_cell); //("localhost");
+        db.setDatabaseName(G_DatabaseName_cell);
+        db.setUserName(G_UserName_cell);
+        db.setPassword(G_Password_cell);
+        if (!db.open()) {
+            //      ui->label->setText("bad");
+            //      cout«"Crash "«endl;
+        }
+        else
+        {
+            // файл должен существовать
+            QFile file("dose.csv");
+
+            QString rez = "";
+            QSqlQuery query(db);
+
+            query.prepare("SELECT u.user_id, name_1, name_0, name_2, birthday, COALESCE(snils, '-') as snils, COALESCE(SUM(dp.dose), 0) as sum, COALESCE(max(dp.rate_max), 0) AS max FROM users AS u LEFT JOIN dose_ppd AS dp ON u.user_id = dp.user_id GROUP BY u.user_id order by u.user_id");
+            qDebug() << "!243";
+            if (file.open( QIODevice::WriteOnly ))
+            {
+                QTextStream stream(&file);
+                file.write("№; Фамилия; Имя; Отчество; Дата рождения; Снилс; Эквивалентная доза, Зв; Максимальная эквивалентная доза, Зв; \n");
+                //  query.bindValue(":img",baToSend);
+                if (query.exec())
+                {
+                    // if(query.first())
+                    {
+                        // dose_ppd_id = query.value(0).toInt();;
+                    }
+
+
+                    while (query.next()) {
+                        stream << query.value(0).toString() + "; " + query.value(1).toString() + "; " + query.value(2).toString() + "; " + query.value(3).toString() + "; " + query.value(4).toString() + "; " + query.value(5).toString()+ "; " + query.value(6).toString() + "; " + query.value(7).toString()+ "; \n";
+                        qDebug() << query.value(0).toString() + "; " + query.value(1).toString() + "; " + query.value(2).toString() + "; " + query.value(3).toString() + "; " + query.value(4).toString() + "; " + query.value(5).toString()+ "; " + query.value(6).toString() + "; " + query.value(7).toString()+ "; \n";
+
+                    }
+                }
+                file.close();
+            }
+            query.clear();
+        }
+        db.close();
+
+    }
+    QSqlDatabase::removeDatabase(G_DatabaseName_cell);
+
+}

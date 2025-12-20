@@ -969,5 +969,8 @@ bool Welcome::createConnection()
                               .arg(dbHost).arg(dbPort).arg(dbUser).arg(dbName)
                               .arg(db.lastError().text()));
 
+
+    //query.clear();
+    db.close();
     return false;
 }
