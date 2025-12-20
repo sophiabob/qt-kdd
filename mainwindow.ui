@@ -1217,7 +1217,7 @@ QStatusBar
          </size>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -1320,7 +1320,7 @@ QStatusBar
                    <property name="geometry">
                     <rect>
                      <x>0</x>
-                     <y>-190</y>
+                     <y>0</y>
                      <width>904</width>
                      <height>896</height>
                     </rect>
@@ -3301,7 +3301,7 @@ QStatusBar
                              <property name="geometry">
                               <rect>
                                <x>0</x>
-                               <y>-39</y>
+                               <y>0</y>
                                <width>531</width>
                                <height>498</height>
                               </rect>
