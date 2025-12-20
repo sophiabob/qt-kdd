@@ -11,6 +11,7 @@
 #include <QWidget>
 #include <QObject>
 #include <QVariant>
+#include <QProgressDialog>
 
 // Контейнеры и структуры данных Qt
 #include <QMap>

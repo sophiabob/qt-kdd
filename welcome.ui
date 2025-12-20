@@ -1323,6 +1323,13 @@ QStatusBar
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="pushButton_syncBD">
+         <property name="text">
+          <string>Синхронизация БД</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
           <widget class="QPushButton" name="pushButton">

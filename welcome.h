@@ -42,6 +42,12 @@
 
 #include "mainwindow.h"
 
+#include <QGroupBox>
+#include <QFormLayout>
+#include <QSpinBox>
+#include <QDialogButtonBox>
+#include <QProgressDialog>
+
 namespace Ui {
 class Welcome;
 }
@@ -105,6 +111,7 @@ private slots:
                               bool keepHost = false);
 
     bool createConnection();*/
+    void on_pushButton_syncBD_pressed();
 
 private:
     Ui::Welcome *ui;

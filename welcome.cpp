@@ -259,125 +259,111 @@ void Welcome::readDatabaseSettings(QString &user, QString &password,
     qDebug() << "  Port:" << port;*/
 }
 
-
 void Welcome::on_pushButton_pressed()
 {
-    //QString dbName = "newdb";
-
     // Закрываем и удаляем все существующие подключения
     QStringList connections = QSqlDatabase::connectionNames();
     for (const QString &connectionName : connections) {
         QSqlDatabase::removeDatabase(connectionName);
     }
 
-    // Получаем параметры подключения
-    QString host, user, password;
-    int port = 5432;
-
-    // Используем ту же логику, что и в createConnection()
-    QString dbName, dbUser, dbPassword, dbHost;
+    // Получаем параметры подключения как в createConnection()
+    QString dbUser, dbPassword, dbName, dbHost;
     int dbPort = 5432;
+    QString dataSource = "";
 
-    // 1. Сначала проверяем, есть ли IP в lineEdit_ip
+    // 1. Проверяем IP из поля ввода
     QString ipFromUI = ui->lineEdit_ip->text().trimmed();
-
     if (!ipFromUI.isEmpty()) {
-        // Проверяем валидность IP
         QHostAddress address;
         if (address.setAddress(ipFromUI)) {
-            // Используем IP из поля ввода
             dbHost = ipFromUI;
+            dataSource = "Поле ввода IP";
             qDebug() << "Используется IP из поля ввода:" << dbHost;
         } else {
             qWarning() << "Неверный IP адрес в поле ввода:" << ipFromUI;
         }
     }
 
-    // 2. Если IP из поля ввода не задан или невалиден, читаем из settings.ini
+    // 2. Если нет IP из UI, читаем из settings.ini
     if (dbHost.isEmpty()) {
         readDatabaseSettings(dbUser, dbPassword, dbName, dbHost, dbPort, false);
+        dataSource = "Файл settings.ini";
+        qDebug() << "Используются настройки из settings.ini";
     }
 
-    // 3. Если после чтения настроек хост все еще пустой, используем OS-специфичные настройки
+    // 3. Если хост все еще пустой, используем OS-специфичные настройки
     if (dbHost.isEmpty()) {
         QString os = detectOS();
         if (os == "Windows") {
             this->showNormal();
             dbUser = "postgres";
             dbPassword = "postgres";
+            dbName = "newdb";
             dbHost = "localhost";
         } else if (os == "Linux") {
             this->showFullScreen();
             dbUser = "postgres";
             dbPassword = "postgres1";
+            dbName = "newdb";
             dbHost = "localhost";
         } else {
             qDebug() << "Используются OS-специфичные настройки для" << os;
         }
-        qDebug() << "Источник - вручную";
+        dataSource = "OS-специфичные настройки";
     }
 
-    // Используем полученные настройки
-    host = dbHost;
-    port = dbPort;
-    user = dbUser;
-    password = dbPassword;
-
     qDebug() << "Параметры подключения для создания базы:";
-    qDebug() << "Хост:" << host;
-    qDebug() << "Порт:" << port;
-    qDebug() << "Пользователь:" << user;
-    qDebug() << "Пароль:" << "[скрыто]";
+    qDebug() << "Хост:" << dbHost;
+    qDebug() << "Порт:" << dbPort;
+    qDebug() << "Пользователь:" << dbUser;
+    qDebug() << "База:" << dbName;
 
     // Проверяем подключение к серверу PostgreSQL (к базе postgres)
-    {
-        QString testConnectionName = "test_connection_" + QString::number(QDateTime::currentMSecsSinceEpoch());
-        QSqlDatabase testDb = QSqlDatabase::addDatabase("QPSQL", testConnectionName);
+    QString testConnectionName = "test_connection_" + QString::number(QDateTime::currentMSecsSinceEpoch());
+    QSqlDatabase testDb = QSqlDatabase::addDatabase("QPSQL", testConnectionName);
 
-        // Настраиваем подключение к системной базе postgres
-        testDb.setHostName(host);
-        testDb.setPort(port);
-        testDb.setUserName(user);
-        testDb.setPassword(password);
-        testDb.setDatabaseName("postgres");
+    testDb.setHostName(dbHost);
+    testDb.setPort(dbPort);
+    testDb.setUserName(dbUser);
+    testDb.setPassword(dbPassword);
+    testDb.setDatabaseName("postgres");
 
-        if (!testDb.open()) {
+    if (!testDb.open()) {
+        QMessageBox::critical(this, "Ошибка",
+                              "Не удалось подключиться к серверу PostgreSQL: " + testDb.lastError().text());
+        QSqlDatabase::removeDatabase(testConnectionName);
+        return;
+    }
+
+    // Проверяем существование базы данных
+    QSqlQuery checkQuery(testDb);
+    if (!checkQuery.exec("SELECT 1 FROM pg_database WHERE datname = '" + dbName + "'") || !checkQuery.next()) {
+        // Базы не существует, создаем её
+        if (!checkQuery.exec("CREATE DATABASE " + dbName)) {
             QMessageBox::critical(this, "Ошибка",
-                                  "Не удалось подключиться к серверу PostgreSQL: " + testDb.lastError().text());
+                                  "Не удалось создать базу данных: " + checkQuery.lastError().text());
+            testDb.close();
             QSqlDatabase::removeDatabase(testConnectionName);
             return;
         }
-
-        // Проверяем существование базы данных
-        QSqlQuery checkQuery(testDb);
-        if (!checkQuery.exec("SELECT 1 FROM pg_database WHERE datname = '" + dbName + "'") || !checkQuery.next()) {
-            // Базы не существует, создаем её
-            if (!checkQuery.exec("CREATE DATABASE " + dbName)) {
-                QMessageBox::critical(this, "Ошибка",
-                                      "Не удалось создать базу данных: " + checkQuery.lastError().text());
-                testDb.close();
-                QSqlDatabase::removeDatabase(testConnectionName);
-                return;
-            }
-            QMessageBox::information(this, "Информация", "База данных " + dbName + " создана успешно");
-        } else {
-            qDebug() << "База данных" << dbName << "уже существует";
-        }
-
-        // Закрываем тестовое соединение
-        testDb.close();
-        QSqlDatabase::removeDatabase(testConnectionName);
+        QMessageBox::information(this, "Информация", "База данных " + dbName + " создана успешно");
+    } else {
+        qDebug() << "База данных" << dbName << "уже существует";
     }
+
+    // Закрываем тестовое соединение
+    testDb.close();
+    QSqlDatabase::removeDatabase(testConnectionName);
 
     // Создаем основное подключение к целевой базе данных
     QString connectionName = QString("main_connection_%1").arg(QDateTime::currentMSecsSinceEpoch());
     QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", connectionName);
 
-    // Настраиваем подключение к нашей базе
-    db.setHostName(host);
-    db.setPort(port);
-    db.setUserName(user);
-    db.setPassword(password);
+    db.setHostName(dbHost);
+    db.setPort(dbPort);
+    db.setUserName(dbUser);
+    db.setPassword(dbPassword);
     db.setDatabaseName(dbName);
 
     if (!db.open()) {
@@ -439,9 +425,6 @@ void Welcome::on_pushButton_pressed()
 
     // Включаем проверку внешних ключей обратно
     query.exec("SET session_replication_role = 'origin'");
-
-    // [ОСТАВЛЯЕМ ВЕСЬ КОД СОЗДАНИЯ ТАБЛИЦ БЕЗ ИЗМЕНЕНИЙ]
-    // ... (ваш существующий код создания таблиц остается без изменений)
 
     // Создаем таблицы заново
     QStringList sqlCommands = {
@@ -677,9 +660,6 @@ void Welcome::on_pushButton_pressed()
         type_edit VARCHAR(30) DEFAULT 'create'
     ))",
 
-        // Таблица dose_ppd_history
-        //R"(CREATE TABLE dose_ppd_history(dose_ppd_id int, user_id int, users_duty_id int, nomer_pdd CHARACTER VARYING(30), time int, time_max timestamp, type_ppd smallint, dose float8 DEFAULT 0, rate_max float8, dose_ppd_note CHARACTER VARYING(30), start_work timestamp, finish_work timestamp, last_update timestamp, user_id_change int, last_update_change timestamp))",
-
         // Таблица dose_ppd
         R"(CREATE TABLE dose_ppd(
         dose_ppd_id int primary key,
@@ -703,7 +683,8 @@ void Welcome::on_pushButton_pressed()
         user_id int,
         users_duty_id int,
         nomer_pdd CHARACTER VARYING(30),
-        time int, time_max timestamp,
+        time int,
+        time_max timestamp,
         type_ppd smallint,
         dose float8 DEFAULT 0,
         rate_max float8,
@@ -716,15 +697,44 @@ void Welcome::on_pushButton_pressed()
         type_edit VARCHAR(30) DEFAULT 'create'
     ))",
 
-        // Таблица dose_ppd_history
-        R"(CREATE TABLE set_kid(set_id int primary key, set_name CHARACTER VARYING(30), ip_set inet, set_quantity int, set_block CHARACTER VARYING(30), set_note CHARACTER VARYING(30), last_update timestamp);)",
+        // Таблица set_kid
+        R"(CREATE TABLE set_kid(
+        set_id int primary key,
+        set_name CHARACTER VARYING(30),
+        ip_set inet,
+        set_quantity int,
+        set_block CHARACTER VARYING(30),
+        set_note CHARACTER VARYING(30),
+        last_update timestamp
+    ))",
 
-        // Таблица dose_ppd_history
-        R"(CREATE TABLE kas_kid(set_id int, kas_id int, kas_name CHARACTER VARYING(30) , kas_height int, kas_width int, kas_block CHARACTER VARYING(30), kas_note CHARACTER VARYING(30), last_update timestamp, PRIMARY KEY (kas_id, set_id));)",
+        // Таблица kas_kid
+        R"(CREATE TABLE kas_kid(
+        set_id int,
+        kas_id int,
+        kas_name CHARACTER VARYING(30),
+        kas_height int,
+        kas_width int,
+        kas_block CHARACTER VARYING(30),
+        kas_note CHARACTER VARYING(30),
+        last_update timestamp,
+        PRIMARY KEY (kas_id, set_id)
+    ))",
 
-        // Таблица dose_ppd_history
-        R"(CREATE TABLE mesh_kid(set_id int, kas_id int,  mesh_id int, user_id int, doz_tld_id CHARACTER VARYING(30), mesh_status int, mesh_note CHARACTER VARYING(30), last_update timestamp, PRIMARY KEY (kas_id, set_id, mesh_id));)",
+        // Таблица mesh_kid
+        R"(CREATE TABLE mesh_kid(
+        set_id int,
+        kas_id int,
+        mesh_id int,
+        user_id int,
+        doz_tld_id CHARACTER VARYING(30),
+        mesh_status int,
+        mesh_note CHARACTER VARYING(30),
+        last_update timestamp,
+        PRIMARY KEY (kas_id, set_id, mesh_id)
+    ))",
 
+        // Таблица set_kid_history
         R"(CREATE TABLE set_kid_history (
         set_id INTEGER NOT NULL,
         set_name VARCHAR(30),
@@ -738,7 +748,7 @@ void Welcome::on_pushButton_pressed()
         type_edit VARCHAR(30) DEFAULT 'create'
     ))",
 
-        // Таблица kas_kid_history для записи истории изменений кассетниц КИД
+        // Таблица kas_kid_history
         R"(CREATE TABLE kas_kid_history (
         set_id INTEGER NOT NULL,
         kas_id INTEGER NOT NULL,
@@ -753,7 +763,7 @@ void Welcome::on_pushButton_pressed()
         type_edit VARCHAR(30) DEFAULT 'create'
     ))",
 
-        // Таблица mesh_kid_history для записи истории изменений ячеек КИД
+        // Таблица mesh_kid_history
         R"(CREATE TABLE mesh_kid_history (
         set_id INTEGER NOT NULL,
         kas_id INTEGER NOT NULL,
@@ -768,6 +778,7 @@ void Welcome::on_pushButton_pressed()
         type_edit VARCHAR(30) DEFAULT 'create'
     ))"
     };
+
     // Создаем таблицы
     int createdCount = 0;
     int errorCount = 0;
@@ -819,6 +830,486 @@ void Welcome::on_pushButton_pressed()
     db.close();
     QSqlDatabase::removeDatabase(connectionName);
 }
+
+void Welcome::on_pushButton_syncBD_pressed()
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Синхронизация баз данных",
+                                  "Вы уверены, что хотите синхронизировать локальную и удаленную базы данных?\n"
+                                  "Эта операция сравнит структуры и добавит отсутствующие элементы.",
+                                  QMessageBox::Yes | QMessageBox::No);
+
+    if (reply == QMessageBox::No) {
+        return;
+    }
+
+    // Встроенный диалог для параметров
+    QDialog paramDialog(this);
+    paramDialog.setWindowTitle("Параметры синхронизации");
+    paramDialog.resize(400, 500);
+
+    QVBoxLayout mainLayout(&paramDialog);
+
+    // Локальная база
+    QGroupBox localGroup("Локальная база (источник)", &paramDialog);
+    QFormLayout localLayout(&localGroup);
+
+    QLineEdit localHostEdit("localhost", &paramDialog);
+    QSpinBox localPortSpin(&paramDialog);
+    localPortSpin.setRange(1, 65535);
+    localPortSpin.setValue(5432);
+    QLineEdit localUserEdit("postgres", &paramDialog);
+    QLineEdit localPassEdit(&paramDialog);
+    localPassEdit.setEchoMode(QLineEdit::Password);
+    QLineEdit localDbEdit("newdb", &paramDialog);
+
+    localLayout.addRow("Хост:", &localHostEdit);
+    localLayout.addRow("Порт:", &localPortSpin);
+    localLayout.addRow("Пользователь:", &localUserEdit);
+    localLayout.addRow("Пароль:", &localPassEdit);
+    localLayout.addRow("База данных:", &localDbEdit);
+
+    // Удаленная база
+    QGroupBox remoteGroup("Удаленная база (цель)", &paramDialog);
+    QFormLayout remoteLayout(&remoteGroup);
+
+    QLineEdit remoteHostEdit("localhost", &paramDialog);
+    QSpinBox remotePortSpin(&paramDialog);
+    remotePortSpin.setRange(1, 65535);
+    remotePortSpin.setValue(5432);
+    QLineEdit remoteUserEdit("postgres", &paramDialog);
+    QLineEdit remotePassEdit(&paramDialog);
+    remotePassEdit.setEchoMode(QLineEdit::Password);
+    QLineEdit remoteDbEdit("newdb", &paramDialog);
+
+    remoteLayout.addRow("Хост:", &remoteHostEdit);
+    remoteLayout.addRow("Порт:", &remotePortSpin);
+    remoteLayout.addRow("Пользователь:", &remoteUserEdit);
+    remoteLayout.addRow("Пароль:", &remotePassEdit);
+    remoteLayout.addRow("База данных:", &remoteDbEdit);
+
+    // Автозаполнение локальной базы из текущих настроек
+    QString localHost, localUser, localPassword, localDbName;
+    int localPort = 5432;
+
+    // 1. Проверяем IP из lineEdit_ip
+    QString ipFromUI = ui->lineEdit_ip->text().trimmed();
+    if (!ipFromUI.isEmpty()) {
+        QHostAddress address;
+        if (address.setAddress(ipFromUI)) {
+            localHost = ipFromUI;
+            localHostEdit.setText(localHost);
+        }
+    }
+
+    // 2. Если IP из UI не задан, читаем из settings.ini
+    if (localHost.isEmpty()) {
+        readDatabaseSettings(localUser, localPassword, localDbName, localHost, localPort, false);
+        if (!localHost.isEmpty()) {
+            localHostEdit.setText(localHost);
+            localPortSpin.setValue(localPort);
+            localUserEdit.setText(localUser);
+            localPassEdit.setText(localPassword);
+            localDbEdit.setText(localDbName);
+        }
+    }
+
+    // 3. Если все еще пусто, используем OS-специфичные настройки
+    if (localHost.isEmpty()) {
+        QString os = detectOS();
+        if (os == "Windows") {
+            localUserEdit.setText("postgres");
+            localPassEdit.setText("postgres");
+            localDbEdit.setText("newdb");
+            localHostEdit.setText("localhost");
+        } else if (os == "Linux") {
+            localUserEdit.setText("postgres");
+            localPassEdit.setText("postgres1");
+            localDbEdit.setText("newdb");
+            localHostEdit.setText("localhost");
+        }
+    }
+
+    // Кнопки тестирования
+    QHBoxLayout testLayout;
+    QPushButton testLocalBtn("Тест локальной", &paramDialog);
+    QPushButton testRemoteBtn("Тест удаленной", &paramDialog);
+
+    testLayout.addWidget(&testLocalBtn);
+    testLayout.addWidget(&testRemoteBtn);
+
+    // Кнопки OK/Cancel
+    QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+                               Qt::Horizontal, &paramDialog);
+
+    mainLayout.addWidget(&localGroup);
+    mainLayout.addWidget(&remoteGroup);
+    mainLayout.addLayout(&testLayout);
+    mainLayout.addWidget(&buttonBox);
+
+    // Функция тестирования подключения
+    auto testConnection = [&](bool isLocal) -> bool {
+        QString host = isLocal ? localHostEdit.text() : remoteHostEdit.text();
+        int port = isLocal ? localPortSpin.value() : remotePortSpin.value();
+        QString user = isLocal ? localUserEdit.text() : remoteUserEdit.text();
+        QString password = isLocal ? localPassEdit.text() : remotePassEdit.text();
+        QString dbName = isLocal ? localDbEdit.text() : remoteDbEdit.text();
+
+        QString connName = "test_conn_" + QString::number(QDateTime::currentMSecsSinceEpoch());
+        QSqlDatabase testDb = QSqlDatabase::addDatabase("QPSQL", connName);
+
+        testDb.setHostName(host);
+        testDb.setPort(port);
+        testDb.setUserName(user);
+        testDb.setPassword(password);
+        testDb.setDatabaseName(dbName);
+
+        bool success = testDb.open();
+        QString message;
+
+        if (success) {
+            message = QString("Подключение к %1 базе данных успешно!")
+                          .arg(isLocal ? "локальной" : "удаленной");
+            QMessageBox::information(&paramDialog, "Успех", message);
+            testDb.close();
+        } else {
+            message = QString("Не удалось подключиться к %1 базе данных:\n%2")
+                          .arg(isLocal ? "локальной" : "удаленной")
+                          .arg(testDb.lastError().text());
+            QMessageBox::critical(&paramDialog, "Ошибка", message);
+        }
+
+        QSqlDatabase::removeDatabase(connName);
+        return success;
+    };
+
+    QObject::connect(&testLocalBtn, &QPushButton::clicked, [&]() { testConnection(true); });
+    QObject::connect(&testRemoteBtn, &QPushButton::clicked, [&]() { testConnection(false); });
+    QObject::connect(&buttonBox, &QDialogButtonBox::accepted, &paramDialog, &QDialog::accept);
+    QObject::connect(&buttonBox, &QDialogButtonBox::rejected, &paramDialog, &QDialog::reject);
+
+    if (paramDialog.exec() != QDialog::Accepted) {
+        return;
+    }
+
+    // Получаем параметры
+    localHost = localHostEdit.text();
+    localPort = localPortSpin.value();
+    localUser = localUserEdit.text();
+    localPassword = localPassEdit.text();
+    localDbName = localDbEdit.text();
+
+    QString remoteHost = remoteHostEdit.text();
+    int remotePort = remotePortSpin.value();
+    QString remoteUser = remoteUserEdit.text();
+    QString remotePassword = remotePassEdit.text();
+    QString remoteDbName = remoteDbEdit.text();
+
+    // Создаем соединения
+    QString localConnName = "local_sync_" + QString::number(QDateTime::currentMSecsSinceEpoch());
+    QString remoteConnName = "remote_sync_" + QString::number(QDateTime::currentMSecsSinceEpoch());
+
+    QSqlDatabase localDb = QSqlDatabase::addDatabase("QPSQL", localConnName);
+    localDb.setHostName(localHost);
+    localDb.setPort(localPort);
+    localDb.setUserName(localUser);
+    localDb.setPassword(localPassword);
+    localDb.setDatabaseName(localDbName);
+
+    QSqlDatabase remoteDb = QSqlDatabase::addDatabase("QPSQL", remoteConnName);
+    remoteDb.setHostName(remoteHost);
+    remoteDb.setPort(remotePort);
+    remoteDb.setUserName(remoteUser);
+    remoteDb.setPassword(remotePassword);
+    remoteDb.setDatabaseName(remoteDbName);
+
+    // Открываем соединения
+    if (!localDb.open()) {
+        QMessageBox::critical(this, "Ошибка",
+                              "Не удалось подключиться к локальной базе данных:\n" + localDb.lastError().text());
+        QSqlDatabase::removeDatabase(localConnName);
+        return;
+    }
+
+    if (!remoteDb.open()) {
+        QMessageBox::critical(this, "Ошибка",
+                              "Не удалось подключиться к удаленной базе данных:\n" + remoteDb.lastError().text());
+        localDb.close();
+        QSqlDatabase::removeDatabase(localConnName);
+        QSqlDatabase::removeDatabase(remoteConnName);
+        return;
+    }
+
+    // Диалог прогресса
+    QProgressDialog progress("Синхронизация...", "Отмена", 0, 100, this);
+    progress.setWindowModality(Qt::WindowModal);
+    progress.setMinimumDuration(0);
+    progress.setValue(5);
+    QApplication::processEvents();
+
+    int tablesCreated = 0;
+    int rowsAdded = 0;
+    bool syncCancelled = false;
+
+    try {
+        // Получаем список таблиц
+        progress.setLabelText("Получение списка таблиц...");
+        progress.setValue(10);
+        QApplication::processEvents();
+
+        QStringList localTables;
+        QSqlQuery localQuery(localDb);
+        if (localQuery.exec("SELECT table_name FROM information_schema.tables "
+                            "WHERE table_schema = 'public' ORDER BY table_name")) {
+            while (localQuery.next()) {
+                localTables << localQuery.value(0).toString();
+            }
+        }
+
+        QStringList remoteTables;
+        QSqlQuery remoteQuery(remoteDb);
+        if (remoteQuery.exec("SELECT table_name FROM information_schema.tables "
+                             "WHERE table_schema = 'public' ORDER BY table_name")) {
+            while (remoteQuery.next()) {
+                remoteTables << remoteQuery.value(0).toString();
+            }
+        }
+
+        // Создаем отсутствующие таблицы
+        progress.setLabelText("Создание отсутствующих таблиц...");
+        progress.setValue(20);
+        int tableCount = localTables.size();
+        int currentTable = 0;
+
+        foreach (const QString &tableName, localTables) {
+            if (progress.wasCanceled()) {
+                syncCancelled = true;
+                break;
+            }
+
+            currentTable++;
+            progress.setLabelText(QString("Обработка таблицы %1 из %2: %3")
+                                      .arg(currentTable).arg(tableCount).arg(tableName));
+            progress.setValue(20 + (currentTable * 20 / tableCount));
+            QApplication::processEvents();
+
+            if (!remoteTables.contains(tableName)) {
+                // Получаем структуру таблицы
+                QSqlQuery structureQuery(localDb);
+                QString createSql = "CREATE TABLE " + tableName + " (";
+                QStringList columns;
+
+                if (structureQuery.exec(QString(
+                                            "SELECT column_name, data_type, character_maximum_length, "
+                                            "is_nullable, column_default "
+                                            "FROM information_schema.columns "
+                                            "WHERE table_name = '%1' ORDER BY ordinal_position").arg(tableName))) {
+
+                    while (structureQuery.next()) {
+                        QString colName = structureQuery.value("column_name").toString();
+                        QString dataType = structureQuery.value("data_type").toString();
+                        QString maxLength = structureQuery.value("character_maximum_length").toString();
+                        QString nullable = structureQuery.value("is_nullable").toString();
+                        QString defaultValue = structureQuery.value("column_default").toString();
+
+                        QString columnDef = QString("\"%1\" %2").arg(colName).arg(dataType);
+
+                        if (dataType == "character varying" && !maxLength.isEmpty()) {
+                            columnDef += QString("(%1)").arg(maxLength);
+                        }
+
+                        if (nullable == "NO") {
+                            columnDef += " NOT NULL";
+                        }
+
+                        if (!defaultValue.isEmpty()) {
+                            columnDef += " DEFAULT " + defaultValue;
+                        }
+
+                        columns << columnDef;
+                    }
+                }
+
+                if (!columns.isEmpty()) {
+                    QString fullCreateSql = createSql + columns.join(", ") + ")";
+                    if (remoteQuery.exec(fullCreateSql)) {
+                        tablesCreated++;
+                        qDebug() << "Создана таблица:" << tableName;
+                    } else {
+                        qDebug() << "Ошибка создания таблицы" << tableName << ":" << remoteQuery.lastError().text();
+                    }
+                }
+            }
+        }
+
+        if (syncCancelled) {
+            QMessageBox::information(this, "Синхронизация отменена",
+                                     "Синхронизация была отменена пользователем.");
+            localDb.close();
+            remoteDb.close();
+            QSqlDatabase::removeDatabase(localConnName);
+            QSqlDatabase::removeDatabase(remoteConnName);
+            return;
+        }
+
+        // Синхронизируем данные
+        progress.setLabelText("Синхронизация данных...");
+        progress.setValue(50);
+        currentTable = 0;
+
+        foreach (const QString &tableName, localTables) {
+            if (progress.wasCanceled()) {
+                syncCancelled = true;
+                break;
+            }
+
+            currentTable++;
+            progress.setLabelText(QString("Синхронизация данных таблицы %1 из %2: %3")
+                                      .arg(currentTable).arg(tableCount).arg(tableName));
+            progress.setValue(50 + (currentTable * 40 / tableCount));
+            QApplication::processEvents();
+
+            // Пропускаем таблицы истории
+            if (tableName.endsWith("_history")) {
+                continue;
+            }
+
+            // Получаем данные из локальной базы
+            QList<QStringList> localData;
+            QSqlQuery localDataQuery(localDb);
+            if (localDataQuery.exec("SELECT * FROM " + tableName)) {
+                QSqlRecord record = localDataQuery.record();
+                while (localDataQuery.next()) {
+                    QStringList row;
+                    for (int i = 0; i < record.count(); i++) {
+                        row << localDataQuery.value(i).toString();
+                    }
+                    localData << row;
+                }
+            }
+
+            // Получаем данные из удаленной базы
+            QList<QStringList> remoteData;
+            QSqlQuery remoteDataQuery(remoteDb);
+            if (remoteDataQuery.exec("SELECT * FROM " + tableName)) {
+                QSqlRecord record = remoteDataQuery.record();
+                while (remoteDataQuery.next()) {
+                    QStringList row;
+                    for (int i = 0; i < record.count(); i++) {
+                        row << remoteDataQuery.value(i).toString();
+                    }
+                    remoteData << row;
+                }
+            }
+
+            // Определяем первичный ключ
+            QStringList pkColumns;
+            QSqlQuery pkQuery(localDb);
+            if (pkQuery.exec(QString(
+                                 "SELECT column_name FROM information_schema.key_column_usage "
+                                 "WHERE table_name = '%1' AND constraint_name LIKE '%%pkey'").arg(tableName))) {
+
+                while (pkQuery.next()) {
+                    pkColumns << pkQuery.value("column_name").toString();
+                }
+            }
+
+            // Добавляем отсутствующие строки
+            foreach (const QStringList &localRow, localData) {
+                bool exists = false;
+
+                if (!pkColumns.isEmpty()) {
+                    // Сравниваем по первичному ключу
+                    foreach (const QStringList &remoteRow, remoteData) {
+                        bool match = true;
+                        foreach (const QString &pkCol, pkColumns) {
+                            int localIdx = localDataQuery.record().indexOf(pkCol);
+                            int remoteIdx = remoteDataQuery.record().indexOf(pkCol);
+
+                            if (localIdx >= 0 && remoteIdx >= 0 &&
+                                localRow[localIdx] != remoteRow[remoteIdx]) {
+                                match = false;
+                                break;
+                            }
+                        }
+
+                        if (match) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                } else {
+                    // Сравниваем все столбцы
+                    foreach (const QStringList &remoteRow, remoteData) {
+                        if (localRow == remoteRow) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!exists) {
+                    // Формируем INSERT запрос
+                    QSqlRecord record = localDataQuery.record();
+                    QStringList columns;
+                    QStringList placeholders;
+
+                    for (int i = 0; i < record.count(); i++) {
+                        columns << record.fieldName(i);
+                        placeholders << "?";
+                    }
+
+                    QString insertSql = QString("INSERT INTO %1 (%2) VALUES (%3)")
+                                            .arg(tableName)
+                                            .arg(columns.join(", "))
+                                            .arg(placeholders.join(", "));
+
+                    QSqlQuery insertQuery(remoteDb);
+                    insertQuery.prepare(insertSql);
+
+                    for (int i = 0; i < localRow.size(); i++) {
+                        insertQuery.addBindValue(localRow[i].isEmpty() ? QVariant() : localRow[i]);
+                    }
+
+                    if (insertQuery.exec()) {
+                        rowsAdded++;
+                    } else {
+                        qDebug() << "Ошибка вставки строки в таблицу" << tableName
+                                 << ":" << insertQuery.lastError().text();
+                    }
+                }
+            }
+        }
+
+        progress.setValue(100);
+
+        if (syncCancelled) {
+            QMessageBox::information(this, "Синхронизация отменена",
+                                     "Синхронизация была отменена пользователем.");
+        } else {
+            QString result = QString(
+                                 "Синхронизация завершена!\n\n"
+                                 "Создано таблиц: %1\n"
+                                 "Добавлено строк: %2\n\n"
+                                 "Базы данных успешно синхронизированы.")
+                                 .arg(tablesCreated)
+                                 .arg(rowsAdded);
+
+            QMessageBox::information(this, "Синхронизация завершена", result);
+        }
+
+    } catch (...) {
+        QMessageBox::critical(this, "Ошибка", "Произошла ошибка при синхронизации.");
+    }
+
+    // Закрываем соединения
+    localDb.close();
+    remoteDb.close();
+    QSqlDatabase::removeDatabase(localConnName);
+    QSqlDatabase::removeDatabase(remoteConnName);
+}
+
+
 
 bool Welcome::createConnection()
 {
