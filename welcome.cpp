@@ -37,7 +37,24 @@ void Welcome::on_btnCencel_pressed()
 {
     close();
 }
+QString Welcome::detectOS()
+{
+    QString osName;
 
+#ifdef Q_OS_WIN
+    osName = "Windows";
+#elif defined(Q_OS_LINUX)
+    osName = "Linux";
+#elif defined(Q_OS_UNIX)
+    osName = "Unix";
+#elif defined(Q_OS_MAC)
+    osName = "macOS";
+#else
+    osName = "Unknown OS";
+#endif
+
+    return osName;
+}
 
 
 bool Welcome::on_btnSignIn_clicked()
@@ -831,494 +848,12 @@ void Welcome::on_pushButton_pressed()
     QSqlDatabase::removeDatabase(connectionName);
 }
 
-void Welcome::on_pushButton_syncBD_pressed()
-{
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, "Синхронизация баз данных",
-                                  "Вы уверены, что хотите синхронизировать локальную и удаленную базы данных?\n"
-                                  "Эта операция сравнит структуры и добавит отсутствующие элементы.",
-                                  QMessageBox::Yes | QMessageBox::No);
-
-    if (reply == QMessageBox::No) {
-        return;
-    }
-
-    // Встроенный диалог для параметров
-    QDialog paramDialog(this);
-    paramDialog.setWindowTitle("Параметры синхронизации");
-    paramDialog.resize(400, 500);
-
-    QVBoxLayout mainLayout(&paramDialog);
-
-    // Локальная база
-    QGroupBox localGroup("Локальная база (источник)", &paramDialog);
-    QFormLayout localLayout(&localGroup);
-
-    QLineEdit localHostEdit("localhost", &paramDialog);
-    QSpinBox localPortSpin(&paramDialog);
-    localPortSpin.setRange(1, 65535);
-    localPortSpin.setValue(5432);
-    QLineEdit localUserEdit("postgres", &paramDialog);
-    QLineEdit localPassEdit(&paramDialog);
-    localPassEdit.setEchoMode(QLineEdit::Password);
-    QLineEdit localDbEdit("newdb", &paramDialog);
-
-    localLayout.addRow("Хост:", &localHostEdit);
-    localLayout.addRow("Порт:", &localPortSpin);
-    localLayout.addRow("Пользователь:", &localUserEdit);
-    localLayout.addRow("Пароль:", &localPassEdit);
-    localLayout.addRow("База данных:", &localDbEdit);
-
-    // Удаленная база
-    QGroupBox remoteGroup("Удаленная база (цель)", &paramDialog);
-    QFormLayout remoteLayout(&remoteGroup);
-
-    QLineEdit remoteHostEdit("localhost", &paramDialog);
-    QSpinBox remotePortSpin(&paramDialog);
-    remotePortSpin.setRange(1, 65535);
-    remotePortSpin.setValue(5432);
-    QLineEdit remoteUserEdit("postgres", &paramDialog);
-    QLineEdit remotePassEdit(&paramDialog);
-    remotePassEdit.setEchoMode(QLineEdit::Password);
-    QLineEdit remoteDbEdit("newdb", &paramDialog);
-
-    remoteLayout.addRow("Хост:", &remoteHostEdit);
-    remoteLayout.addRow("Порт:", &remotePortSpin);
-    remoteLayout.addRow("Пользователь:", &remoteUserEdit);
-    remoteLayout.addRow("Пароль:", &remotePassEdit);
-    remoteLayout.addRow("База данных:", &remoteDbEdit);
-
-    // Автозаполнение локальной базы из текущих настроек
-    QString localHost, localUser, localPassword, localDbName;
-    int localPort = 5432;
-
-    // 1. Проверяем IP из lineEdit_ip
-    QString ipFromUI = ui->lineEdit_ip->text().trimmed();
-    if (!ipFromUI.isEmpty()) {
-        QHostAddress address;
-        if (address.setAddress(ipFromUI)) {
-            localHost = ipFromUI;
-            localHostEdit.setText(localHost);
-        }
-    }
-
-    // 2. Если IP из UI не задан, читаем из settings.ini
-    if (localHost.isEmpty()) {
-        readDatabaseSettings(localUser, localPassword, localDbName, localHost, localPort, false);
-        if (!localHost.isEmpty()) {
-            localHostEdit.setText(localHost);
-            localPortSpin.setValue(localPort);
-            localUserEdit.setText(localUser);
-            localPassEdit.setText(localPassword);
-            localDbEdit.setText(localDbName);
-        }
-    }
-
-    // 3. Если все еще пусто, используем OS-специфичные настройки
-    if (localHost.isEmpty()) {
-        QString os = detectOS();
-        if (os == "Windows") {
-            localUserEdit.setText("postgres");
-            localPassEdit.setText("postgres");
-            localDbEdit.setText("newdb");
-            localHostEdit.setText("localhost");
-        } else if (os == "Linux") {
-            localUserEdit.setText("postgres");
-            localPassEdit.setText("postgres1");
-            localDbEdit.setText("newdb");
-            localHostEdit.setText("localhost");
-        }
-    }
-
-    // Кнопки тестирования
-    QHBoxLayout testLayout;
-    QPushButton testLocalBtn("Тест локальной", &paramDialog);
-    QPushButton testRemoteBtn("Тест удаленной", &paramDialog);
-
-    testLayout.addWidget(&testLocalBtn);
-    testLayout.addWidget(&testRemoteBtn);
-
-    // Кнопки OK/Cancel
-    QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
-                               Qt::Horizontal, &paramDialog);
-
-    mainLayout.addWidget(&localGroup);
-    mainLayout.addWidget(&remoteGroup);
-    mainLayout.addLayout(&testLayout);
-    mainLayout.addWidget(&buttonBox);
-
-    // Функция тестирования подключения
-    auto testConnection = [&](bool isLocal) -> bool {
-        QString host = isLocal ? localHostEdit.text() : remoteHostEdit.text();
-        int port = isLocal ? localPortSpin.value() : remotePortSpin.value();
-        QString user = isLocal ? localUserEdit.text() : remoteUserEdit.text();
-        QString password = isLocal ? localPassEdit.text() : remotePassEdit.text();
-        QString dbName = isLocal ? localDbEdit.text() : remoteDbEdit.text();
-
-        QString connName = "test_conn_" + QString::number(QDateTime::currentMSecsSinceEpoch());
-        QSqlDatabase testDb = QSqlDatabase::addDatabase("QPSQL", connName);
-
-        testDb.setHostName(host);
-        testDb.setPort(port);
-        testDb.setUserName(user);
-        testDb.setPassword(password);
-        testDb.setDatabaseName(dbName);
-
-        bool success = testDb.open();
-        QString message;
-
-        if (success) {
-            message = QString("Подключение к %1 базе данных успешно!")
-                          .arg(isLocal ? "локальной" : "удаленной");
-            QMessageBox::information(&paramDialog, "Успех", message);
-            testDb.close();
-        } else {
-            message = QString("Не удалось подключиться к %1 базе данных:\n%2")
-                          .arg(isLocal ? "локальной" : "удаленной")
-                          .arg(testDb.lastError().text());
-            QMessageBox::critical(&paramDialog, "Ошибка", message);
-        }
-
-        QSqlDatabase::removeDatabase(connName);
-        return success;
-    };
-
-    QObject::connect(&testLocalBtn, &QPushButton::clicked, [&]() { testConnection(true); });
-    QObject::connect(&testRemoteBtn, &QPushButton::clicked, [&]() { testConnection(false); });
-    QObject::connect(&buttonBox, &QDialogButtonBox::accepted, &paramDialog, &QDialog::accept);
-    QObject::connect(&buttonBox, &QDialogButtonBox::rejected, &paramDialog, &QDialog::reject);
-
-    if (paramDialog.exec() != QDialog::Accepted) {
-        return;
-    }
-
-    // Получаем параметры
-    localHost = localHostEdit.text();
-    localPort = localPortSpin.value();
-    localUser = localUserEdit.text();
-    localPassword = localPassEdit.text();
-    localDbName = localDbEdit.text();
-
-    QString remoteHost = remoteHostEdit.text();
-    int remotePort = remotePortSpin.value();
-    QString remoteUser = remoteUserEdit.text();
-    QString remotePassword = remotePassEdit.text();
-    QString remoteDbName = remoteDbEdit.text();
-
-    // Создаем соединения
-    QString localConnName = "local_sync_" + QString::number(QDateTime::currentMSecsSinceEpoch());
-    QString remoteConnName = "remote_sync_" + QString::number(QDateTime::currentMSecsSinceEpoch());
-
-    QSqlDatabase localDb = QSqlDatabase::addDatabase("QPSQL", localConnName);
-    localDb.setHostName(localHost);
-    localDb.setPort(localPort);
-    localDb.setUserName(localUser);
-    localDb.setPassword(localPassword);
-    localDb.setDatabaseName(localDbName);
-
-    QSqlDatabase remoteDb = QSqlDatabase::addDatabase("QPSQL", remoteConnName);
-    remoteDb.setHostName(remoteHost);
-    remoteDb.setPort(remotePort);
-    remoteDb.setUserName(remoteUser);
-    remoteDb.setPassword(remotePassword);
-    remoteDb.setDatabaseName(remoteDbName);
-
-    // Открываем соединения
-    if (!localDb.open()) {
-        QMessageBox::critical(this, "Ошибка",
-                              "Не удалось подключиться к локальной базе данных:\n" + localDb.lastError().text());
-        QSqlDatabase::removeDatabase(localConnName);
-        return;
-    }
-
-    if (!remoteDb.open()) {
-        QMessageBox::critical(this, "Ошибка",
-                              "Не удалось подключиться к удаленной базе данных:\n" + remoteDb.lastError().text());
-        localDb.close();
-        QSqlDatabase::removeDatabase(localConnName);
-        QSqlDatabase::removeDatabase(remoteConnName);
-        return;
-    }
-
-    // Диалог прогресса
-    QProgressDialog progress("Синхронизация...", "Отмена", 0, 100, this);
-    progress.setWindowModality(Qt::WindowModal);
-    progress.setMinimumDuration(0);
-    progress.setValue(5);
-    QApplication::processEvents();
-
-    int tablesCreated = 0;
-    int rowsAdded = 0;
-    bool syncCancelled = false;
-
-    try {
-        // Получаем список таблиц
-        progress.setLabelText("Получение списка таблиц...");
-        progress.setValue(10);
-        QApplication::processEvents();
-
-        QStringList localTables;
-        QSqlQuery localQuery(localDb);
-        if (localQuery.exec("SELECT table_name FROM information_schema.tables "
-                            "WHERE table_schema = 'public' ORDER BY table_name")) {
-            while (localQuery.next()) {
-                localTables << localQuery.value(0).toString();
-            }
-        }
-
-        QStringList remoteTables;
-        QSqlQuery remoteQuery(remoteDb);
-        if (remoteQuery.exec("SELECT table_name FROM information_schema.tables "
-                             "WHERE table_schema = 'public' ORDER BY table_name")) {
-            while (remoteQuery.next()) {
-                remoteTables << remoteQuery.value(0).toString();
-            }
-        }
-
-        // Создаем отсутствующие таблицы
-        progress.setLabelText("Создание отсутствующих таблиц...");
-        progress.setValue(20);
-        int tableCount = localTables.size();
-        int currentTable = 0;
-
-        foreach (const QString &tableName, localTables) {
-            if (progress.wasCanceled()) {
-                syncCancelled = true;
-                break;
-            }
-
-            currentTable++;
-            progress.setLabelText(QString("Обработка таблицы %1 из %2: %3")
-                                      .arg(currentTable).arg(tableCount).arg(tableName));
-            progress.setValue(20 + (currentTable * 20 / tableCount));
-            QApplication::processEvents();
-
-            if (!remoteTables.contains(tableName)) {
-                // Получаем структуру таблицы
-                QSqlQuery structureQuery(localDb);
-                QString createSql = "CREATE TABLE " + tableName + " (";
-                QStringList columns;
-
-                if (structureQuery.exec(QString(
-                                            "SELECT column_name, data_type, character_maximum_length, "
-                                            "is_nullable, column_default "
-                                            "FROM information_schema.columns "
-                                            "WHERE table_name = '%1' ORDER BY ordinal_position").arg(tableName))) {
-
-                    while (structureQuery.next()) {
-                        QString colName = structureQuery.value("column_name").toString();
-                        QString dataType = structureQuery.value("data_type").toString();
-                        QString maxLength = structureQuery.value("character_maximum_length").toString();
-                        QString nullable = structureQuery.value("is_nullable").toString();
-                        QString defaultValue = structureQuery.value("column_default").toString();
-
-                        QString columnDef = QString("\"%1\" %2").arg(colName).arg(dataType);
-
-                        if (dataType == "character varying" && !maxLength.isEmpty()) {
-                            columnDef += QString("(%1)").arg(maxLength);
-                        }
-
-                        if (nullable == "NO") {
-                            columnDef += " NOT NULL";
-                        }
-
-                        if (!defaultValue.isEmpty()) {
-                            columnDef += " DEFAULT " + defaultValue;
-                        }
-
-                        columns << columnDef;
-                    }
-                }
-
-                if (!columns.isEmpty()) {
-                    QString fullCreateSql = createSql + columns.join(", ") + ")";
-                    if (remoteQuery.exec(fullCreateSql)) {
-                        tablesCreated++;
-                        qDebug() << "Создана таблица:" << tableName;
-                    } else {
-                        qDebug() << "Ошибка создания таблицы" << tableName << ":" << remoteQuery.lastError().text();
-                    }
-                }
-            }
-        }
-
-        if (syncCancelled) {
-            QMessageBox::information(this, "Синхронизация отменена",
-                                     "Синхронизация была отменена пользователем.");
-            localDb.close();
-            remoteDb.close();
-            QSqlDatabase::removeDatabase(localConnName);
-            QSqlDatabase::removeDatabase(remoteConnName);
-            return;
-        }
-
-        // Синхронизируем данные
-        progress.setLabelText("Синхронизация данных...");
-        progress.setValue(50);
-        currentTable = 0;
-
-        foreach (const QString &tableName, localTables) {
-            if (progress.wasCanceled()) {
-                syncCancelled = true;
-                break;
-            }
-
-            currentTable++;
-            progress.setLabelText(QString("Синхронизация данных таблицы %1 из %2: %3")
-                                      .arg(currentTable).arg(tableCount).arg(tableName));
-            progress.setValue(50 + (currentTable * 40 / tableCount));
-            QApplication::processEvents();
-
-            // Пропускаем таблицы истории
-            if (tableName.endsWith("_history")) {
-                continue;
-            }
-
-            // Получаем данные из локальной базы
-            QList<QStringList> localData;
-            QSqlQuery localDataQuery(localDb);
-            if (localDataQuery.exec("SELECT * FROM " + tableName)) {
-                QSqlRecord record = localDataQuery.record();
-                while (localDataQuery.next()) {
-                    QStringList row;
-                    for (int i = 0; i < record.count(); i++) {
-                        row << localDataQuery.value(i).toString();
-                    }
-                    localData << row;
-                }
-            }
-
-            // Получаем данные из удаленной базы
-            QList<QStringList> remoteData;
-            QSqlQuery remoteDataQuery(remoteDb);
-            if (remoteDataQuery.exec("SELECT * FROM " + tableName)) {
-                QSqlRecord record = remoteDataQuery.record();
-                while (remoteDataQuery.next()) {
-                    QStringList row;
-                    for (int i = 0; i < record.count(); i++) {
-                        row << remoteDataQuery.value(i).toString();
-                    }
-                    remoteData << row;
-                }
-            }
-
-            // Определяем первичный ключ
-            QStringList pkColumns;
-            QSqlQuery pkQuery(localDb);
-            if (pkQuery.exec(QString(
-                                 "SELECT column_name FROM information_schema.key_column_usage "
-                                 "WHERE table_name = '%1' AND constraint_name LIKE '%%pkey'").arg(tableName))) {
-
-                while (pkQuery.next()) {
-                    pkColumns << pkQuery.value("column_name").toString();
-                }
-            }
-
-            // Добавляем отсутствующие строки
-            foreach (const QStringList &localRow, localData) {
-                bool exists = false;
-
-                if (!pkColumns.isEmpty()) {
-                    // Сравниваем по первичному ключу
-                    foreach (const QStringList &remoteRow, remoteData) {
-                        bool match = true;
-                        foreach (const QString &pkCol, pkColumns) {
-                            int localIdx = localDataQuery.record().indexOf(pkCol);
-                            int remoteIdx = remoteDataQuery.record().indexOf(pkCol);
-
-                            if (localIdx >= 0 && remoteIdx >= 0 &&
-                                localRow[localIdx] != remoteRow[remoteIdx]) {
-                                match = false;
-                                break;
-                            }
-                        }
-
-                        if (match) {
-                            exists = true;
-                            break;
-                        }
-                    }
-                } else {
-                    // Сравниваем все столбцы
-                    foreach (const QStringList &remoteRow, remoteData) {
-                        if (localRow == remoteRow) {
-                            exists = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!exists) {
-                    // Формируем INSERT запрос
-                    QSqlRecord record = localDataQuery.record();
-                    QStringList columns;
-                    QStringList placeholders;
-
-                    for (int i = 0; i < record.count(); i++) {
-                        columns << record.fieldName(i);
-                        placeholders << "?";
-                    }
-
-                    QString insertSql = QString("INSERT INTO %1 (%2) VALUES (%3)")
-                                            .arg(tableName)
-                                            .arg(columns.join(", "))
-                                            .arg(placeholders.join(", "));
-
-                    QSqlQuery insertQuery(remoteDb);
-                    insertQuery.prepare(insertSql);
-
-                    for (int i = 0; i < localRow.size(); i++) {
-                        insertQuery.addBindValue(localRow[i].isEmpty() ? QVariant() : localRow[i]);
-                    }
-
-                    if (insertQuery.exec()) {
-                        rowsAdded++;
-                    } else {
-                        qDebug() << "Ошибка вставки строки в таблицу" << tableName
-                                 << ":" << insertQuery.lastError().text();
-                    }
-                }
-            }
-        }
-
-        progress.setValue(100);
-
-        if (syncCancelled) {
-            QMessageBox::information(this, "Синхронизация отменена",
-                                     "Синхронизация была отменена пользователем.");
-        } else {
-            QString result = QString(
-                                 "Синхронизация завершена!\n\n"
-                                 "Создано таблиц: %1\n"
-                                 "Добавлено строк: %2\n\n"
-                                 "Базы данных успешно синхронизированы.")
-                                 .arg(tablesCreated)
-                                 .arg(rowsAdded);
-
-            QMessageBox::information(this, "Синхронизация завершена", result);
-        }
-
-    } catch (...) {
-        QMessageBox::critical(this, "Ошибка", "Произошла ошибка при синхронизации.");
-    }
-
-    // Закрываем соединения
-    localDb.close();
-    remoteDb.close();
-    QSqlDatabase::removeDatabase(localConnName);
-    QSqlDatabase::removeDatabase(remoteConnName);
-}
-
-
-
 bool Welcome::createConnection()
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
     QString dbUser, dbPassword, dbName, dbHost;
     int dbPort = 5432;
     QString dataSource = "";
-
-    // ШАГ 1: ПЕРВАЯ ПОПЫТКА ПОДКЛЮЧЕНИЯ
 
     // 1.1. Проверяем IP из поля ввода
     QString ipFromUI = ui->lineEdit_ip->text().trimmed();
@@ -1464,4 +999,1421 @@ bool Welcome::createConnection()
     //query.clear();
     db.close();
     return false;
+}
+
+void Welcome::on_pushButton_syncBD_pressed()
+{
+    checkAndSyncDatabases();
+}
+
+// Основные функции управления БД
+
+void Welcome::checkAndSyncDatabases()
+{
+    // Подключаемся к базам данных
+    QList<DatabaseInfo> databases = connectToDatabases();
+
+    // Проверяем успешные подключения
+    QList<DatabaseInfo> connectedDBs;
+    for (DatabaseInfo &dbInfo : databases) {
+        if (dbInfo.isConnected) {
+            connectedDBs.append(dbInfo);
+        }
+    }
+
+    if (connectedDBs.isEmpty()) {
+        QMessageBox::critical(this, "Ошибка",
+                              "Не удалось подключиться ни к одной базе данных.");
+        return;
+    }
+
+    QString fullReport = "ОТЧЕТ О ПРОВЕРКЕ И СИНХРОНИЗАЦИИ БАЗ ДАННЫХ\n";
+    fullReport += "==============================================\n\n";
+
+    // 1. Проверяем структуру каждой базы
+    fullReport += "1. ПРОВЕРКА СТРУКТУРЫ БАЗ ДАННЫХ:\n";
+    fullReport += "================================\n";
+
+    for (DatabaseInfo &dbInfo : connectedDBs) {
+        QString structureReport = checkAndRepairDatabaseStructure(dbInfo.db, dbInfo.name);
+        fullReport += structureReport + "\n";
+    }
+
+    // 2. Синхронизируем данные между базами (если их две)
+    if (connectedDBs.size() >= 2) {
+        fullReport += "\n2. СИНХРОНИЗАЦИЯ ДАННЫХ:\n";
+        fullReport += "=======================\n";
+
+        // Двусторонняя синхронизация
+        QString syncReport1 = compareAndSyncData(connectedDBs[0].db, connectedDBs[1].db,
+                                                 connectedDBs[0].name, connectedDBs[1].name);
+        fullReport += syncReport1 + "\n";
+
+        QString syncReport2 = compareAndSyncData(connectedDBs[1].db, connectedDBs[0].db,
+                                                 connectedDBs[1].name, connectedDBs[0].name);
+        fullReport += syncReport2 + "\n";
+    } else if (connectedDBs.size() == 1) {
+        fullReport += "\n2. СИНХРОНИЗАЦИЯ ДАННЫХ:\n";
+        fullReport += "=======================\n";
+        fullReport += "✓ Подключена только одна база данных.\n";
+        fullReport += "✓ Синхронизация с другими базами невозможна.\n";
+    }
+
+    // Выводим полный отчет
+    QMessageBox::information(this, "Полный отчет", fullReport);
+
+    // Закрываем соединения
+    for (DatabaseInfo &dbInfo : connectedDBs) {
+        if (dbInfo.db.isOpen()) {
+            dbInfo.db.close();
+        }
+    }
+}
+
+QList<DatabaseInfo> Welcome::connectToDatabases()
+{
+    QList<DatabaseInfo> databases;
+
+    // 1. Локальная база данных
+    DatabaseInfo localDB;
+    QString os = detectOS();
+
+    if (os == "Windows") {
+        this->showNormal();
+        localDB.port = 5432;
+        localDB.user = "postgres";
+        localDB.password = "123";
+        localDB.database = "postgres";
+        localDB.host = "localhost";
+        localDB.name = "Локальная БД (Windows)";
+    } else if (os == "Linux") {
+        this->showFullScreen();
+        localDB.port = 5432;
+        localDB.user = "postgres";
+        localDB.password = "postgres1";
+        localDB.database = "kdd";
+        localDB.host = "localhost";
+        localDB.name = "Локальная БД (Linux)";
+    } else {
+        qDebug() << "OS не опознана" << os;
+    }
+
+    databases.append(localDB);
+
+    // 2. Удаленная база данных (из настроек)
+    DatabaseInfo remoteDB;
+    remoteDB.name = "Удаленная база данных";
+    readDatabaseSettings(remoteDB.user, remoteDB.password,
+                         remoteDB.database, remoteDB.host, remoteDB.port, false);
+
+    // Если настройки не найдены, используем значения по умолчанию
+    if (remoteDB.host.isEmpty()) {
+        qDebug() << "Настройки из ini не найдены";
+    }
+
+    databases.append(remoteDB);
+
+    // Подключаемся к каждой базе
+    for (int i = 0; i < databases.size(); ++i) {
+        DatabaseInfo &dbInfo = databases[i];
+
+        QString connectionName = QString("db_connection_%1").arg(i);
+        dbInfo.db = QSqlDatabase::addDatabase("QPSQL", connectionName);
+        dbInfo.db.setHostName(dbInfo.host);
+        dbInfo.db.setPort(dbInfo.port);
+        dbInfo.db.setDatabaseName(dbInfo.database);
+        dbInfo.db.setUserName(dbInfo.user);
+        dbInfo.db.setPassword(dbInfo.password);
+
+        // Устанавливаем таймауты
+        dbInfo.db.setConnectOptions("connect_timeout=5");
+
+        dbInfo.isConnected = dbInfo.db.open();
+
+        if (!dbInfo.isConnected) {
+            dbInfo.errorMessage = dbInfo.db.lastError().text();
+        }
+    }
+
+    // Выводим информационное окно
+    QString message = "Результаты подключения к базам данных:\n";
+    message += "=============================================\n\n";
+
+    for (const DatabaseInfo &dbInfo : databases) {
+        message += QString("%1:\n").arg(dbInfo.name);
+        message += QString("  Хост: %1:%2\n").arg(dbInfo.host).arg(dbInfo.port);
+        message += QString("  База данных: %1\n").arg(dbInfo.database);
+        message += QString("  Пользователь: %1\n").arg(dbInfo.user);
+        message += QString("  Статус: %1\n\n").arg(dbInfo.isConnected ?
+                                                             "✓ Успешно подключено" :
+                                                             "✗ Ошибка подключения");
+        if (!dbInfo.isConnected) {
+            message += QString("  Ошибка: %1\n\n").arg(dbInfo.errorMessage);
+        }
+    }
+
+    QMessageBox::information(this, "Результаты подключения", message);
+
+    return databases;
+}
+
+QString Welcome::checkAndRepairDatabaseStructure(QSqlDatabase &database, const QString &dbName)
+{
+    QString resultMessage;
+    int tablesModified = 0;
+    int columnsAdded = 0;
+
+    QStringList tables = getTableList();
+
+    for (const QString &tableName : tables) {
+        // Проверяем существование таблицы
+        QSqlQuery checkTableQuery(database);
+        checkTableQuery.prepare(
+            "SELECT EXISTS ("
+            "SELECT FROM information_schema.tables "
+            "WHERE table_schema = 'public' "
+            "AND table_name = :tableName)"
+            );
+        checkTableQuery.bindValue(":tableName", tableName);
+
+        if (!checkTableQuery.exec() || !checkTableQuery.next()) {
+            resultMessage += QString("\nОшибка проверки таблицы %1: %2")
+                                 .arg(tableName)
+                                 .arg(checkTableQuery.lastError().text());
+            continue;
+        }
+
+        bool tableExists = checkTableQuery.value(0).toBool();
+
+        if (!tableExists) {
+            // Таблица не существует - создаем
+            resultMessage += QString("\nТаблица %1 не существует. Создание...")
+                                 .arg(tableName);
+            createMissingTable(database, tableName);
+            tablesModified++;
+        } else {
+            // Таблица существует - проверяем структуру
+            QList<ColumnInfo> expectedColumns = getExpectedTableStructure(tableName);
+            QString tableCheckResult = checkTableStructure(database, tableName, expectedColumns);
+
+            if (!tableCheckResult.isEmpty()) {
+                resultMessage += tableCheckResult;
+                columnsAdded += tableCheckResult.count("Добавлен столбец");
+                tablesModified++;
+            }
+        }
+    }
+
+    // Формируем итоговое сообщение
+    QString finalMessage = QString("\n\n=== ИТОГ ДЛЯ %1 ===\n").arg(dbName);
+
+    if (tablesModified > 0 || columnsAdded > 0) {
+        finalMessage += QString("Изменено таблиц: %1\n").arg(tablesModified);
+        finalMessage += QString("Добавлено столбцов: %1\n").arg(columnsAdded);
+        finalMessage += "Были внесены следующие изменения:\n";
+        finalMessage += resultMessage;
+    } else {
+        finalMessage += "✓ Структура базы данных в полном порядке.\n";
+        finalMessage += "✓ Все таблицы присутствуют.\n";
+        finalMessage += "✓ Все столбцы соответствуют ожидаемой структуре.\n";
+        finalMessage += "✓ Изменений не требуется.";
+    }
+
+    return finalMessage;
+}
+
+QString Welcome::compareAndSyncData(QSqlDatabase &sourceDB, QSqlDatabase &targetDB,
+                                    const QString &dbNameSource, const QString &dbNameTarget)
+{
+    QString resultMessage;
+    int totalRowsAdded = 0;
+
+    QStringList tables = getMainTables(); // Синхронизируем только основные таблицы
+
+    for (const QString &tableName : tables) {
+        // Определяем первичный ключ
+        QString primaryKey;
+        if (tableName == "users_duty") {
+            primaryKey = "users_duty_id";
+        } else if (tableName == "dose_ppd") {
+            primaryKey = "dose_ppd_id";
+        } else if (tableName.contains("_")) {
+            QString firstPart = tableName.split("_").first();
+            primaryKey = firstPart + "_id";
+        } else {
+            primaryKey = tableName + "_id";
+        }
+
+        // Проверяем, существует ли таблица в целевой базе
+        QSqlQuery checkTargetTable(targetDB);
+        checkTargetTable.prepare(
+            "SELECT EXISTS ("
+            "SELECT FROM information_schema.tables "
+            "WHERE table_schema = 'public' "
+            "AND table_name = :tableName)"
+            );
+        checkTargetTable.bindValue(":tableName", tableName);
+
+        if (!checkTargetTable.exec() || !checkTargetTable.next() || !checkTargetTable.value(0).toBool()) {
+            resultMessage += QString("\nТаблица %1 отсутствует в целевой базе %2")
+                                 .arg(tableName).arg(dbNameTarget);
+            continue;
+        }
+
+        // Проверяем, существует ли таблица в исходной базе
+        QSqlQuery checkSourceTable(sourceDB);
+        checkSourceTable.prepare(
+            "SELECT EXISTS ("
+            "SELECT FROM information_schema.tables "
+            "WHERE table_schema = 'public' "
+            "AND table_name = :tableName)"
+            );
+        checkSourceTable.bindValue(":tableName", tableName);
+
+        if (!checkSourceTable.exec() || !checkSourceTable.next() || !checkSourceTable.value(0).toBool()) {
+            resultMessage += QString("\nТаблица %1 отсутствует в исходной базе %2")
+                                 .arg(tableName).arg(dbNameSource);
+            continue;
+        }
+
+        // Получаем ID из исходной базы
+        QSqlQuery sourceQuery(sourceDB);
+        QString sourceSql = QString("SELECT %1 FROM %2 ORDER BY %1")
+                                .arg(primaryKey).arg(tableName);
+
+        if (!sourceQuery.exec(sourceSql)) {
+            resultMessage += QString("\nОшибка получения ID из %1.%2: %3")
+                                 .arg(dbNameSource).arg(tableName).arg(sourceQuery.lastError().text());
+            continue;
+        }
+
+        QSet<int> sourceIds;
+        while (sourceQuery.next()) {
+            bool ok;
+            int id = sourceQuery.value(0).toInt(&ok);
+            if (ok) {
+                sourceIds.insert(id);
+            }
+        }
+
+        // Получаем ID из целевой базы
+        QSqlQuery targetQuery(targetDB);
+        QString targetSql = QString("SELECT %1 FROM %2 ORDER BY %1")
+                                .arg(primaryKey).arg(tableName);
+
+        if (!targetQuery.exec(targetSql)) {
+            resultMessage += QString("\nОшибка получения ID из %1.%2: %3")
+                                 .arg(dbNameTarget).arg(tableName).arg(targetQuery.lastError().text());
+            continue;
+        }
+
+        QSet<int> targetIds;
+        while (targetQuery.next()) {
+            bool ok;
+            int id = targetQuery.value(0).toInt(&ok);
+            if (ok) {
+                targetIds.insert(id);
+            }
+        }
+
+        // Находим отсутствующие ID
+        QSet<int> missingIds;
+        for (int id : sourceIds) {
+            if (!targetIds.contains(id)) {
+                missingIds.insert(id);
+            }
+        }
+
+        if (!missingIds.isEmpty()) {
+            // Получаем структуру таблицы
+            QSqlQuery columnsQuery(sourceDB);
+            columnsQuery.prepare(
+                "SELECT column_name "
+                "FROM information_schema.columns "
+                "WHERE table_schema = 'public' AND table_name = :tableName "
+                "ORDER BY ordinal_position"
+                );
+            columnsQuery.bindValue(":tableName", tableName);
+
+            if (!columnsQuery.exec()) {
+                resultMessage += QString("\nОшибка получения структуры таблицы %1: %2")
+                                     .arg(tableName).arg(columnsQuery.lastError().text());
+                continue;
+            }
+
+            QStringList columnNames;
+            while (columnsQuery.next()) {
+                columnNames.append(columnsQuery.value(0).toString());
+            }
+
+            // Вставляем недостающие строки
+            int rowsAdded = 0;
+            for (int id : missingIds) {
+                // Получаем данные строки
+                QSqlQuery dataQuery(sourceDB);
+                QString dataSql = QString("SELECT * FROM %1 WHERE %2 = :id")
+                                      .arg(tableName).arg(primaryKey);
+                dataQuery.prepare(dataSql);
+                dataQuery.bindValue(":id", id);
+
+                if (!dataQuery.exec() || !dataQuery.next()) {
+                    resultMessage += QString("\nОшибка получения данных для ID %1 из таблицы %2")
+                                         .arg(id).arg(tableName);
+                    continue;
+                }
+
+                // Формируем запрос INSERT
+                QString insertSql = QString("INSERT INTO %1 (").arg(tableName);
+                QString placeholders;
+
+                for (int i = 0; i < columnNames.size(); ++i) {
+                    insertSql += columnNames[i];
+                    placeholders += ":" + columnNames[i];
+
+                    if (i < columnNames.size() - 1) {
+                        insertSql += ", ";
+                        placeholders += ", ";
+                    }
+                }
+                insertSql += ") VALUES (" + placeholders + ")";
+
+                // Выполняем вставку
+                QSqlQuery insertQuery(targetDB);
+                insertQuery.prepare(insertSql);
+
+                for (int i = 0; i < columnNames.size(); ++i) {
+                    QVariant value = dataQuery.value(i);
+                    // Для NULL значений используем QVariant()
+                    if (value.isNull()) {
+                        insertQuery.bindValue(":" + columnNames[i], QVariant());
+                    } else {
+                        insertQuery.bindValue(":" + columnNames[i], value);
+                    }
+                }
+
+                if (!insertQuery.exec()) {
+                    resultMessage += QString("\nОшибка вставки ID %1 в %2.%3: %4")
+                                         .arg(id)
+                                         .arg(dbNameTarget)
+                                         .arg(tableName)
+                                         .arg(insertQuery.lastError().text());
+                } else {
+                    rowsAdded++;
+                }
+            }
+
+            if (rowsAdded > 0) {
+                resultMessage += QString("\n✓ Таблица %1: добавлено %2 строк из %3 в %4")
+                                     .arg(tableName)
+                                     .arg(rowsAdded)
+                                     .arg(dbNameSource)
+                                     .arg(dbNameTarget);
+                totalRowsAdded += rowsAdded;
+            }
+        }
+    }
+
+    // Формируем итоговое сообщение
+    QString finalMessage = QString("\n\n=== СИНХРОНИЗАЦИЯ ИЗ %1 В %2 ===\n")
+                               .arg(dbNameSource).arg(dbNameTarget);
+
+    if (totalRowsAdded > 0) {
+        finalMessage += QString("✓ Всего добавлено строк: %1\n").arg(totalRowsAdded);
+        finalMessage += "Подробности синхронизации:\n";
+        finalMessage += resultMessage;
+    } else {
+        finalMessage += "✓ Базы данных полностью синхронизированы\n";
+        finalMessage += "✓ Добавление строк не требуется\n";
+        finalMessage += "✓ Все данные совпадают";
+    }
+
+    return finalMessage;
+}
+
+// Функции для работы с таблицами
+
+QStringList Welcome::getTableList()
+{
+    return {
+        "users", "user_photo", "duty", "users_duty", "set", "kas", "mesh",
+        "users_history", "duty_history", "users_duty_history", "set_history",
+        "kas_history", "mesh_history", "dose_ppd", "dose_ppd_history",
+        "set_kid", "kas_kid", "mesh_kid", "set_kid_history", "kas_kid_history",
+        "mesh_kid_history"
+    };
+}
+
+QStringList Welcome::getMainTables()
+{
+    return {
+        "users", "user_photo", "duty", "users_duty", "set", "kas", "mesh",
+        "dose_ppd", "set_kid", "kas_kid", "mesh_kid"
+    };
+}
+
+QStringList Welcome::getHistoryTables()
+{
+    return {
+        "users_history", "duty_history", "users_duty_history", "set_history",
+        "kas_history", "mesh_history", "dose_ppd_history",
+        "set_kid_history", "kas_kid_history", "mesh_kid_history"
+    };
+}
+
+QStringList Welcome::getKidTables()
+{
+    return {
+        "set_kid", "kas_kid", "mesh_kid", "set_kid_history",
+        "kas_kid_history", "mesh_kid_history"
+    };
+}
+
+QString Welcome::checkTableStructure(QSqlDatabase &db, const QString &tableName,
+                                     const QList<ColumnInfo> &expectedColumns)
+{
+    QString result;
+
+    // Получаем существующие столбцы
+    QSqlQuery query(db);
+    query.prepare(
+        "SELECT column_name, data_type, is_nullable, column_default "
+        "FROM information_schema.columns "
+        "WHERE table_schema = 'public' AND table_name = :tableName "
+        "ORDER BY ordinal_position"
+        );
+    query.bindValue(":tableName", tableName);
+
+    if (!query.exec()) {
+        return QString("Ошибка получения столбцов таблицы %1: %2")
+            .arg(tableName).arg(query.lastError().text());
+    }
+
+    QMap<QString, ColumnInfo> existingColumns;
+    while (query.next()) {
+        ColumnInfo col;
+        col.name = query.value("column_name").toString();
+        col.type = query.value("data_type").toString();
+        col.notNull = (query.value("is_nullable").toString() == "NO");
+        col.defaultValue = query.value("column_default").toString();
+        existingColumns[col.name] = col;
+    }
+
+    // Проверяем каждый ожидаемый столбец
+    for (const ColumnInfo &expectedCol : expectedColumns) {
+        if (!existingColumns.contains(expectedCol.name)) {
+            // Столбец отсутствует - добавляем
+            addMissingColumn(db, tableName, expectedCol);
+            result += QString("\n  Добавлен столбец %1 (%2)").arg(expectedCol.name).arg(expectedCol.type);
+        }
+    }
+
+    return result;
+}
+
+void Welcome::createMissingTable(QSqlDatabase &db, const QString &tableName)
+{
+    QString createSQL = getCreateTableSQL(tableName);
+    if (!createSQL.isEmpty()) {
+        QSqlQuery query(db);
+        if (!query.exec(createSQL)) {
+            qDebug() << "Ошибка создания таблицы" << tableName << ":" << query.lastError().text();
+        }
+    }
+}
+
+void Welcome::addMissingColumn(QSqlDatabase &db, const QString &tableName,
+                               const ColumnInfo &column)
+{
+    QString sql = QString("ALTER TABLE %1 ADD COLUMN %2 %3")
+    .arg(tableName)
+        .arg(column.name)
+        .arg(column.type);
+
+    if (column.notNull) {
+        sql += " NOT NULL";
+    }
+    if (!column.defaultValue.isEmpty()) {
+        sql += QString(" DEFAULT %1").arg(column.defaultValue);
+    }
+
+    QSqlQuery query(db);
+    if (!query.exec(sql)) {
+        qDebug() << "Ошибка добавления столбца" << column.name << "в таблицу" << tableName
+                 << ":" << query.lastError().text();
+    }
+}
+
+// SQL функции для создания таблиц
+
+QString Welcome::getUsersSQL()
+{
+    return R"(CREATE TABLE users(
+        user_id int primary key,
+        login CHARACTER VARYING(30) UNIQUE,
+        password CHARACTER VARYING(30),
+        name_0 CHARACTER VARYING(30),
+        name_1 CHARACTER VARYING(30),
+        name_2 CHARACTER VARYING(30),
+        gender CHARACTER VARYING(3),
+        birthday date,
+        role CHARACTER VARYING(30),
+        snils CHARACTER VARYING(30),
+        tab_num int UNIQUE,
+        department CHARACTER VARYING(30),
+        card_id CHARACTER VARYING(30) UNIQUE,
+        set_ID int NOT NULL,
+        kas_ID int NOT NULL,
+        mesh_ID int NOT NULL,
+        doz_tld_id CHARACTER VARYING(30),
+        cell_date date,
+        dose_year float8,
+        dose_year_now float8,
+        dose_year_now_ppd float8,
+        code CHARACTER VARYING(50) UNIQUE,
+        block CHARACTER VARYING(30),
+        last_update timestamp
+    ))";
+}
+
+QString Welcome::getUserPhotoSQL()
+{
+    return R"(CREATE TABLE user_photo(
+        user_id bigint,
+        user_photo bytea
+    ))";
+}
+
+QString Welcome::getDutySQL()
+{
+    return R"(CREATE TABLE duty(
+        duty_id SERIAL PRIMARY KEY,
+        type_duty INTEGER NOT NULL,
+        blok VARCHAR(100),
+        room VARCHAR(100),
+        equipment VARCHAR(100),
+        name_work VARCHAR(200),
+        type_work VARCHAR(200),
+        time INTEGER,
+        dose_a_1 NUMERIC(10,4) DEFAULT 0.1,
+        dose_a_2 NUMERIC(10,4) DEFAULT 1.0,
+        rate_a_1 NUMERIC(10,4) DEFAULT 0.1,
+        rate_a_2 NUMERIC(10,4) DEFAULT 1.0,
+        dose_b_1 NUMERIC(10,4) DEFAULT 0.1,
+        dose_b_2 NUMERIC(10,4) DEFAULT 1.0,
+        rate_b_1 NUMERIC(10,4) DEFAULT 0.1,
+        rate_b_2 NUMERIC(10,4) DEFAULT 1.0,
+        dose_g_1 NUMERIC(10,4) DEFAULT 0.1,
+        dose_g_2 NUMERIC(10,4) DEFAULT 1.0,
+        rate_g_1 NUMERIC(10,4) DEFAULT 0.1,
+        rate_g_2 NUMERIC(10,4) DEFAULT 1.0,
+        dose_n_1 NUMERIC(10,4) DEFAULT 0.01,
+        dose_n_2 NUMERIC(10,4) DEFAULT 0.1,
+        rate_n_1 NUMERIC(10,4) DEFAULT 0.01,
+        rate_n_2 NUMERIC(10,4) DEFAULT 0.1,
+        duty_note TEXT,
+        last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ))";
+}
+
+QString Welcome::getUsersDutySQL()
+{
+    return R"(CREATE TABLE users_duty(
+        users_duty_id int primary key,
+        user_id int,
+        duty_id int,
+        date_start date,
+        date_finish date,
+        users_duty_note CHARACTER VARYING(30)
+    ))";
+}
+
+QString Welcome::getSetSQL()
+{
+    return R"(CREATE TABLE set(
+        set_id int primary key,
+        set_name CHARACTER VARYING(30),
+        ip_set inet,
+        set_quantity int,
+        set_block CHARACTER VARYING(30),
+        set_note CHARACTER VARYING(30),
+        last_update timestamp
+    ))";
+}
+
+QString Welcome::getKasSQL()
+{
+    return R"(CREATE TABLE kas(
+        set_id int,
+        kas_id int,
+        kas_name CHARACTER VARYING(30),
+        kas_height int,
+        kas_width int,
+        kas_block CHARACTER VARYING(30),
+        kas_note CHARACTER VARYING(30),
+        last_update timestamp,
+        PRIMARY KEY (kas_id, set_id)
+    ))";
+}
+
+QString Welcome::getMeshSQL()
+{
+    return R"(CREATE TABLE mesh(
+        set_id int,
+        kas_id int,
+        mesh_id int,
+        user_id int,
+        doz_tld_id CHARACTER VARYING(30),
+        mesh_status int,
+        mesh_note CHARACTER VARYING(30),
+        last_update timestamp,
+        PRIMARY KEY (kas_id, set_id, mesh_id)
+    ))";
+}
+
+QString Welcome::getUsersHistorySQL()
+{
+    return R"(CREATE TABLE users_history (
+        user_id INTEGER NOT NULL,
+        login VARCHAR(50) NOT NULL,
+        password VARCHAR(100) NOT NULL,
+        name_0 VARCHAR(50) NOT NULL,
+        name_1 VARCHAR(50) NOT NULL,
+        name_2 VARCHAR(50),
+        gender VARCHAR(10),
+        birthday DATE,
+        role VARCHAR(30),
+        tab_num VARCHAR(20) NOT NULL,
+        department VARCHAR(100),
+        card_id VARCHAR(30) NOT NULL,
+        set_inf INTEGER NOT NULL DEFAULT 1,
+        kas_inf INTEGER NOT NULL DEFAULT 1,
+        mesh_inf INTEGER NOT NULL DEFAULT 1,
+        doz_tld_id VARCHAR(30) NOT NULL,
+        cell_date DATE,
+        dose_year DECIMAL(10,4),
+        dose_year_now DECIMAL(10,4),
+        dose_year_now_ppd DECIMAL(10,4),
+        code VARCHAR(30),
+        block VARCHAR(30),
+        last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        user_id_change INTEGER,
+        type_edit VARCHAR(30) DEFAULT 'create'
+    ))";
+}
+
+QString Welcome::getDutyHistorySQL()
+{
+    return R"(CREATE TABLE duty_history (
+        duty_id VARCHAR(100),
+        type_duty INTEGER,
+        blok VARCHAR(100),
+        room VARCHAR(100),
+        equipment VARCHAR(100),
+        name_work VARCHAR(200),
+        type_work VARCHAR(200),
+        time INTEGER,
+        dose_a_1 NUMERIC(10,4),
+        dose_a_2 NUMERIC(10,4),
+        rate_a_1 NUMERIC(10,4),
+        rate_a_2 NUMERIC(10,4),
+        dose_b_1 NUMERIC(10,4),
+        dose_b_2 NUMERIC(10,4),
+        rate_b_1 NUMERIC(10,4),
+        rate_b_2 NUMERIC(10,4),
+        dose_g_1 NUMERIC(10,4),
+        dose_g_2 NUMERIC(10,4),
+        rate_g_1 NUMERIC(10,4),
+        rate_g_2 NUMERIC(10,4),
+        dose_n_1 NUMERIC(10,4),
+        dose_n_2 NUMERIC(10,4),
+        rate_n_1 NUMERIC(10,4),
+        rate_n_2 NUMERIC(10,4),
+        duty_note TEXT,
+        last_update TIMESTAMP,
+        user_id_change INTEGER NOT NULL,
+        last_update_change TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        type_edit VARCHAR(30) DEFAULT 'create'
+    ))";
+}
+
+QString Welcome::getUsersDutyHistorySQL()
+{
+    return R"(CREATE TABLE users_duty_history (
+        users_duty_id INTEGER,
+        user_id INTEGER,
+        duty_id INTEGER,
+        date_start DATE,
+        date_finish DATE,
+        users_duty_note TEXT,
+        last_update_change TIMESTAMP,
+        user_id_change INTEGER NOT NULL,
+        last_update TIMESTAMP,
+        type_edit VARCHAR(30) DEFAULT 'create',
+        change_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ))";
+}
+
+QString Welcome::getSetHistorySQL()
+{
+    return R"(CREATE TABLE set_history (
+        set_id INTEGER NOT NULL,
+        set_name VARCHAR(30),
+        ip_set INET,
+        set_quantity INTEGER,
+        set_block VARCHAR(30),
+        set_note VARCHAR(30),
+        last_update TIMESTAMP,
+        user_id_change INTEGER,
+        last_update_change TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        type_edit VARCHAR(30) DEFAULT 'create'
+    ))";
+}
+
+QString Welcome::getKasHistorySQL()
+{
+    return R"(CREATE TABLE kas_history (
+        set_id INTEGER NOT NULL,
+        kas_id INTEGER NOT NULL,
+        kas_name VARCHAR(30),
+        kas_height INTEGER,
+        kas_width INTEGER,
+        kas_block VARCHAR(30),
+        kas_note VARCHAR(30),
+        last_update TIMESTAMP,
+        user_id_change INTEGER NOT NULL,
+        last_update_change TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        type_edit VARCHAR(30) DEFAULT 'create'
+    ))";
+}
+
+QString Welcome::getMeshHistorySQL()
+{
+    return R"(CREATE TABLE mesh_history (
+        set_id INTEGER NOT NULL,
+        kas_id INTEGER NOT NULL,
+        mesh_id INTEGER NOT NULL,
+        user_id INTEGER,
+        doz_tld_id VARCHAR(30),
+        mesh_status INTEGER DEFAULT 0,
+        mesh_note VARCHAR(30),
+        last_update TIMESTAMP,
+        user_id_change INTEGER NOT NULL,
+        last_update_change TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        type_edit VARCHAR(30) DEFAULT 'create'
+    ))";
+}
+
+QString Welcome::getDosePpdSQL()
+{
+    return R"(CREATE TABLE dose_ppd(
+        dose_ppd_id int primary key,
+        user_id int,
+        users_duty_id int,
+        nomer_pdd CHARACTER VARYING(30),
+        time int,
+        time_max timestamp,
+        type_ppd smallint,
+        dose float8 DEFAULT 0,
+        rate_max float8,
+        dose_ppd_note CHARACTER VARYING(30),
+        start_work timestamp,
+        finish_work timestamp,
+        last_update timestamp
+    ))";
+}
+
+QString Welcome::getDosePpdHistorySQL()
+{
+    return R"(CREATE TABLE dose_ppd_history(
+        dose_ppd_id int,
+        user_id int,
+        users_duty_id int,
+        nomer_pdd CHARACTER VARYING(30),
+        time int,
+        time_max timestamp,
+        type_ppd smallint,
+        dose float8 DEFAULT 0,
+        rate_max float8,
+        dose_ppd_note CHARACTER VARYING(30),
+        start_work timestamp,
+        finish_work timestamp,
+        last_update timestamp,
+        user_id_change int,
+        last_update_change timestamp,
+        type_edit VARCHAR(30) DEFAULT 'create'
+    ))";
+}
+
+QString Welcome::getSetKidSQL()
+{
+    return R"(CREATE TABLE set_kid(
+        set_id int primary key,
+        set_name CHARACTER VARYING(30),
+        ip_set inet,
+        set_quantity int,
+        set_block CHARACTER VARYING(30),
+        set_note CHARACTER VARYING(30),
+        last_update timestamp
+    ))";
+}
+
+QString Welcome::getKasKidSQL()
+{
+    return R"(CREATE TABLE kas_kid(
+        set_id int,
+        kas_id int,
+        kas_name CHARACTER VARYING(30),
+        kas_height int,
+        kas_width int,
+        kas_block CHARACTER VARYING(30),
+        kas_note CHARACTER VARYING(30),
+        last_update timestamp,
+        PRIMARY KEY (kas_id, set_id)
+    ))";
+}
+
+QString Welcome::getMeshKidSQL()
+{
+    return R"(CREATE TABLE mesh_kid(
+        set_id int,
+        kas_id int,
+        mesh_id int,
+        user_id int,
+        doz_tld_id CHARACTER VARYING(30),
+        mesh_status int,
+        mesh_note CHARACTER VARYING(30),
+        last_update timestamp,
+        PRIMARY KEY (kas_id, set_id, mesh_id)
+    ))";
+}
+
+QString Welcome::getSetKidHistorySQL()
+{
+    return R"(CREATE TABLE set_kid_history (
+        set_id INTEGER NOT NULL,
+        set_name VARCHAR(30),
+        ip_set INET,
+        set_quantity INTEGER,
+        set_block VARCHAR(30),
+        set_note VARCHAR(30),
+        last_update TIMESTAMP,
+        user_id_change INTEGER,
+        last_update_change TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        type_edit VARCHAR(30) DEFAULT 'create'
+    ))";
+}
+
+QString Welcome::getKasKidHistorySQL()
+{
+    return R"(CREATE TABLE kas_kid_history (
+        set_id INTEGER NOT NULL,
+        kas_id INTEGER NOT NULL,
+        kas_name VARCHAR(30),
+        kas_height INTEGER,
+        kas_width INTEGER,
+        kas_block VARCHAR(30),
+        kas_note VARCHAR(30),
+        last_update TIMESTAMP,
+        user_id_change INTEGER NOT NULL,
+        last_update_change TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        type_edit VARCHAR(30) DEFAULT 'create'
+    ))";
+}
+
+QString Welcome::getMeshKidHistorySQL()
+{
+    return R"(CREATE TABLE mesh_kid_history (
+        set_id INTEGER NOT NULL,
+        kas_id INTEGER NOT NULL,
+        mesh_id INTEGER NOT NULL,
+        user_id INTEGER,
+        doz_tld_id VARCHAR(30),
+        mesh_status INTEGER DEFAULT 0,
+        mesh_note VARCHAR(30),
+        last_update TIMESTAMP,
+        user_id_change INTEGER NOT NULL,
+        last_update_change TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        type_edit VARCHAR(30) DEFAULT 'create'
+    ))";
+}
+
+QString Welcome::getCreateTableSQL(const QString &tableName)
+{
+    if (tableName == "users") return getUsersSQL();
+    if (tableName == "user_photo") return getUserPhotoSQL();
+    if (tableName == "duty") return getDutySQL();
+    if (tableName == "users_duty") return getUsersDutySQL();
+    if (tableName == "set") return getSetSQL();
+    if (tableName == "kas") return getKasSQL();
+    if (tableName == "mesh") return getMeshSQL();
+    if (tableName == "users_history") return getUsersHistorySQL();
+    if (tableName == "duty_history") return getDutyHistorySQL();
+    if (tableName == "users_duty_history") return getUsersDutyHistorySQL();
+    if (tableName == "set_history") return getSetHistorySQL();
+    if (tableName == "kas_history") return getKasHistorySQL();
+    if (tableName == "mesh_history") return getMeshHistorySQL();
+    if (tableName == "dose_ppd") return getDosePpdSQL();
+    if (tableName == "dose_ppd_history") return getDosePpdHistorySQL();
+    if (tableName == "set_kid") return getSetKidSQL();
+    if (tableName == "kas_kid") return getKasKidSQL();
+    if (tableName == "mesh_kid") return getMeshKidSQL();
+    if (tableName == "set_kid_history") return getSetKidHistorySQL();
+    if (tableName == "kas_kid_history") return getKasKidHistorySQL();
+    if (tableName == "mesh_kid_history") return getMeshKidHistorySQL();
+
+    return "";
+}
+/*
+// Вспомогательные функции
+QString Welcome::detectOS()
+{
+#ifdef Q_OS_WIN
+    return "Windows";
+#elif defined(Q_OS_LINUX)
+    return "Linux";
+#elif defined(Q_OS_MAC)
+    return "macOS";
+#else
+    return "Unknown";
+#endif
+}
+
+QString Welcome::findSettingsFile()
+{
+    QStringList searchPaths = {
+        QCoreApplication::applicationDirPath() + "/settings.ini",
+        QDir::currentPath() + "/settings.ini",
+        QDir::homePath() + "/.config/" + QCoreApplication::applicationName() + "/settings.ini",
+        "./settings.ini"
+    };
+
+    for (const QString &path : searchPaths) {
+        if (QFileInfo::exists(path)) {
+            return path;
+        }
+    }
+
+    // Создаем файл с настройками по умолчанию
+    QString defaultPath = QCoreApplication::applicationDirPath() + "/settings.ini";
+    QSettings defaultSettings(defaultPath, QSettings::IniFormat);
+    defaultSettings.beginGroup("Database");
+    defaultSettings.setValue("UserName", "postgres");
+    defaultSettings.setValue("Password", "postgres1");
+    defaultSettings.setValue("Name", "newdb");
+    defaultSettings.setValue("Host", "localhost");
+    defaultSettings.setValue("Port", 5432);
+    defaultSettings.endGroup();
+    defaultSettings.sync();
+
+    return defaultPath;
+}
+
+void Welcome::readDatabaseSettings(QString &user, QString &password,
+                                   QString &database, QString &host, int &port,
+                                   bool keepHost)
+{
+    QString settingsPath = findSettingsFile();
+
+    if (settingsPath.isEmpty()) {
+        qDebug() << "Файл settings.ini не найден";
+        return;
+    }
+
+    QSettings settings(settingsPath, QSettings::IniFormat);
+
+    // Читаем настройки из секции [Settings]
+    if (user.isEmpty()) {
+        user = settings.value("Settings/UserName",
+                              settings.value("Settings/Server_UserName",
+                                             settings.value("UserName", ""))).toString();
+    }
+
+    if (password.isEmpty()) {
+        password = settings.value("Settings/Password",
+                                  settings.value("Settings/Server_Password",
+                                                 settings.value("Password", ""))).toString();
+    }
+
+    if (database.isEmpty()) {
+        database = settings.value("Settings/DatabaseName",
+                                  settings.value("Settings/Server_DatabaseName",
+                                                 settings.value("DatabaseName", "newdb"))).toString();
+    }
+
+    // Хост читаем только если keepHost = false или host еще не установлен
+    if (!keepHost && host.isEmpty()) {
+        // Пробуем разные варианты ключей для хоста
+        QString hostWithPort = settings.value("Settings/ip_database",
+                                              settings.value("Settings/Server_ip_database",
+                                                             settings.value("ip_database", ""))).toString();
+
+        // Разделяем хост и порт, если они вместе
+        if (hostWithPort.contains(':')) {
+            QStringList parts = hostWithPort.split(':');
+            host = parts[0];
+            bool ok;
+            port = (parts.size() > 1) ? parts[1].toInt(&ok) : port;
+            if (!ok) port = 5432;
+        } else {
+            host = hostWithPort;
+            // Пробуем прочитать порт отдельно (если есть)
+            int savedPort = settings.value("Settings/Port", port).toInt();
+            if (savedPort > 0) port = savedPort;
+        }
+    }
+}*/
+
+
+QList<ColumnInfo> Welcome::getExpectedTableStructure(const QString &tableName)
+{
+    QList<ColumnInfo> columns;
+
+    if (tableName == "users") {
+        columns = {
+            {"user_id", "int", true, "", true},
+            {"login", "CHARACTER VARYING(30)", false, "", false},
+            {"password", "CHARACTER VARYING(30)", false, "", false},
+            {"name_0", "CHARACTER VARYING(30)", false, "", false},
+            {"name_1", "CHARACTER VARYING(30)", false, "", false},
+            {"name_2", "CHARACTER VARYING(30)", false, "", false},
+            {"gender", "CHARACTER VARYING(3)", false, "", false},
+            {"birthday", "date", false, "", false},
+            {"role", "CHARACTER VARYING(30)", false, "", false},
+            {"snils", "CHARACTER VARYING(30)", false, "", false},
+            {"tab_num", "int", false, "", false},
+            {"department", "CHARACTER VARYING(30)", false, "", false},
+            {"card_id", "CHARACTER VARYING(30)", false, "", false},
+            {"set_ID", "int", true, "", false},
+            {"kas_ID", "int", true, "", false},
+            {"mesh_ID", "int", true, "", false},
+            {"doz_tld_id", "CHARACTER VARYING(30)", false, "", false},
+            {"cell_date", "date", false, "", false},
+            {"dose_year", "float8", false, "", false},
+            {"dose_year_now", "float8", false, "", false},
+            {"dose_year_now_ppd", "float8", false, "", false},
+            {"code", "CHARACTER VARYING(50)", false, "", false},
+            {"block", "CHARACTER VARYING(30)", false, "", false},
+            {"last_update", "timestamp", false, "", false}
+        };
+    }
+    else if (tableName == "user_photo") {
+        columns = {
+            {"user_id", "bigint", false, "", false},
+            {"user_photo", "bytea", false, "", false}
+        };
+    }
+    else if (tableName == "duty") {
+        columns = {
+            {"duty_id", "SERIAL", true, "", true},
+            {"type_duty", "INTEGER", true, "", false},
+            {"blok", "VARCHAR(100)", false, "", false},
+            {"room", "VARCHAR(100)", false, "", false},
+            {"equipment", "VARCHAR(100)", false, "", false},
+            {"name_work", "VARCHAR(200)", false, "", false},
+            {"type_work", "VARCHAR(200)", false, "", false},
+            {"time", "INTEGER", false, "", false},
+            {"dose_a_1", "NUMERIC(10,4)", false, "0.1", false},
+            {"dose_a_2", "NUMERIC(10,4)", false, "1.0", false},
+            {"rate_a_1", "NUMERIC(10,4)", false, "0.1", false},
+            {"rate_a_2", "NUMERIC(10,4)", false, "1.0", false},
+            {"dose_b_1", "NUMERIC(10,4)", false, "0.1", false},
+            {"dose_b_2", "NUMERIC(10,4)", false, "1.0", false},
+            {"rate_b_1", "NUMERIC(10,4)", false, "0.1", false},
+            {"rate_b_2", "NUMERIC(10,4)", false, "1.0", false},
+            {"dose_g_1", "NUMERIC(10,4)", false, "0.1", false},
+            {"dose_g_2", "NUMERIC(10,4)", false, "1.0", false},
+            {"rate_g_1", "NUMERIC(10,4)", false, "0.1", false},
+            {"rate_g_2", "NUMERIC(10,4)", false, "1.0", false},
+            {"dose_n_1", "NUMERIC(10,4)", false, "0.01", false},
+            {"dose_n_2", "NUMERIC(10,4)", false, "0.1", false},
+            {"rate_n_1", "NUMERIC(10,4)", false, "0.01", false},
+            {"rate_n_2", "NUMERIC(10,4)", false, "0.1", false},
+            {"duty_note", "TEXT", false, "", false},
+            {"last_update", "TIMESTAMP", false, "CURRENT_TIMESTAMP", false}
+        };
+    }
+    else if (tableName == "users_duty") {
+        columns = {
+            {"users_duty_id", "int", true, "", true},
+            {"user_id", "int", false, "", false},
+            {"duty_id", "int", false, "", false},
+            {"date_start", "date", false, "", false},
+            {"date_finish", "date", false, "", false},
+            {"users_duty_note", "CHARACTER VARYING(30)", false, "", false}
+        };
+    }
+    else if (tableName == "set") {
+        columns = {
+            {"set_id", "int", true, "", true},
+            {"set_name", "CHARACTER VARYING(30)", false, "", false},
+            {"ip_set", "inet", false, "", false},
+            {"set_quantity", "int", false, "", false},
+            {"set_block", "CHARACTER VARYING(30)", false, "", false},
+            {"set_note", "CHARACTER VARYING(30)", false, "", false},
+            {"last_update", "timestamp", false, "", false}
+        };
+    }
+    else if (tableName == "kas") {
+        columns = {
+            {"set_id", "int", false, "", false},
+            {"kas_id", "int", false, "", false},
+            {"kas_name", "CHARACTER VARYING(30)", false, "", false},
+            {"kas_height", "int", false, "", false},
+            {"kas_width", "int", false, "", false},
+            {"kas_block", "CHARACTER VARYING(30)", false, "", false},
+            {"kas_note", "CHARACTER VARYING(30)", false, "", false},
+            {"last_update", "timestamp", false, "", false}
+        };
+    }
+    else if (tableName == "mesh") {
+        columns = {
+            {"set_id", "int", false, "", false},
+            {"kas_id", "int", false, "", false},
+            {"mesh_id", "int", false, "", false},
+            {"user_id", "int", false, "", false},
+            {"doz_tld_id", "CHARACTER VARYING(30)", false, "", false},
+            {"mesh_status", "int", false, "", false},
+            {"mesh_note", "CHARACTER VARYING(30)", false, "", false},
+            {"last_update", "timestamp", false, "", false}
+        };
+    }
+    else if (tableName == "users_history") {
+        columns = {
+            {"user_id", "INTEGER", true, "", false},
+            {"login", "VARCHAR(50)", true, "", false},
+            {"password", "VARCHAR(100)", true, "", false},
+            {"name_0", "VARCHAR(50)", true, "", false},
+            {"name_1", "VARCHAR(50)", true, "", false},
+            {"name_2", "VARCHAR(50)", false, "", false},
+            {"gender", "VARCHAR(10)", false, "", false},
+            {"birthday", "DATE", false, "", false},
+            {"role", "VARCHAR(30)", false, "", false},
+            {"tab_num", "VARCHAR(20)", true, "", false},
+            {"department", "VARCHAR(100)", false, "", false},
+            {"card_id", "VARCHAR(30)", true, "", false},
+            {"set_inf", "INTEGER", true, "1", false},
+            {"kas_inf", "INTEGER", true, "1", false},
+            {"mesh_inf", "INTEGER", true, "1", false},
+            {"doz_tld_id", "VARCHAR(30)", true, "", false},
+            {"cell_date", "DATE", false, "", false},
+            {"dose_year", "DECIMAL(10,4)", false, "", false},
+            {"dose_year_now", "DECIMAL(10,4)", false, "", false},
+            {"dose_year_now_ppd", "DECIMAL(10,4)", false, "", false},
+            {"code", "VARCHAR(30)", false, "", false},
+            {"block", "VARCHAR(30)", false, "", false},
+            {"last_update", "TIMESTAMP", false, "CURRENT_TIMESTAMP", false},
+            {"user_id_change", "INTEGER", false, "", false},
+            {"type_edit", "VARCHAR(30)", false, "'create'", false}
+        };
+    }
+    else if (tableName == "duty_history") {
+        columns = {
+            {"duty_id", "VARCHAR(100)", false, "", false},
+            {"type_duty", "INTEGER", false, "", false},
+            {"blok", "VARCHAR(100)", false, "", false},
+            {"room", "VARCHAR(100)", false, "", false},
+            {"equipment", "VARCHAR(100)", false, "", false},
+            {"name_work", "VARCHAR(200)", false, "", false},
+            {"type_work", "VARCHAR(200)", false, "", false},
+            {"time", "INTEGER", false, "", false},
+            {"dose_a_1", "NUMERIC(10,4)", false, "", false},
+            {"dose_a_2", "NUMERIC(10,4)", false, "", false},
+            {"rate_a_1", "NUMERIC(10,4)", false, "", false},
+            {"rate_a_2", "NUMERIC(10,4)", false, "", false},
+            {"dose_b_1", "NUMERIC(10,4)", false, "", false},
+            {"dose_b_2", "NUMERIC(10,4)", false, "", false},
+            {"rate_b_1", "NUMERIC(10,4)", false, "", false},
+            {"rate_b_2", "NUMERIC(10,4)", false, "", false},
+            {"dose_g_1", "NUMERIC(10,4)", false, "", false},
+            {"dose_g_2", "NUMERIC(10,4)", false, "", false},
+            {"rate_g_1", "NUMERIC(10,4)", false, "", false},
+            {"rate_g_2", "NUMERIC(10,4)", false, "", false},
+            {"dose_n_1", "NUMERIC(10,4)", false, "", false},
+            {"dose_n_2", "NUMERIC(10,4)", false, "", false},
+            {"rate_n_1", "NUMERIC(10,4)", false, "", false},
+            {"rate_n_2", "NUMERIC(10,4)", false, "", false},
+            {"duty_note", "TEXT", false, "", false},
+            {"last_update", "TIMESTAMP", false, "", false},
+            {"user_id_change", "INTEGER", true, "", false},
+            {"last_update_change", "TIMESTAMP", false, "CURRENT_TIMESTAMP", false},
+            {"type_edit", "VARCHAR(30)", false, "'create'", false}
+        };
+    }
+    else if (tableName == "users_duty_history") {
+        columns = {
+            {"users_duty_id", "INTEGER", false, "", false},
+            {"user_id", "INTEGER", false, "", false},
+            {"duty_id", "INTEGER", false, "", false},
+            {"date_start", "DATE", false, "", false},
+            {"date_finish", "DATE", false, "", false},
+            {"users_duty_note", "TEXT", false, "", false},
+            {"last_update_change", "TIMESTAMP", false, "", false},
+            {"user_id_change", "INTEGER", true, "", false},
+            {"last_update", "TIMESTAMP", false, "", false},
+            {"type_edit", "VARCHAR(30)", false, "'create'", false},
+            {"change_time", "TIMESTAMP", false, "CURRENT_TIMESTAMP", false}
+        };
+    }
+    else if (tableName == "set_history") {
+        columns = {
+            {"set_id", "INTEGER", true, "", false},
+            {"set_name", "VARCHAR(30)", false, "", false},
+            {"ip_set", "INET", false, "", false},
+            {"set_quantity", "INTEGER", false, "", false},
+            {"set_block", "VARCHAR(30)", false, "", false},
+            {"set_note", "VARCHAR(30)", false, "", false},
+            {"last_update", "TIMESTAMP", false, "", false},
+            {"user_id_change", "INTEGER", false, "", false},
+            {"last_update_change", "TIMESTAMP", false, "CURRENT_TIMESTAMP", false},
+            {"type_edit", "VARCHAR(30)", false, "'create'", false}
+        };
+    }
+    else if (tableName == "kas_history") {
+        columns = {
+            {"set_id", "INTEGER", true, "", false},
+            {"kas_id", "INTEGER", true, "", false},
+            {"kas_name", "VARCHAR(30)", false, "", false},
+            {"kas_height", "INTEGER", false, "", false},
+            {"kas_width", "INTEGER", false, "", false},
+            {"kas_block", "VARCHAR(30)", false, "", false},
+            {"kas_note", "VARCHAR(30)", false, "", false},
+            {"last_update", "TIMESTAMP", false, "", false},
+            {"user_id_change", "INTEGER", true, "", false},
+            {"last_update_change", "TIMESTAMP", false, "CURRENT_TIMESTAMP", false},
+            {"type_edit", "VARCHAR(30)", false, "'create'", false}
+        };
+    }
+    else if (tableName == "mesh_history") {
+        columns = {
+            {"set_id", "INTEGER", true, "", false},
+            {"kas_id", "INTEGER", true, "", false},
+            {"mesh_id", "INTEGER", true, "", false},
+            {"user_id", "INTEGER", false, "", false},
+            {"doz_tld_id", "VARCHAR(30)", false, "", false},
+            {"mesh_status", "INTEGER", false, "0", false},
+            {"mesh_note", "VARCHAR(30)", false, "", false},
+            {"last_update", "TIMESTAMP", false, "", false},
+            {"user_id_change", "INTEGER", true, "", false},
+            {"last_update_change", "TIMESTAMP", false, "CURRENT_TIMESTAMP", false},
+            {"type_edit", "VARCHAR(30)", false, "'create'", false}
+        };
+    }
+    else if (tableName == "dose_ppd") {
+        columns = {
+            {"dose_ppd_id", "int", true, "", true},
+            {"user_id", "int", false, "", false},
+            {"users_duty_id", "int", false, "", false},
+            {"nomer_pdd", "CHARACTER VARYING(30)", false, "", false},
+            {"time", "int", false, "", false},
+            {"time_max", "timestamp", false, "", false},
+            {"type_ppd", "smallint", false, "", false},
+            {"dose", "float8", false, "0", false},
+            {"rate_max", "float8", false, "", false},
+            {"dose_ppd_note", "CHARACTER VARYING(30)", false, "", false},
+            {"start_work", "timestamp", false, "", false},
+            {"finish_work", "timestamp", false, "", false},
+            {"last_update", "timestamp", false, "", false}
+        };
+    }
+    else if (tableName == "dose_ppd_history") {
+        columns = {
+            {"dose_ppd_id", "int", false, "", false},
+            {"user_id", "int", false, "", false},
+            {"users_duty_id", "int", false, "", false},
+            {"nomer_pdd", "CHARACTER VARYING(30)", false, "", false},
+            {"time", "int", false, "", false},
+            {"time_max", "timestamp", false, "", false},
+            {"type_ppd", "smallint", false, "", false},
+            {"dose", "float8", false, "0", false},
+            {"rate_max", "float8", false, "", false},
+            {"dose_ppd_note", "CHARACTER VARYING(30)", false, "", false},
+            {"start_work", "timestamp", false, "", false},
+            {"finish_work", "timestamp", false, "", false},
+            {"last_update", "timestamp", false, "", false},
+            {"user_id_change", "int", false, "", false},
+            {"last_update_change", "timestamp", false, "", false},
+            {"type_edit", "VARCHAR(30)", false, "'create'", false}
+        };
+    }
+    else if (tableName == "set_kid") {
+        columns = {
+            {"set_id", "int", true, "", true},
+            {"set_name", "CHARACTER VARYING(30)", false, "", false},
+            {"ip_set", "inet", false, "", false},
+            {"set_quantity", "int", false, "", false},
+            {"set_block", "CHARACTER VARYING(30)", false, "", false},
+            {"set_note", "CHARACTER VARYING(30)", false, "", false},
+            {"last_update", "timestamp", false, "", false}
+        };
+    }
+    else if (tableName == "kas_kid") {
+        columns = {
+            {"set_id", "int", false, "", false},
+            {"kas_id", "int", false, "", false},
+            {"kas_name", "CHARACTER VARYING(30)", false, "", false},
+            {"kas_height", "int", false, "", false},
+            {"kas_width", "int", false, "", false},
+            {"kas_block", "CHARACTER VARYING(30)", false, "", false},
+            {"kas_note", "CHARACTER VARYING(30)", false, "", false},
+            {"last_update", "timestamp", false, "", false}
+        };
+    }
+    else if (tableName == "mesh_kid") {
+        columns = {
+            {"set_id", "int", false, "", false},
+            {"kas_id", "int", false, "", false},
+            {"mesh_id", "int", false, "", false},
+            {"user_id", "int", false, "", false},
+            {"doz_tld_id", "CHARACTER VARYING(30)", false, "", false},
+            {"mesh_status", "int", false, "", false},
+            {"mesh_note", "CHARACTER VARYING(30)", false, "", false},
+            {"last_update", "timestamp", false, "", false}
+        };
+    }
+    else if (tableName == "set_kid_history") {
+        columns = {
+            {"set_id", "INTEGER", true, "", false},
+            {"set_name", "VARCHAR(30)", false, "", false},
+            {"ip_set", "INET", false, "", false},
+            {"set_quantity", "INTEGER", false, "", false},
+            {"set_block", "VARCHAR(30)", false, "", false},
+            {"set_note", "VARCHAR(30)", false, "", false},
+            {"last_update", "TIMESTAMP", false, "", false},
+            {"user_id_change", "INTEGER", false, "", false},
+            {"last_update_change", "TIMESTAMP", false, "CURRENT_TIMESTAMP", false},
+            {"type_edit", "VARCHAR(30)", false, "'create'", false}
+        };
+    }
+    else if (tableName == "kas_kid_history") {
+        columns = {
+            {"set_id", "INTEGER", true, "", false},
+            {"kas_id", "INTEGER", true, "", false},
+            {"kas_name", "VARCHAR(30)", false, "", false},
+            {"kas_height", "INTEGER", false, "", false},
+            {"kas_width", "INTEGER", false, "", false},
+            {"kas_block", "VARCHAR(30)", false, "", false},
+            {"kas_note", "VARCHAR(30)", false, "", false},
+            {"last_update", "TIMESTAMP", false, "", false},
+            {"user_id_change", "INTEGER", true, "", false},
+            {"last_update_change", "TIMESTAMP", false, "CURRENT_TIMESTAMP", false},
+            {"type_edit", "VARCHAR(30)", false, "'create'", false}
+        };
+    }
+    else if (tableName == "mesh_kid_history") {
+        columns = {
+            {"set_id", "INTEGER", true, "", false},
+            {"kas_id", "INTEGER", true, "", false},
+            {"mesh_id", "INTEGER", true, "", false},
+            {"user_id", "INTEGER", false, "", false},
+            {"doz_tld_id", "VARCHAR(30)", false, "", false},
+            {"mesh_status", "INTEGER", false, "0", false},
+            {"mesh_note", "VARCHAR(30)", false, "", false},
+            {"last_update", "TIMESTAMP", false, "", false},
+            {"user_id_change", "INTEGER", true, "", false},
+            {"last_update_change", "TIMESTAMP", false, "CURRENT_TIMESTAMP", false},
+            {"type_edit", "VARCHAR(30)", false, "'create'", false}
+        };
+    }
+
+    return columns;
 }
