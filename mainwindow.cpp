@@ -5560,62 +5560,125 @@ void MainWindow::on_btnUserFilterStop_2_pressed() //сброс фильтров 
 
 void MainWindow::on_pushButton_usersHistoryFile_pressed()
 {
-    //выгрузить в csv
-    // Получаем текущую дату для названия файла
-    QString currentDate = QDate::currentDate().toString("dd.MM.yyyy");
-    QString fileName = QString("user-%1.csv").arg(currentDate);
+    QDialog formatDialog(this);
+    formatDialog.setWindowTitle("Выбор формата файла");
+    formatDialog.resize(300, 150);
 
-    // Запрашиваем путь для сохранения
-    QString filePath = QFileDialog::getSaveFileName(this, "Сохранить файл",
-                                                   QDir::homePath() + "/" + fileName,
-                                                   "CSV Files (*.csv)");
+    QVBoxLayout layout(&formatDialog);
 
-    if (filePath.isEmpty()) {
-        return; // Пользователь отменил диалог
+    QLabel label("Выберите формат для сохранения:", &formatDialog);
+    layout.addWidget(&label);
+
+    QComboBox formatComboBox(&formatDialog);
+    formatComboBox.addItem("CSV (*.csv)", "csv");
+    formatComboBox.addItem("Excel (*.xlsx)", "xlsx");
+    formatComboBox.addItem("Word (*.docx)", "docx");
+    layout.addWidget(&formatComboBox);
+
+    QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+                              Qt::Horizontal, &formatDialog);
+    layout.addWidget(&buttonBox);
+
+    connect(&buttonBox, &QDialogButtonBox::accepted, &formatDialog, &QDialog::accept);
+    connect(&buttonBox, &QDialogButtonBox::rejected, &formatDialog, &QDialog::reject);
+
+    if (formatDialog.exec() != QDialog::Accepted) {
+        return;
     }
 
-    // Открываем файл для записи
+    QString format = formatComboBox.currentData().toString();
+    QString formatName = formatComboBox.currentText();
+
+    QString currentDateTime = QDateTime::currentDateTime().toString("dd-MM-yyyy_hh-mm-ss");
+    QString defaultFileName = QString("users_history_%1.%2").arg(currentDateTime).arg(format);
+
+    QString fileFilter = formatName + ";;All Files (*.*)";
+    QString filePath = QFileDialog::getSaveFileName(this,
+                                                   QString("Сохранить как %1").arg(formatName),
+                                                   QDir::homePath() + "/" + defaultFileName,
+                                                   fileFilter);
+
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    bool success = false;
+    QString resultMessage;
+
+    if (format == "csv") {
+        success = saveTableToCSV(filePath);
+        resultMessage = "CSV файл успешно создан";
+    } else if (format == "xlsx") {
+        success = saveTableToExcel(filePath);
+        resultMessage = "Excel файл успешно создан";
+    } else if (format == "docx") {
+        success = saveTableToWord(filePath);
+        resultMessage = "Word файл успешно создан";
+    }
+
+    if (success) {
+        QFileInfo fileInfo(filePath);
+        QString successText = QString("%1\n\n"
+                                      "Файл: %2\n"
+                                      "Путь: %3\n"
+                                      "Размер: %4 байт\n"
+                                      "Дата создания: %5")
+                               .arg(resultMessage)
+                               .arg(fileInfo.fileName())
+                               .arg(fileInfo.absolutePath())
+                               .arg(fileInfo.size())
+                               .arg(fileInfo.birthTime().toString("dd.MM.yyyy HH:mm:ss"));
+
+        QMessageBox::information(this, "Экспорт завершен", successText);
+    } else {
+        QMessageBox::critical(this, "Ошибка экспорта",
+                             QString("Не удалось сохранить файл в формате %1").arg(format.toUpper()));
+    }
+}
+
+bool MainWindow::saveTableToCSV(const QString &filePath)
+{
     QFile file(filePath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Ошибка057", "Не удалось создать файл: " + file.errorString());
-        return;
+        return false;
     }
 
     QTextStream out(&file);
 
-
-    // Установка кодировки в зависимости от версии Qt
+    // Установка кодировки
     #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    out.setCodec("UTF-8"); // Qt 5
+    out.setCodec("UTF-8");
     #else
-    out.setEncoding(QStringConverter::Utf8); // Qt 6
+    out.setEncoding(QStringConverter::Utf8);
     #endif
 
-    // Записываем заголовки столбцов
+    // Записываем BOM для правильного отображения кириллицы в Excel
+    out << "\xEF\xBB\xBF";
+
+    // Заголовки столбцов
     for (int col = 0; col < ui->tableWidget_historyUsers->columnCount(); ++col) {
         QTableWidgetItem *headerItem = ui->tableWidget_historyUsers->horizontalHeaderItem(col);
         if (headerItem) {
-            out << "\"" << headerItem->text() << "\"";
+            out << "\"" << headerItem->text().replace("\"", "\"\"") << "\"";
         } else {
             out << "\"Column " << col + 1 << "\"";
         }
         if (col < ui->tableWidget_historyUsers->columnCount() - 1) {
-            out << ";"; // Разделитель столбцов
+            out << ";";
         }
     }
     out << "\n";
 
-    // Записываем данные
+    // Данные
     for (int row = 0; row < ui->tableWidget_historyUsers->rowCount(); ++row) {
         for (int col = 0; col < ui->tableWidget_historyUsers->columnCount(); ++col) {
             QTableWidgetItem *item = ui->tableWidget_historyUsers->item(row, col);
             if (item && !item->text().isEmpty()) {
-                // Экранируем кавычки и добавляем текст
                 QString text = item->text();
-                text.replace("\"", "\"\""); // Экранирование кавычек
+                text.replace("\"", "\"\"");
                 out << "\"" << text << "\"";
             } else {
-                out << "\"\""; // Пустая ячейка
+                out << "\"\"";
             }
             if (col < ui->tableWidget_historyUsers->columnCount() - 1) {
                 out << ";";
@@ -5625,7 +5688,182 @@ void MainWindow::on_pushButton_usersHistoryFile_pressed()
     }
 
     file.close();
-    QMessageBox::information(this, "Успех", QString("Данные сохранены в файл:\n%1").arg(filePath));
+    return true;
+}
+bool MainWindow::saveTableToExcel(const QString &filePath)
+{
+    // Вариант 1: HTML таблица (надежно открывается в Excel)
+    QString htmlPath = filePath;
+    if (htmlPath.endsWith(".xlsx", Qt::CaseInsensitive)) {
+        htmlPath.replace(".xlsx", ".html");
+    } else if (!htmlPath.endsWith(".html", Qt::CaseInsensitive) &&
+               !htmlPath.endsWith(".htm", Qt::CaseInsensitive)) {
+        htmlPath += ".html";
+    }
+
+    QFile file(htmlPath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        return false;
+    }
+
+    QTextStream out(&file);
+
+    #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    out.setCodec("UTF-8");
+    #else
+    out.setEncoding(QStringConverter::Utf8);
+    #endif
+
+    // HTML с мета-тегом для Excel
+    out << "<!DOCTYPE html>\n";
+    out << "<html>\n<head>\n";
+    out << "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n";
+    out << "<title>История пользователей</title>\n";
+    out << "<!--[if gte mso 9]><xml>\n";
+    out << "<x:ExcelWorkbook>\n";
+    out << "<x:ExcelWorksheets>\n";
+    out << "<x:ExcelWorksheet>\n";
+    out << "<x:Name>Данные</x:Name>\n";
+    out << "<x:WorksheetOptions>\n";
+    out << "<x:DisplayGridlines/>\n";
+    out << "</x:WorksheetOptions>\n";
+    out << "</x:ExcelWorksheet>\n";
+    out << "</x:ExcelWorksheets>\n";
+    out << "</x:ExcelWorkbook>\n";
+    out << "</xml><![endif]-->\n";
+    out << "<style>\n";
+    out << "table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }\n";
+    out << "th { background-color: #4F81BD; color: white; font-weight: bold; padding: 8px; text-align: center; border: 1px solid #ddd; }\n";
+    out << "td { padding: 6px; border: 1px solid #ddd; text-align: left; }\n";
+    out << "tr:nth-child(even) { background-color: #f2f2f2; }\n";
+    out << "</style>\n";
+    out << "</head>\n<body>\n";
+
+    out << "<table>\n";
+    out << "<thead>\n<tr>\n";
+
+    // Заголовки
+    for (int col = 0; col < ui->tableWidget_historyUsers->columnCount(); ++col) {
+        QTableWidgetItem *headerItem = ui->tableWidget_historyUsers->horizontalHeaderItem(col);
+        QString headerText = headerItem ? headerItem->text().toHtmlEscaped() : QString("Column %1").arg(col + 1);
+        out << "<th>" << headerText << "</th>\n";
+    }
+    out << "</tr>\n</thead>\n<tbody>\n";
+
+    // Данные
+    for (int row = 0; row < ui->tableWidget_historyUsers->rowCount(); ++row) {
+        out << "<tr>\n";
+        for (int col = 0; col < ui->tableWidget_historyUsers->columnCount(); ++col) {
+            QTableWidgetItem *item = ui->tableWidget_historyUsers->item(row, col);
+            QString cellText = item && !item->text().isEmpty() ? item->text().toHtmlEscaped() : "&nbsp;";
+            out << "<td>" << cellText << "</td>\n";
+        }
+        out << "</tr>\n";
+    }
+
+    out << "</tbody>\n</table>\n";
+    out << "</body>\n</html>";
+
+    file.close();
+
+    if (filePath != htmlPath) {
+        QMessageBox::information(this, "Excel экспорт",
+            "Данные сохранены как HTML файл: " + QFileInfo(htmlPath).fileName() + "\n\n"
+            "Чтобы открыть в Excel:\n"
+            "1. Откройте Excel\n"
+            "2. Файл → Открыть\n"
+            "3. Выберите 'Все файлы (*.*)'\n"
+            "4. Откройте сохраненный .html файл\n"
+            "5. Файл → Сохранить как → Выберите 'Книга Excel (*.xlsx)'");
+    }
+
+    return true;
+}
+
+bool MainWindow::saveTableToWord(const QString &filePath)
+{
+    // Вариант 1: Создаем простой HTML, который Word откроет как документ
+    QString docPath = filePath;
+    if (docPath.endsWith(".docx", Qt::CaseInsensitive)) {
+        docPath.replace(".docx", ".html");
+    } else if (!docPath.endsWith(".html", Qt::CaseInsensitive) &&
+               !docPath.endsWith(".htm", Qt::CaseInsensitive)) {
+        docPath += ".html";
+    }
+
+    QFile file(docPath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        return false;
+    }
+
+    QTextStream out(&file);
+
+    #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    out.setCodec("UTF-8");
+    #else
+    out.setEncoding(QStringConverter::Utf8);
+    #endif
+
+    out << "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n";
+    out << "<html>\n<head>\n";
+    out << "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n";
+    out << "<title>История пользователей</title>\n";
+    out << "<style>\n";
+    out << "body { font-family: 'Times New Roman', serif; font-size: 12pt; }\n";
+    out << "h1 { color: #2E74B5; border-bottom: 2px solid #2E74B5; padding-bottom: 5px; }\n";
+    out << "table { border-collapse: collapse; width: 100%; margin: 20px 0; }\n";
+    out << "th { background-color: #2E74B5; color: white; font-weight: bold; padding: 8px; border: 1px solid #ddd; text-align: center; }\n";
+    out << "td { padding: 6px; border: 1px solid #ddd; text-align: left; }\n";
+    out << "tr:nth-child(even) { background-color: #f2f2f2; }\n";
+    out << ".info { color: #666; font-style: italic; margin-bottom: 20px; }\n";
+    out << "</style>\n";
+    out << "</head>\n<body>\n";
+
+    out << "<h1>История пользователей</h1>\n";
+    out << "<div class=\"info\">\n";
+    out << "<p>Дата экспорта: " << QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm:ss") << "</p>\n";
+    out << "<p>Количество записей: " << ui->tableWidget_historyUsers->rowCount() << "</p>\n";
+    out << "</div>\n";
+
+    out << "<table>\n";
+    out << "<thead>\n<tr>\n";
+
+    // Заголовки
+    for (int col = 0; col < ui->tableWidget_historyUsers->columnCount(); ++col) {
+        QTableWidgetItem *headerItem = ui->tableWidget_historyUsers->horizontalHeaderItem(col);
+        QString headerText = headerItem ? headerItem->text().toHtmlEscaped() : QString("Column %1").arg(col + 1);
+        out << "<th>" << headerText << "</th>\n";
+    }
+    out << "</tr>\n</thead>\n<tbody>\n";
+
+    // Данные
+    for (int row = 0; row < ui->tableWidget_historyUsers->rowCount(); ++row) {
+        out << "<tr>\n";
+        for (int col = 0; col < ui->tableWidget_historyUsers->columnCount(); ++col) {
+            QTableWidgetItem *item = ui->tableWidget_historyUsers->item(row, col);
+            QString cellText = item && !item->text().isEmpty() ? item->text().toHtmlEscaped() : "";
+            out << "<td>" << cellText << "</td>\n";
+        }
+        out << "</tr>\n";
+    }
+
+    out << "</tbody>\n</table>\n";
+    out << "</body>\n</html>";
+
+    file.close();
+
+    if (filePath != docPath) {
+        QMessageBox::information(this, "Word экспорт",
+            "Данные сохранены как HTML файл: " + QFileInfo(docPath).fileName() + "\n\n"
+            "Чтобы открыть в Word:\n"
+            "1. Откройте Word\n"
+            "2. Файл → Открыть\n"
+            "3. Выберите 'Все файлы (*.*)'\n"
+            "4. Откройте сохраненный .html файл\n"
+            "5. Файл → Сохранить как → Выберите 'Документ Word (*.docx)'");
+    }
+
+    return true;
 }
 
 

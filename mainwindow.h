@@ -83,6 +83,14 @@
 #include <QDebug>
 #include <QLoggingCategory>
 
+#include <QXmlStreamWriter>    // Для создания XML структуры Excel/Word
+#include <QByteArray>          // Для работы с бинарными данными
+#include <QBuffer>             // Для буферизации данных
+#include <QTextDocument>       // Для форматирования текста
+#include <QTextCursor>         // Для позиционирования в документе
+#include <QTextTable>          // Для создания таблиц в Word
+//#include <QDomDocument>        // Для работы с XML (альтернатива QXmlStreamWriter)
+
 // Пространство имен UI
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -345,6 +353,35 @@ private slots:
     void updateListSetForHistory();
     void updateListSetForHistory_kid();
 
+    //конвертирование в другой формат
+    //void exportUsersHistoryToCSV(const QString &filePath);
+    //void exportUsersHistoryToExcel(const QString &filePath);
+    //void exportUsersHistoryToWord(const QString &filePath);
+
+
+    // Методы экспорта
+    bool saveTableToCSV(const QString &filePath);
+    bool saveTableToExcel(const QString &filePath);
+    bool saveTableToWord(const QString &filePath);
+    /*
+    QString generateDefaultFileName(const QString &format);
+    QString getFileFilterForFormat(const QString &format);
+    QString getFormatDisplayName(const QString &format);
+    /*
+    // Методы экспорта
+    bool saveTableToCSV(QTableWidget *table, const QString &filePath);
+    bool saveTableToExcel(QTableWidget *table, const QString &filePath);
+    bool saveTableToWord(QTableWidget *table, const QString &filePath);
+
+    // Вспомогательные методы для форматов
+    QString generateDefaultFileName(const QString &format);
+    QString getFileFilterForFormat(const QString &format);
+    QString getFormatDisplayName(const QString &format);
+
+    // Вспомогательные методы для диалогов
+    void showExportFormatDialog();
+    void showExportSuccessDialog(const QString &filePath, const QString &formatName);*/
+
     // Методы для добавления истории
     bool addUserHistory(
         int userId,
@@ -527,6 +564,12 @@ private:
     QComboBox* m_setKidComboBox = nullptr;
     QComboBox* m_kasKidComboBox = nullptr;
     QComboBox* m_meshKidComboBox = nullptr;
+
+
+
+    // Диалоговые окна (указатели для управления)
+    QDialog *exportFormatDialog;
+    QComboBox *formatComboBox;
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
