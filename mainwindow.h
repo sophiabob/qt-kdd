@@ -358,46 +358,11 @@ private slots:
     void updateListSetForHistory();
     void updateListSetForHistory_kid();
 
-    //конвертирование в другой формат
-    //void exportUsersHistoryToCSV(const QString &filePath);
-    //void exportUsersHistoryToExcel(const QString &filePath);
-    //void exportUsersHistoryToWord(const QString &filePath);
-
-
-    // Методы экспорта
-    bool saveTableToCSV(const QString &filePath);
-    bool saveTableToExcel(const QString &filePath);
-    bool saveTableToWord(const QString &filePath);
-    //QString generateRtfDocument(QTableWidget *table);
-
-    //bool saveToHtmlForWord(QTableWidget *table, const QString &filePath);
-
-    //bool saveToDocxWithQXlsx(QTableWidget *table, const QString &filePath);
-    QString generateHtmlDocument(QTableWidget *table);
-    //QString stringToRtfUnicode(const QString &text);
-
-    //bool saveTableToWord(const QString &filePath);
-
-    //bool saveTableToWordRTF(const QString &filePath);
-    //bool saveTableToHtml(const QString &filePath);
-    /*
-    QString generateDefaultFileName(const QString &format);
-    QString getFileFilterForFormat(const QString &format);
-    QString getFormatDisplayName(const QString &format);
-    /*
     // Методы экспорта
     bool saveTableToCSV(QTableWidget *table, const QString &filePath);
     bool saveTableToExcel(QTableWidget *table, const QString &filePath);
     bool saveTableToWord(QTableWidget *table, const QString &filePath);
 
-    // Вспомогательные методы для форматов
-    QString generateDefaultFileName(const QString &format);
-    QString getFileFilterForFormat(const QString &format);
-    QString getFormatDisplayName(const QString &format);
-
-    // Вспомогательные методы для диалогов
-    void showExportFormatDialog();
-    void showExportSuccessDialog(const QString &filePath, const QString &formatName);*/
 
     // Методы для добавления истории
     bool addUserHistory(
