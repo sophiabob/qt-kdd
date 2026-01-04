@@ -15,14 +15,21 @@ SOURCES_DIR = $$PWD
 # Передаем в код как define
 DEFINES += SOURCE_CODE_PATH=\"\\\"$$SOURCES_DIR\\\"\"
 
+QT += core gui sql quick widgets
 
+# Проверка подключения QXlsx
+exists($$PWD/QXlsx/qxlsx.pri) {
+    include($$PWD/QXlsx/qxlsx.pri)
+    DEFINES += WITH_QXLSX
+    message("QXlsx подключен")
+} else:exists($$PWD/../QXlsx/qxlsx.pri) {
+    include($$PWD/../QXlsx/qxlsx.pri)
+    DEFINES += WITH_QXLSX
+    message("QXlsx подключен из родительской папки")
+} else {
+    message("ВНИМАНИЕ: QXlsx не найден")
+}
 
-QT       += core gui sql \
-    quick widgets
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
-#CONFIG += c++17
 CONFIG += c++11
 
 # You can make your code fail to compile if it uses deprecated APIs.
@@ -46,25 +53,18 @@ FORMS += \
     mainwindow.ui \
     welcome.ui
 
+# PostgreSQL подключение (только для Windows)
+win32 {
+    INCLUDEPATH += "C:/Program Files/PostgreSQL/12/include"
+    LIBS += -L"C:/Program Files/PostgreSQL/12/lib" -llibpq
+}
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-
 #win32 {
 #    LIBS += -lkernel32 -luser32 -lshell32
 #    QMAKE_LFLAGS += /ENTRY:mainCRTStartup
 #}
-
-
-
-INCLUDEPATH += \
-    "C:\Program Files\PostgreSQL\12\include"
-
-LIBS += -L"C:\Program Files\PostgreSQL\12\bin" #-llibpq
-
-TEMPLATE = app  # Для консольного приложения
-# ИЛИ
-#TEMPLATE = lib  # Для библиотеки
-

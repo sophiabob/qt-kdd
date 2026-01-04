@@ -89,6 +89,11 @@
 #include <QTextDocument>       // Для форматирования текста
 #include <QTextCursor>         // Для позиционирования в документе
 #include <QTextTable>          // Для создания таблиц в Word
+
+//#include <QAxObject>
+//#include <QAxWidget>
+
+#include <QDateTime>
 //#include <QDomDocument>        // Для работы с XML (альтернатива QXmlStreamWriter)
 
 // Пространство имен UI
@@ -363,6 +368,8 @@ private slots:
     bool saveTableToCSV(const QString &filePath);
     bool saveTableToExcel(const QString &filePath);
     bool saveTableToWord(const QString &filePath);
+    QString generateRtfDocument(QTableWidget *table);
+    //bool saveTableToHtml(const QString &filePath);
     /*
     QString generateDefaultFileName(const QString &format);
     QString getFileFilterForFormat(const QString &format);
