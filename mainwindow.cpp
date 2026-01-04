@@ -5577,7 +5577,7 @@ void MainWindow::on_pushButton_usersHistoryFile_pressed()
     QComboBox formatComboBox(&formatDialog);
     formatComboBox.addItem("CSV (*.csv)", "csv");
     formatComboBox.addItem("Excel (*.xlsx)", "xlsx");
-    formatComboBox.addItem("Word (*.docx)", "docx");
+    formatComboBox.addItem("Word (*.doc)", "doc");
     layout.addWidget(&formatComboBox);
 
     QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
@@ -5616,7 +5616,7 @@ void MainWindow::on_pushButton_usersHistoryFile_pressed()
     } else if (format == "xlsx") {
         success = saveTableToExcel(filePath);
         resultMessage = "Excel файл успешно создан";
-    } else if (format == "docx") {
+    } else if (format == "doc") {
         success = saveTableToWord(filePath);
         resultMessage = "Word файл успешно создан";
     }
@@ -5767,125 +5767,468 @@ bool MainWindow::saveTableToExcel(const QString &filePath)
     return saveTableToCSV(csvPath);
 #endif
 }
-
 bool MainWindow::saveTableToWord(const QString &filePath)
 {
-    QTableWidget *table = ui->tableWidget_historyUsers;
-    if (!table) {
-        QMessageBox::critical(this, "Ошибка", "Таблица истории пользователей не найдена");
-        return false;
-    }
-
-    int rowCount = table->rowCount();
-    int columnCount = table->columnCount();
-
-    if (rowCount == 0 || columnCount == 0) {
-        QMessageBox::warning(this, "Предупреждение", "Таблица пуста");
-        return false;
-    }
-
     QString docPath = filePath;
-    if (!docPath.endsWith(".rtf", Qt::CaseInsensitive)) {
-        docPath += ".rtf";
+    if (!docPath.endsWith(".doc", Qt::CaseInsensitive)) {
+        docPath += ".doc";
     }
-
-    // Создаем RTF документ
-    QString rtf = generateRtfDocument(table);
-
-
 
     QFile file(docPath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Ошибка", "Не удалось создать файл");
+        QMessageBox::critical(this, "Ошибка", "Не удалось создать файл: " + file.errorString());
         return false;
     }
 
-    // Записываем BOM для UTF-8
-    QByteArray bom = QByteArray::fromHex("EFBBBF");
-    file.write(bom);
-
-    QTextStream stream(&file);
+    QTextStream out(&file);
 
     #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        stream.setCodec("UTF-8");
+    out.setCodec("UTF-8");
     #else
-        stream.setEncoding(QStringConverter::Utf8);
+    out.setEncoding(QStringConverter::Utf8);
     #endif
 
-    stream << rtf;
+    out << "<!DOCTYPE html>\n";
+    out << "<html>\n";
+    out << "<head>\n";
+    out << "<meta charset=\"UTF-8\">\n";
+    out << "<title>История пользователей</title>\n";
+
+    // Специальные теги для Word
+    out << "<!--[if gte mso 9]>\n";
+    out << "<xml>\n";
+    out << "<o:DocumentProperties>\n";
+    out << "<o:Revision>1</o:Revision>\n";
+    out << "</o:DocumentProperties>\n";
+    out << "<w:WordDocument>\n";
+    out << "<w:View>Print</w:View>\n";
+    out << "<w:Zoom>100</w:Zoom>\n";
+    out << "<w:DoNotOptimizeForBrowser/>\n";
+    out << "</w:WordDocument>\n";
+    out << "</xml>\n";
+    out << "<![endif]-->\n";
+
+    out << "<style>\n";
+
+    // Минимальные отступы страницы
+    out << "@page {\n";
+    out << "  margin: 0.5cm 0.5cm 0.5cm 1cm; /* top, right, bottom, left */\n";
+    out << "  size: 29.7cm 21cm; /* Горизонтальная A4: ширина x высота */\n";
+    out << "}\n";
+
+    out << "body {\n";
+    out << "  font-family: Arial, sans-serif;\n";
+    out << "  margin: 0;\n";
+    out << "  padding: 0;\n";
+    out << "  font-size: 12pt;\n";
+    out << "  width: 29.7cm; /* Ширина альбомной страницы */\n";
+    out << "  height: 21cm; /* Высота альбомной страницы */\n";
+    out << "  background: white;\n";
+    out << "}\n";
+
+    // Контейнер с поворотом на 90 градусов для горизонтальной ориентации
+    out << ".horizontal-page {\n";
+    out << "  width: 100%;\n";
+    out << "  height: 100%;\n";
+    out << "  padding: 0;\n";
+    out << "  margin: 0;\n";
+    out << "  box-sizing: border-box;\n";
+    out << "}\n";
+
+    out << "h1 {\n";
+    out << "  color: #000000;\n";
+    out << "  margin: 0 0 10px 0;\n";
+    out << "  padding: 0;\n";
+    out << "  font-size: 14pt;\n";
+    out << "}\n";
+
+    out << "p {\n";
+    out << "  color: #000000;\n";
+    out << "  margin: 0 0 15px 0;\n";
+    out << "  padding: 0;\n";
+    out << "}\n";
+
+    out << "table {\n";
+    out << "  border-collapse: collapse;\n";
+    out << "  width: 100%;\n";
+    out << "  margin-top: 10px;\n";
+    out << "  table-layout: auto;\n";
+    out << "}\n";
+
+    out << "th, td {\n";
+    out << "  border: 1px solid #000000;\n";
+    out << "  padding: 4px;\n";
+    out << "  text-align: left;\n";
+    out << "  font-size: 12pt;\n";
+    out << "}\n";
+
+    out << "th {\n";
+    out << "  background-color: #f2f2f2;\n";
+    out << "  font-weight: bold;\n";
+    out << "}\n";
+
+    out << "</style>\n";
+
+    // Стили специально для Word
+    out << "<style>\n";
+    out << "  @page WordSection1 {\n";
+    out << "    size: 841.7pt 595.35pt; /* A4 landscape в пунктах */\n";
+    out << "    mso-page-orientation: landscape;\n";
+    out << "    margin: 13.35pt 28.35pt 28.35pt 16.7pt; /* 1cm 1cm 1cm 2cm в пунктах */\n";
+    out << "  }\n";
+    out << "  div.WordSection1 {\n";
+    out << "    page: WordSection1;\n";
+    out << "  }\n";
+    out << "</style>\n";
+
+    out << "</head>\n";
+    out << "<body>\n";
+
+    // Раздел Word с горизонтальной ориентацией
+    out << "<!--[if gte mso 9]>\n";
+    out << "<div class=\"WordSection1\">\n";
+    out << "<![endif]-->\n";
+
+    out << "<div class=\"horizontal-page\">\n";
+
+    out << "<h1>История пользователей</h1>\n";
+    out << "<p>Дата экспорта: " << QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm:ss") << "</p>\n";
+
+    out << "<table>\n";
+
+    // Заголовки таблицы
+    out << "<tr>\n";
+    for (int col = 0; col < ui->tableWidget_historyUsers->columnCount(); ++col) {
+        QTableWidgetItem *headerItem = ui->tableWidget_historyUsers->horizontalHeaderItem(col);
+        QString headerText = headerItem ? headerItem->text().toHtmlEscaped() : QString("Колонка %1").arg(col + 1);
+        out << "<th>" << headerText << "</th>\n";
+    }
+    out << "</tr>\n";
+
+    // Данные таблицы
+    for (int row = 0; row < ui->tableWidget_historyUsers->rowCount(); ++row) {
+        out << "<tr>\n";
+        for (int col = 0; col < ui->tableWidget_historyUsers->columnCount(); ++col) {
+            QTableWidgetItem *item = ui->tableWidget_historyUsers->item(row, col);
+            QString cellText = item && !item->text().isEmpty() ? item->text().toHtmlEscaped() : "";
+            out << "<td>" << cellText << "</td>\n";
+        }
+        out << "</tr>\n";
+    }
+
+    out << "</table>\n";
+    out << "</div>\n"; // закрываем horizontal-page
+
+    out << "<!--[if gte mso 9]>\n";
+    out << "</div>\n";
+    out << "<![endif]-->\n";
+
+    out << "</body>\n";
+    out << "</html>\n";
+
     file.close();
-
-    QMessageBox::information(this, "Успех",
-        QString("Документ сохранен: %1\n\n"
-               "Файл открывается в Microsoft Word.")
-               .arg(docPath));
-
-    QDesktopServices::openUrl(QUrl::fromLocalFile(docPath));
 
     return true;
 }
 
-QString MainWindow::generateRtfDocument(QTableWidget *table)
+/*
+// Вспомогательная функция для конвертации строк в RTF Unicode
+QString MainWindow::stringToRtfUnicode(const QString &text)
+{
+    QString result;
+
+    for (int i = 0; i < text.length(); ++i) {
+        QChar ch = text.at(i);
+        ushort unicode = ch.unicode();
+
+        if (unicode < 128) {
+            // ASCII символы
+            if (ch == '\\') result += "\\\\";
+            else if (ch == '{') result += "\\{";
+            else if (ch == '}') result += "\\}";
+            else result += ch;
+        } else {
+            // Unicode символы
+            result += QString("\\u%1?").arg(unicode);
+        }
+    }
+
+    return result;
+}*/
+
+QString MainWindow::generateHtmlDocument(QTableWidget *table)
 {
     int rowCount = table->rowCount();
     int columnCount = table->columnCount();
 
-    QString rtf;
+    QString html;
 
-    // Заголовок RTF документа
-    rtf += "{\\rtf1\\ansi\\ansicpg1251\\deff0\\deflang1049{\\fonttbl{\\f0\\fnil\\fcharset204 Times New Roman;}}\n";
-    rtf += "{\\*\\generator Программа экспорта;}\n";
-    rtf += "\\viewkind4\\uc1\\pard\\f0\\fs24\n";
+    // 1. Начало HTML документа с правильными мета-тегами для Word
+    html += "<!DOCTYPE html>\n";
+    html += "<html xmlns:v=\"urn:schemas-microsoft-com:vml\" "
+            "xmlns:o=\"urn:schemas-microsoft-com:office:office\" "
+            "xmlns:w=\"urn:schemas-microsoft-com:office:word\" "
+            "xmlns:m=\"http://schemas.microsoft.com/office/2004/12/omml\" "
+            "xmlns=\"http://www.w3.org/TR/REC-html40\">\n";
 
-    // Заголовок документа
-    rtf += "\\qc\\b\\fs28 История изменений пользователей\\b0\\fs24\\par\n";
-    rtf += "\\qr\\fs18 Дата создания: " + QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm") + "\\par\n";
-    rtf += "\\qr\\fs18 Всего записей: " + QString::number(rowCount) + "\\par\n";
-    rtf += "\\par\n";
+    // 2. Head с мета-информацией
+    html += "<head>\n";
+    html += "<meta charset=\"UTF-8\">\n";
+    html += "<meta name=\"ProgId\" content=\"Word.Document\">\n";
+    html += "<meta name=\"Generator\" content=\"Microsoft Word\">\n";
+    html += "<meta name=\"Originator\" content=\"Microsoft Word\">\n";
+    html += "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n";
+    html += "<title>История пользователей - Экспорт</title>\n";
 
-    // Создаем таблицу в RTF
-    rtf += "\\trowd\\trgaph100\\trleft0\n";
+    // 3. Стили для правильного отображения в Word
+    html += "<style>\n";
+    html += "/* Основные стили документа */\n";
+    html += "body {\n";
+    html += "    font-family: 'Times New Roman', Times, serif;\n";
+    html += "    margin: 2cm;\n";
+    html += "    font-size: 12pt;\n";
+    html += "    line-height: 1.5;\n";
+    html += "}\n";
 
-    // Устанавливаем ширину столбцов
-    int columnWidth = 4500 / columnCount; // равномерное распределение
-    for (int col = 0; col < columnCount; ++col) {
-        rtf += QString("\\cellx%1\n").arg((col + 1) * columnWidth);
-    }
+    html += "/* Заголовок документа */\n";
+    html += "h1 {\n";
+    html += "    text-align: center;\n";
+    html += "    color: #000000;\n";
+    html += "    font-size: 16pt;\n";
+    html += "    font-weight: bold;\n";
+    html += "    margin-bottom: 20pt;\n";
+    html += "    border-bottom: 2pt solid #000000;\n";
+    html += "    padding-bottom: 10pt;\n";
+    html += "}\n";
 
-    // Заголовки столбцов
-    rtf += "\\intbl\\b";
-    for (int col = 0; col < columnCount; ++col) {
-        QTableWidgetItem *header = table->horizontalHeaderItem(col);
-        QString headerText = header ? header->text() : QString("Колонка %1").arg(col + 1);
-        rtf += headerText.toHtmlEscaped();
-        if (col < columnCount - 1) rtf += "\\cell ";
-        else rtf += "\\cell";
-    }
-    rtf += "\\b0\\row\n";
+    html += "/* Информация о документе */\n";
+    html += ".document-info {\n";
+    html += "    text-align: right;\n";
+    html += "    color: #666666;\n";
+    html += "    font-size: 10pt;\n";
+    html += "    margin-bottom: 30pt;\n";
+    html += "    padding: 10pt;\n";
+    html += "    background-color: #f8f8f8;\n";
+    html += "    border-left: 4pt solid #4CAF50;\n";
+    html += "}\n";
 
-    // Данные таблицы
-    for (int row = 0; row < rowCount; ++row) {
-        rtf += "\\trowd\\trgaph100\\trleft0\n";
-        for (int col = 0; col < columnCount; ++col) {
-            rtf += QString("\\cellx%1\n").arg((col + 1) * columnWidth);
+    html += "/* Стили для таблицы */\n";
+    html += "table {\n";
+    html += "    width: 100%;\n";
+    html += "    border-collapse: collapse;\n";
+    html += "    margin-top: 20pt;\n";
+    html += "    margin-bottom: 30pt;\n";
+    html += "    font-size: 11pt;\n";
+    html += "}\n";
+
+    html += "/* Стили для заголовков столбцов */\n";
+    html += "th {\n";
+    html += "    background-color: #4CAF50;\n";
+    html += "    color: white;\n";
+    html += "    padding: 12pt 8pt;\n";
+    html += "    border: 1pt solid #000000;\n";
+    html += "    text-align: left;\n";
+    html += "    font-weight: bold;\n";
+    html += "    font-size: 12pt;\n";
+    html += "}\n";
+
+    html += "/* Стили для ячеек таблицы */\n";
+    html += "td {\n";
+    html += "    padding: 8pt;\n";
+    html += "    border: 1pt solid #000000;\n";
+    html += "    text-align: left;\n";
+    html += "    vertical-align: top;\n";
+    html += "}\n";
+
+    html += "/* Чередование цвета строк для лучшей читаемости */\n";
+    html += "tr:nth-child(even) {\n";
+    html += "    background-color: #f9f9f9;\n";
+    html += "}\n";
+
+    html += "/* Эффект при наведении на строку */\n";
+    html += "tr:hover {\n";
+    html += "    background-color: #f5f5f5;\n";
+    html += "}\n";
+
+    html += "/* Подвал документа */\n";
+    html += ".document-footer {\n";
+    html += "    margin-top: 40pt;\n";
+    html += "    text-align: center;\n";
+    html += "    color: #666666;\n";
+    html += "    font-size: 9pt;\n";
+    html += "    border-top: 1pt solid #CCCCCC;\n";
+    html += "    padding-top: 10pt;\n";
+    html += "    font-style: italic;\n";
+    html += "}\n";
+
+    html += "/* Стили для статистики */\n";
+    html += ".statistics {\n";
+    html += "    background-color: #e8f4f8;\n";
+    html += "    padding: 15pt;\n";
+    html += "    margin: 20pt 0;\n";
+    html += "    border-radius: 5pt;\n";
+    html += "    border: 1pt solid #b3e0f2;\n";
+    html += "}\n";
+
+    html += "/* Для мобильных устройств */\n";
+    html += "@media print {\n";
+    html += "    body { margin: 0; }\n";
+    html += "    table { page-break-inside: auto; }\n";
+    html += "    tr { page-break-inside: avoid; }\n";
+    html += "}\n";
+    html += "</style>\n";
+    html += "</head>\n";
+
+    // 4. Тело документа
+    html += "<body>\n";
+
+    // 5. Заголовок документа
+    html += "<h1>История изменений пользователей</h1>\n";
+
+    // 6. Информация о документе
+    html += "<div class=\"document-info\">\n";
+    html += QString("<strong>Дата создания документа:</strong> %1<br>\n")
+               .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm:ss"));
+    html += QString("<strong>Всего записей в таблице:</strong> %1<br>\n").arg(rowCount);
+    html += QString("<strong>Количество столбцов:</strong> %1<br>\n").arg(columnCount);
+    html += "<strong>Источник данных:</strong> База данных программы<br>\n";
+    html += "</div>\n";
+
+    // 7. Статистика (опционально)
+    if (rowCount > 0) {
+        html += "<div class=\"statistics\">\n";
+        html += "<strong>📊 Статистика данных:</strong><br>\n";
+
+        // Подсчитываем заполненные ячейки
+        int filledCells = 0;
+        for (int row = 0; row < rowCount; ++row) {
+            for (int col = 0; col < columnCount; ++col) {
+                QTableWidgetItem *item = table->item(row, col);
+                if (item && !item->text().trimmed().isEmpty()) {
+                    filledCells++;
+                }
+            }
         }
 
-        rtf += "\\intbl";
-        for (int col = 0; col < columnCount; ++col) {
-            QTableWidgetItem *item = table->item(row, col);
-            QString cellText = item ? item->text() : "";
-            rtf += cellText.toHtmlEscaped();
-            if (col < columnCount - 1) rtf += "\\cell ";
-            else rtf += "\\cell";
-        }
-        rtf += "\\row\n";
+        double fillPercentage = (rowCount * columnCount > 0) ?
+                               (filledCells * 100.0) / (rowCount * columnCount) : 0;
+
+        html += QString("• Заполненных ячеек: %1 из %2 (%3%)<br>\n")
+                   .arg(filledCells)
+                   .arg(rowCount * columnCount)
+                   .arg(QString::number(fillPercentage, 'f', 1));
+        html += QString("• Экспорт выполнен: %1\n")
+                   .arg(QDateTime::currentDateTime().toString("HH:mm:ss"));
+        html += "</div>\n";
     }
 
-    rtf += "\\pard\\par\n";
-    rtf += "\\qc\\fs16 Создано программой\\par\n";
-    rtf += "}";
+    // 8. Проверяем, есть ли данные для таблицы
+    if (rowCount > 0 && columnCount > 0) {
+        // 9. Начинаем таблицу
+        html += "<table>\n";
 
-    return rtf;
+        // 10. Заголовки столбцов
+        html += "<thead>\n";
+        html += "<tr>\n";
+        for (int col = 0; col < columnCount; ++col) {
+            QTableWidgetItem *header = table->horizontalHeaderItem(col);
+            QString headerText = header ? header->text() : QString("Столбец %1").arg(col + 1);
+
+            // Экранируем HTML-символы
+            headerText = headerText.replace("&", "&amp;")
+                                   .replace("<", "&lt;")
+                                   .replace(">", "&gt;")
+                                   .replace("\"", "&quot;");
+
+            html += QString("<th>%1</th>\n").arg(headerText);
+        }
+        html += "</tr>\n";
+        html += "</thead>\n";
+
+        // 11. Тело таблицы с данными
+        html += "<tbody>\n";
+        for (int row = 0; row < rowCount; ++row) {
+            html += "<tr>\n";
+
+            for (int col = 0; col < columnCount; ++col) {
+                QTableWidgetItem *item = table->item(row, col);
+                QString cellText = item ? item->text() : "";
+
+                // Обработка текста ячейки
+                if (!cellText.isEmpty()) {
+                    // Экранируем HTML-символы
+                    cellText = cellText.replace("&", "&amp;")
+                                       .replace("<", "&lt;")
+                                       .replace(">", "&gt;")
+                                       .replace("\"", "&quot;");
+
+                    // Заменяем переносы строк на <br> для читаемости
+                    cellText = cellText.replace("\n", "<br>");
+
+                    // Проверяем, является ли значение числом (для выравнивания)
+                    bool isNumber = false;
+                    bool ok;
+                    cellText.toDouble(&ok);
+                    if (ok && !cellText.isEmpty()) {
+                        isNumber = true;
+                    }
+
+                    // Проверяем, является ли значение датой
+                    bool isDate = false;
+                    QRegularExpression dateRegex("^\\d{2}\\.\\d{2}\\.\\d{4}$");
+                    if (dateRegex.match(cellText).hasMatch()) {
+                        isDate = true;
+                    }
+
+                    html += QString("<td>%1</td>\n").arg(cellText);
+                } else {
+                    html += "<td></td>\n";
+                }
+            }
+
+            html += "</tr>\n";
+        }
+        html += "</tbody>\n";
+
+        html += "</table>\n";
+    } else {
+        // 12. Сообщение если таблица пуста
+        html += "<div style=\"text-align: center; padding: 40pt; color: #ff0000; font-size: 14pt;\">\n";
+        html += "⚠️ Таблица не содержит данных\n";
+        html += "</div>\n";
+    }
+
+    // 13. Подвал документа
+    html += "<div class=\"document-footer\">\n";
+    html += "📄 <strong>Документ сгенерирован автоматически</strong><br>\n";
+    html += QString("🕐 Время генерации: %1<br>\n")
+               .arg(QDateTime::currentDateTime().toString("HH:mm:ss"));
+    html += QString("📊 Всего экспортировано записей: %1<br>\n").arg(rowCount);
+    html += "💻 Создано программой управления пользователями\n";
+    html += "</div>\n";
+
+    // 14. JavaScript для дополнительной функциональности (опционально)
+    html += "<script>\n";
+    html += "// Простой JavaScript для улучшения взаимодействия\n";
+    html += "document.addEventListener('DOMContentLoaded', function() {\n";
+    html += "    // Добавляем нумерацию строк\n";
+    html += "    var rows = document.querySelectorAll('tbody tr');\n";
+    html += "    rows.forEach(function(row, index) {\n";
+    html += "        row.setAttribute('data-row-number', index + 1);\n";
+    html += "    });\n";
+    html += "    \n";
+    html += "    // Сообщение при печати\n";
+    html += "    window.onbeforeprint = function() {\n";
+    html += "        console.log('Подготовка к печати документа...');\n";
+    html += "    };\n";
+    html += "});\n";
+    html += "</script>\n";
+
+    // 15. Закрываем теги
+    html += "</body>\n";
+    html += "</html>\n";
+
+    return html;
 }
 
 void MainWindow::on_btn_dutyUsersFilterStop_pressed()

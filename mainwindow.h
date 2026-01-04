@@ -368,7 +368,17 @@ private slots:
     bool saveTableToCSV(const QString &filePath);
     bool saveTableToExcel(const QString &filePath);
     bool saveTableToWord(const QString &filePath);
-    QString generateRtfDocument(QTableWidget *table);
+    //QString generateRtfDocument(QTableWidget *table);
+
+    //bool saveToHtmlForWord(QTableWidget *table, const QString &filePath);
+
+    //bool saveToDocxWithQXlsx(QTableWidget *table, const QString &filePath);
+    QString generateHtmlDocument(QTableWidget *table);
+    //QString stringToRtfUnicode(const QString &text);
+
+    //bool saveTableToWord(const QString &filePath);
+
+    //bool saveTableToWordRTF(const QString &filePath);
     //bool saveTableToHtml(const QString &filePath);
     /*
     QString generateDefaultFileName(const QString &format);
