@@ -38,6 +38,7 @@ CONFIG += c++11
 
 SOURCES += \
     doubleclickbutton.cpp \
+    helpers.cpp \
     main.cpp \
     mainwindow.cpp \
     meshstatusmodel.cpp \
@@ -45,6 +46,7 @@ SOURCES += \
 
 HEADERS += \
     doubleclickbutton.h \
+    helpers.h \
     mainwindow.h \
     meshstatusmodel.h \
     welcome.h

@@ -1394,11 +1394,7 @@ void MainWindow::on_btnChangeUser_pressed(){ //изменения пользов
     QDate DateCellDate = ui->inputDateCellDate->date();
     QDate UserBirthday = ui->dateUserBirthday->date();
 
-    //QDate UserLastUpdate = ui->dateUserLastUpdate->date();
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-    QString UserLastUpdate = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
+    timeDateMoscow(UserLastUpdate);
 
     QDate UserSrart = ui->dateUserSrart->date();
     QDate UserFinish = ui->dateUserFinish->date();
@@ -1701,15 +1697,7 @@ void MainWindow::on_btnSetSave_pressed() //новый set
     QString SetNote = ui->lineSetNote->text();
     QString SetIp = ui->inputSetIp->text();
 
-    //QDate SetLastUpdate = ui->dateSetLastUpdate->date();//поменять на настоящее время
-    // Указываем часовой пояс для Москвы (UTC+3)
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    // Получаем текущее время и дату в UTC
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    // Конвертируем время в московское
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-    QString SetLastUpdate = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
-    //qDebug() << "Current date and time in Moscow:" << dateTimeString;
+    timeDateMoscow(SetLastUpdate);
 
     QString SetStatus = ui->comboSetStatus->currentText();
 
