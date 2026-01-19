@@ -3,6 +3,7 @@
 
 #include "welcome.h"
 #include "ui_welcome.h"
+#include "helpers.h"
 
 #ifdef WITH_QXLSX
 #include "xlsxdocument.h"
@@ -49,10 +50,10 @@ MainWindow::MainWindow(int userId, QWidget *parent)
     }
 
 
-    ui->tabWidget_3->setTabVisible(2, false);
+    ui->tabWidget_3->setTabEnabled(2, false);  //что это такое?
 
     ui->spinUserDoseYear->setValue(5);
-    ui->tabWidget_4->setTabVisible(3, false); //скрыть вкладку история комплектов kid
+    ui->tabWidget_4->setTabEnabled(3, false); //скрыть вкладку история комплектов kid
 
     //скрыть кнопк и выпадающий список
     ui->combobox_createReport->hide();
@@ -235,16 +236,7 @@ void MainWindow::on_btnSetChange_pressed(){
 
     QString set_block = ui->comboSetStatus->currentText();
 
-
-    // Указываем часовой пояс для Москвы (UTC+3)
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    // Получаем текущее время и дату в UTC
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    // Конвертируем время в московское
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-    QString last_update = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
-    //qDebug() << "Current date and time in Moscow:" << dateTimeString;
-    //last_update - Настоящее время
+    QString last_update = Helpers::timeDateMoscow();
 
 
 
@@ -640,11 +632,7 @@ void MainWindow::on_btnCreateNewUser_pressed() //создаём нового п�
     QDate DateCellDate = ui->inputDateCellDate->date();
     QDate UserBirthday = ui->dateUserBirthday->date();
 
-    //QDate UserLastUpdate = ui->dateUserLastUpdate->date();
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-    QString UserLastUpdate = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
+    QString UserLastUpdate = Helpers::timeDateMoscow();
 
 
     QDate UserSrart = ui->dateUserSrart->date();
@@ -771,19 +759,19 @@ void MainWindow::on_btnCreateNewUser_pressed() //создаём нового п�
         qDebug() << "Ошибка при вставке в mesh:" << query.lastError().text();
         return;
     }
-    // Получаем изображение из QLabel
-    QPixmap pixmap = ui->labelPhoto->pixmap(Qt::ReturnByValue);
 
-    if (pixmap.isNull()) {
-        qDebug() << "Ошибка: изображение не найдено в QLabel.";
-        //return;
+
+    const QPixmap* pixmapPtr = ui->labelPhoto->pixmap();
+    QByteArray imageData;
+    if (pixmapPtr && !pixmapPtr->isNull()) {
+        QPixmap pixmap = *pixmapPtr;
+        // Преобразуем изображение в массив байтов
+
+        QBuffer buffer(&imageData);
+        buffer.open(QIODevice::WriteOnly);
+        pixmap.save(&buffer, "PNG"); // Сохраняем в формате PNG (можно выбрать другой формат)
     }
 
-    // Преобразуем изображение в массив байтов
-    QByteArray imageData;
-    QBuffer buffer(&imageData);
-    buffer.open(QIODevice::WriteOnly);
-    pixmap.save(&buffer, "PNG"); // Сохраняем в формате PNG (можно выбрать другой формат)
 
 
     //query.prepare("INSERT INTO user_photo_history (user_id, user_photo) VALUES (:user_id, :user_photo)");
@@ -1394,7 +1382,7 @@ void MainWindow::on_btnChangeUser_pressed(){ //изменения пользов
     QDate DateCellDate = ui->inputDateCellDate->date();
     QDate UserBirthday = ui->dateUserBirthday->date();
 
-    timeDateMoscow(UserLastUpdate);
+    QString UserLastUpdate = Helpers::timeDateMoscow();
 
     QDate UserSrart = ui->dateUserSrart->date();
     QDate UserFinish = ui->dateUserFinish->date();
@@ -1697,7 +1685,7 @@ void MainWindow::on_btnSetSave_pressed() //новый set
     QString SetNote = ui->lineSetNote->text();
     QString SetIp = ui->inputSetIp->text();
 
-    timeDateMoscow(SetLastUpdate);
+    QString SetLastUpdate = Helpers::timeDateMoscow();
 
     QString SetStatus = ui->comboSetStatus->currentText();
 
@@ -2004,16 +1992,7 @@ void MainWindow::on_btnKasSave_pressed()
 
     QString KasStatus = ui->comboKasStatus->currentText();
 
-
-
-    //QDate SetLastUpdate = ui->dateSetLastUpdate->date();//поменять на настоящее время
-    // Указываем часовой пояс для Москвы (UTC+3)
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    // Получаем текущее время и дату в UTC
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    // Конвертируем время в московское
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-    QString last_update = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
+    QString last_update = Helpers::timeDateMoscow();
 
     query.prepare("INSERT INTO kas (set_id, kas_id, kas_name, kas_height, kas_width, kas_block, kas_note, last_update) VALUES (:set_id, :kas_id, :kas_name, :kas_height, :kas_width, :kas_block, :kas_note, :last_update)");
 
@@ -2394,17 +2373,7 @@ void MainWindow::on_btn_saveNewDuty_pressed()
     } else {
         qDebug() << "Ошибка выполнения запроса11:" << query.lastError().text();
     }
-
-    //label_last_update - последнее обновление - дд/мм/гг, мм/чч
-
-    // Указываем часовой пояс для Москвы (UTC+3)
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    // Получаем текущее время и дату в UTC
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    // Конвертируем время в московское
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-    QString last_update = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
-    //qDebug() << "Current date and time in Moscow:" << dateTimeString;
+    QString last_update = Helpers::timeDateMoscow();
 
 
     //выполнить запрос
@@ -2770,11 +2739,7 @@ void MainWindow::on_btn_saveNewDutyUser_pressed()
     QDate date_start = ui->dateTimeEdit_date_start->date();
     QDate date_finish = ui->dateTimeEdit_date_finish->date();
 
-    // Получаем московское время
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-    QString SetLastUpdate = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
+    QString lastUpdate = Helpers::timeDateMoscow();
 
     // Генерируем новый ID
     int users_duty_id = 1;
@@ -2825,9 +2790,7 @@ void MainWindow::on_btn_saveNewDutyUser_pressed()
         } else {
             changing_user_id = "1";
         }
-
-        // Добавляем запись в историю
-        QDateTime SetLastUpdate_1 = QDateTime::fromString(SetLastUpdate, "yyyy-MM-dd HH:mm:ss");
+        QString SetLastUpdate_1 = Helpers::timeDateMoscow();
         QString type_edit = "create";
         bool success = addUserDutyHistory(users_duty_id, user_id, duty_id, date_start, date_finish, duty_note, SetLastUpdate_1, changing_user_id, type_edit);
 
@@ -2912,7 +2875,7 @@ bool MainWindow::addUserDutyHistory(
     const QDate &date_start,
     const QDate &date_finish,
     const QString &duty_note,
-    const QDateTime &SetLastUpdate,
+    const QString &SetLastUpdate,
     const QString &user_id_change,
     const QString &type_edit
 ){
@@ -3197,10 +3160,7 @@ void MainWindow::on_btn_saveChangeUserDuty_pressed()
     QDate date_start = ui->dateTimeEdit_date_start->date();
     QDate date_finish = ui->dateTimeEdit_date_finish->date();
 
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-    QString SetLastUpdate = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
+    QString SetLastUpdate = Helpers::timeDateMoscow();
 
     QSqlQuery query;
 
@@ -3241,7 +3201,7 @@ tableUsersDutyUpd();
 
 
     int users_duty_id_1 = users_duty_id.toInt();
-    QDateTime SetLastUpdate_1 = QDateTime::fromString(SetLastUpdate, "yyyy-MM-dd HH:mm:ss");
+    QString SetLastUpdate_1 = Helpers::timeDateMoscow();
     QString for_user_id = ui->label_userId->text();
     QString changing_user_id;
     QStringList parts1 = for_user_id.split(' ', Qt::SkipEmptyParts);
@@ -3507,17 +3467,7 @@ void MainWindow::on_btn_saveChangeDuty_pressed()
         query.addBindValue(last_update);
         query.addBindValue(duty_id);
 
-
-
-
-        // Указываем часовой пояс для Москвы (UTC+3)
-        QTimeZone moscowTimeZone("Europe/Moscow");
-        // Получаем текущее время и дату в UTC
-        QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-        // Конвертируем время в московское
-        QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-        QString last_update = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
-        //qDebug() << "Current date and time in Moscow:" << dateTimeString;
+        QString last_update = Helpers::timeDateMoscow();
 
         if (!query.exec()) {
             throw std::runtime_error(query.lastError().text().toStdString());
@@ -4096,15 +4046,7 @@ void MainWindow::on_btnMeshSave_pressed() //выглядит бесполезн�
     QString MeshNote = ui->line_MeshNote->text();
     QString MeshDoz = ui->lineEdit_MeshDoz->text();
 
-    //QDate SetLastUpdate = ui->dateSetLastUpdate->date();//поменять на настоящее время
-    // Указываем часовой пояс для Москвы (UTC+3)
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    // Получаем текущее время и дату в UTC
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    // Конвертируем время в московское
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-    QString label_MeshUpdate = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
-    //qDebug() << "Current date and time in Moscow:" << dateTimeString;
+    QString label_MeshUpdate = Helpers::timeDateMoscow();
 
     QString MeshStatus_str = ui->comboBox_MeshStatus->currentText();
     QStringList parts1 = MeshStatus_str.split(" - ");
@@ -4160,8 +4102,9 @@ void MainWindow::on_btnMeshChange_pressed() {
     QString MeshDoz = ui->lineEdit_MeshDoz->text().trimmed();
 
     // Получение текущего времени для Москвы
-    const QDateTime moscowDateTime = QDateTime::currentDateTimeUtc().toTimeZone(QTimeZone("Europe/Moscow"));
-    const QString label_MeshUpdate = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
+    QString moscowDateTime = Helpers::timeDateMoscow();
+
+    QString label_MeshUpdate = Helpers::timeDateMoscow();
 
     // Получение статуса
     const QString MeshStatus_str = ui->comboBox_MeshStatus->currentText();
@@ -5208,11 +5151,8 @@ void MainWindow::on_btnKasChange_pressed() {
         }
     }
 
-    // Подготовка данных для обновления
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-    QString last_update = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
+
+    QString last_update = Helpers::timeDateMoscow();
 
     QString KasName = ui->inputKasName->text();
     QString KasNote = ui->inputKasNote->text();
@@ -7169,10 +7109,7 @@ void MainWindow::on_pushButton_DoseSaveNew_pressed()
     }
     dosePpdId++;
 
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-    //QString DoseLastUpdate = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");*/
+    QString moscowDateTime = Helpers::timeDateMoscow();
 
     QDateTime currentDate = QDateTime::currentDateTime();
     QDateTime timeMaxDateTime = QDateTime(currentDate.date(), DoseTimeMax);
@@ -7304,10 +7241,7 @@ void MainWindow::on_pushButton_DoseSaveChange_pressed()
     QDateTime startWorkDateTime = QDateTime(currentDate.date(), DoseStartWork);
     QDateTime finishWorkDateTime = QDateTime(currentDate.date(), FinishWork);
 
-    // Получаем текущее время для Moscow timezone
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
+    QString moscowDateTime = Helpers::timeDateMoscow();
 
     QSqlQuery query;
 
@@ -7454,7 +7388,7 @@ bool MainWindow::addDosePpdHistory(
     const QString &dosePpdNote,
     const QDateTime &startWork,
     const QDateTime &finishWork,
-    const QDateTime &lastUpdate,
+    const QString &lastUpdate,
     const QString userIdChange,
     const QString type_edit)
 {
@@ -8736,13 +8670,37 @@ void MainWindow::on_pushButton_help_pressed()
 
     // Загружаем GIF
     QMovie *movie = new QMovie(gifLabel);
-    QString gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";//"C:/Users/sophia/Documents/work work work/kdd/img/help.gif";
 
-    if (!QFile::exists(gifPath)) {
-        QMessageBox::warning(this, "Ошибка", "Файл помощи не найден: " + gifPath);
-        delete overlay;
-        return;
+
+    //tabWidget//проверить на пользователей
+    int same = ui->tabWidget->currentIndex();
+    if (same == 0) { //пользователи
+        QString gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";//"C:/Users/sophia/Documents/work work work/kdd/img/help.gif";
+        if (!QFile::exists(gifPath)) {
+            QMessageBox::warning(this, "Ошибка", "Файл помощи пользователям не найден: " + gifPath);
+            delete overlay;
+            return;
+        }
+    } else if (same == 1){ //идк
+        int idk = ui->tabWidget_7->currentIndex();
+        if (idk == 0){ //наряды
+
+        } else if (idk == 1){ //эксплуатация
+
+        } else if (idk == 2){ //дозы
+
+        }
+    } else if (same == 2){ //системы хранения
+        int idk = ui->tabWidget_7->currentIndex();
+    } else if (same == 3){ //история
+        int idk = ui->tabWidget_7->currentIndex();
+    } else if (same == 4){ //настройки
+        int idk = ui->tabWidget_7->currentIndex();
+    } else if (same == 5){ //отчёты
+        int idk = ui->tabWidget_7->currentIndex();
     }
+
+
 
     movie->setFileName(gifPath);
     gifLabel->setMovie(movie);
@@ -9260,10 +9218,7 @@ void MainWindow::on_btnKasChange_kid_pressed() {
         }
     }
 
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-    QString last_update = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
+    QString last_update = Helpers::timeDateMoscow();
 
     QString KasName = ui->inputKasName_kid->text();
     QString KasNote = ui->inputKasNote_kid->text();
@@ -9430,10 +9385,7 @@ void MainWindow::on_btnSetChange_kid_pressed(){
     QString SetIp = ui->inputSetIp_kid->text();
     QString set_block = ui->comboSetStatus_kid->currentText();
 
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-    QString last_update = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
+    QString last_update = Helpers::timeDateMoscow();
 
     int SetQuantity = ui->inputIntSetQuantity_kid->value();
     if (SetQuantity > set_quantityStart){
@@ -9600,10 +9552,7 @@ void MainWindow::on_btnSetSave_kid_pressed()
     QString SetNote = ui->lineSetNote_kid->text();
     QString SetIp = ui->inputSetIp_kid->text();
 
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-    QString SetLastUpdate = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
+    QString SetLastUpdate = Helpers::timeDateMoscow();
 
     QString SetStatus = ui->comboSetStatus_kid->currentText();
 
@@ -9862,10 +9811,7 @@ void MainWindow::on_btnKasSave_kid_pressed()
     int KasWidth = ui->inputIntKasWidth_kid->value();
     QString KasStatus = ui->comboKasStatus_kid->currentText();
 
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-    QString last_update = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
+    QString last_update = Helpers::timeDateMoscow();
 
     query.prepare("INSERT INTO kas_kid (set_id, kas_id, kas_name, kas_height, kas_width, kas_block, kas_note, last_update) VALUES (:set_id, :kas_id, :kas_name, :kas_height, :kas_width, :kas_block, :kas_note, :last_update)");
 
@@ -10228,10 +10174,7 @@ void MainWindow::on_btnMeshSave_kid_pressed()
     QString MeshNote = ui->line_MeshNote_kid->text();
     QString MeshDoz = ui->lineEdit_MeshDoz_kid->text();
 
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-    QString label_MeshUpdate = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
+    QString label_MeshUpdate = Helpers::timeDateMoscow();
 
     QString MeshStatus_str = ui->comboBox_MeshStatus_kid->currentText();
     QStringList parts1 = MeshStatus_str.split(" - ");
@@ -10276,8 +10219,7 @@ void MainWindow::on_btnMeshChange_kid_pressed() {
     const QString MeshNote = ui->line_MeshNote_kid->text();
     QString MeshDoz = ui->lineEdit_MeshDoz_kid->text().trimmed();
 
-    const QDateTime moscowDateTime = QDateTime::currentDateTimeUtc().toTimeZone(QTimeZone("Europe/Moscow"));
-    const QString label_MeshUpdate = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
+    QString label_MeshUpdate = Helpers::timeDateMoscow();
 
     const QString MeshStatus_str = ui->comboBox_MeshStatus_kid->currentText();
     const int MeshStatus = MeshStatus_str.split(" - ")[0].trimmed().toInt();

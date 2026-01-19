@@ -1,9 +1,9 @@
 #include "helpers.h"
 
 
-void Helpers::timeDateMoscow(QString& result)
+QString Helpers::timeDateMoscow()
 {
     QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
     QDateTime moscowDateTime = utcDateTime.addSecs(3 * 3600);
-    result = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss"s);
+    return moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
 }

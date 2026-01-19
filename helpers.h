@@ -1,14 +1,14 @@
+// helpers.h
 #ifndef HELPERS_H
 #define HELPERS_H
 
 #include <QString>
 #include <QDateTime>
+#include <QTimeZone>
 
-class Helpers  // С большой буквы
-{
+class Helpers {
 public:
-    Helpers();  // Конструктор с большой буквы
-    void timeDateMoscow(QString& result);
+    static QString timeDateMoscow();
 };
 
 #endif // HELPERS_H

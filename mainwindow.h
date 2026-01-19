@@ -399,7 +399,7 @@ private slots:
         const QDate &date_start,
         const QDate &date_finish,
         const QString &duty_note,
-        const QDateTime &SetLastUpdate,
+        const QString &SetLastUpdate,
         const QString &user_id_change,
         const QString &type_edit
         );
@@ -457,7 +457,7 @@ private slots:
         const QString &dosePpdNote,
         const QDateTime &startWork,
         const QDateTime &finishWork,
-        const QDateTime &lastUpdate,
+        const QString &lastUpdate,
         const QString userIdChange,
         const QString type_edit);
 
