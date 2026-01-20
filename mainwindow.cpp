@@ -81,6 +81,13 @@ MainWindow::MainWindow(int userId, QWidget *parent)
         ui->tabWidget_kas->setCurrentIndex(nextIndex);
     });
 
+    //  создаём виджеты: идк -> наряды -> наряды
+    QPushButton* rightButton = new QPushButton("Действие", this);
+    rightButton->setFixedSize(100, 30); // Фиксированный размер
+
+    // Размещаем кнопку в правом верхнем углу
+    ui->tabWidget_7->setCornerWidget(rightButton, Qt::TopRightCorner);
+
 
     //убрать ограничения на числа
 
@@ -3752,44 +3759,25 @@ void MainWindow::setupSearch()
     connect(ui->btnSearchUser, &QPushButton::pressed, this, &MainWindow::on_btnSearchUser_pressed);
 }
 
-// Основная функция поиска
-void MainWindow::on_btnSearchUser_pressed()
-{
-    QString searchText = ui->lineSearchUser->text().trimmed();
+void MainWindow::on_btnSearchUser_pressed(){    
+    try {
+        QString searchText = ui->lineSearchUser->text().trimmed();
 
-    // Показываем/скрываем кнопку очистки
-    clearSearchButton->setVisible(!searchText.isEmpty());
+        bool found = Helpers::searchInLayout(ui->verticalUsersList, searchText, clearSearchButton);
 
-    if (searchText.isEmpty()) {
-        showAllUsers();
-        return;
-    }
-
-    // Поиск по всем пользователям
-    bool found = false;
-    for (int i = 0; i < ui->verticalUsersList->count(); ++i) {
-        QLayoutItem *item = ui->verticalUsersList->itemAt(i);
-        if (item && item->widget()) {
-            QWidget *userWidget = item->widget();
-
-            // Ищем все кнопки в виджете пользователя
-            bool match = false;
-            QList<QPushButton*> buttons = userWidget->findChildren<QPushButton*>();
-            for (QPushButton *btn : buttons) {
-                if (btn->text().contains(searchText, Qt::CaseInsensitive)) {
-                    match = true;
-                    break;
-                }
-            }
-
-            userWidget->setVisible(match);
-            if (match) found = true;
+        if (!found && !searchText.isEmpty()) {
+            QMessageBox::information(this, "Поиск",
+                "Ничего не найдено по запросу: " + searchText);
         }
-    }
 
-    // Показываем сообщение если ничего не найдено
-    if (!found) {
-        QMessageBox::information(this, "Поиск", "Ничего не найдено");
+    } catch (const std::exception& e) {
+        qCritical() << "Ошибка поиска:" << e.what();
+        QMessageBox::critical(this, "Ошибка",
+            QString("Ошибка при поиске: %1").arg(e.what()));
+    } catch (const QException& e) {
+        qCritical() << "Qt ошибка поиска:" << e.what();
+        QMessageBox::critical(this, "Ошибка Qt",
+            "Ошибка Qt при поиске");
     }
 }
 
@@ -8374,43 +8362,16 @@ void MainWindow::setupPpdSearch()
     connect(ui->btn_ppdSearch, &QPushButton::pressed, this, &MainWindow::on_btn_ppdSearch_pressed);
 }
 
-void MainWindow::on_btn_ppdSearch_pressed()
-{
-    QString searchText = ui->line_ppdSearch->text().trimmed();
-
-    // Показываем/скрываем кнопку очистки
-    clearPpdSearchButton->setVisible(!searchText.isEmpty());
-
-    if (searchText.isEmpty()) {
-        showAllPpdRows();
-        return;
-    }
-
-    // Поиск в таблице tableWidget_Dose
-    bool found = false;
-    int rowCount = ui->tableWidget_Dose->rowCount();
-    int columnCount = ui->tableWidget_Dose->columnCount();
-
-    for (int row = 0; row < rowCount; ++row) {
-        bool match = false;
-
-        // Проверяем все ячейки в строке
-        for (int col = 0; col < columnCount; ++col) {
-            QTableWidgetItem *item = ui->tableWidget_Dose->item(row, col);
-            if (item && item->text().contains(searchText, Qt::CaseInsensitive)) {
-                match = true;
-                break;
-            }
+void MainWindow::on_btn_ppdSearch_pressed() {
+    try {
+        QString searchText = ui->line_ppdSearch->text().trimmed();
+        bool found = Helpers::searchInTable(ui->tableWidget_Dose, searchText, clearPpdSearchButton, TableSearchConfig());
+        if (!found && !searchText.isEmpty()) {
+            QMessageBox::information(this, "Поиск", "Ничего не найдено");
         }
-
-        // Показываем/скрываем строку в зависимости от результата поиска
-        ui->tableWidget_Dose->setRowHidden(row, !match);
-        if (match) found = true;
-    }
-
-    // Показываем сообщение если ничего не найдено
-    if (!found) {
-        QMessageBox::information(this, "Поиск", "Ничего не найдено");
+    } catch (const std::exception& e) {
+        qCritical() << "Ошибка поиска:" << e.what();
+        QMessageBox::critical(this, "Ошибка поиска", QString("Произошла ошибка при поиске:\n%1").arg(e.what()));
     }
 }
 
@@ -8670,12 +8631,13 @@ void MainWindow::on_pushButton_help_pressed()
 
     // Загружаем GIF
     QMovie *movie = new QMovie(gifLabel);
+    QString gifPath = "";
 
 
     //tabWidget//проверить на пользователей
     int same = ui->tabWidget->currentIndex();
     if (same == 0) { //пользователи
-        QString gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";//"C:/Users/sophia/Documents/work work work/kdd/img/help.gif";
+        gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";//"C:/Users/sophia/Documents/work work work/kdd/img/help.gif";
         if (!QFile::exists(gifPath)) {
             QMessageBox::warning(this, "Ошибка", "Файл помощи пользователям не найден: " + gifPath);
             delete overlay;
@@ -8684,21 +8646,120 @@ void MainWindow::on_pushButton_help_pressed()
     } else if (same == 1){ //идк
         int idk = ui->tabWidget_7->currentIndex();
         if (idk == 0){ //наряды
-
+            int duty = ui->tabWidget_8->currentIndex();
+            if (duty == 0){//наряды
+                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+            } else if (duty == 1){ //наряды пользователей
+                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+            }
         } else if (idk == 1){ //эксплуатация
-
+            int use = ui->tabWidget_9->currentIndex();
+            if (use == 0){//ппд
+                gifPath = "";
+            } else if (use == 1){//тлд
+                gifPath = "";
+            } else if (use == 2){//ппдрд
+                gifPath = "";
+            }
         } else if (idk == 2){ //дозы
+            int dose = ui->tabWidget_10->currentIndex();
+            if (dose == 0){//ппд
+                int dose2 = ui->tabWidget_15->currentIndex();
+                if (dose2 == 0){ //дозы
+                    gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+                }
+            } else if (dose == 1){//тлд
+                int dose3 = ui->tabWidget_11->currentIndex();
+                if (dose3 == 0){ //дозы
+                    gifPath = "";
+                }
+            } else if (dose == 2){//сич
+                int dose4 = ui->tabWidget_12->currentIndex();
+                if (dose4 == 0){ //дозы
+                    gifPath = "";
+                }
+            } else if (dose == 3){//ожидаемые дозы
+                int dose5 = ui->tabWidget_13->currentIndex();
+                if (dose5 == 0){ //дозы
+                    gifPath = "";
+                }
+            } else if (dose == 4){//отчёты
+                int report = ui->tabWidget_14->currentIndex();
+                if (report == 0){//ппд
+                    gifPath = "";
+                } else if (report == 1){//тлд
+                    gifPath = "";
+                } else if (report == 2){//сич
+                    gifPath = "";
+                } else if (report == 3){//ожидаемые дозы
+                    gifPath = "";
+                }
+            }
 
         }
     } else if (same == 2){ //системы хранения
-        int idk = ui->tabWidget_7->currentIndex();
+        int sist = ui->tabWidget_7->currentIndex();
+        if (sist == 0){//увд гамма
+            int set = ui->tabWidget_kas->currentIndex();
+            if (set == 0){//комплектов
+                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+            } else if (set == 1){//блоков хранения
+                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+            } else if (set == 2){//ячеек
+                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+            }
+        } else if (sist == 1){//кид
+            int set2 = ui->tabWidget_kas_kid->currentIndex();
+            if (set2 == 0){//комплектов
+                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+            } else if (set2 == 1){//блоков хранения
+                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+            } else if (set2 == 2){//ячеек
+                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+            }
+        }
     } else if (same == 3){ //история
-        int idk = ui->tabWidget_7->currentIndex();
+        int history = ui->tabWidget_4->currentIndex();
+        if (history == 0){//пользователей
+            gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+        } else if (history == 1){//нарядов
+            int duty = ui->tabWidget_5->currentIndex();
+            if (duty == 0){//нарядов
+                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+            } else if (duty == 1){//нарядов пользователей
+                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+            } else if (duty == 2){//доз
+                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+            }
+        } else if (history == 2){//история комплектов
+            int set3 = ui->tabWidget_6->currentIndex();
+            if (set3 == 0){//комплектов
+                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+            } else if (set3 == 1){//блоков хранения
+                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+            } else if (set3 == 2){//ячеек
+                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+            }
+        } else if (history == 3){//история кид
+        }
     } else if (same == 4){ //настройки
-        int idk = ui->tabWidget_7->currentIndex();
+        int settings = ui->tabWidget_3->currentIndex();
+        if (settings == 0){//синхронизация
+            gifPath = "";
+        } else if (settings == 1){//натсройки
+            gifPath = "";
+        }
     } else if (same == 5){ //отчёты
-        int idk = ui->tabWidget_7->currentIndex();
+        int report = ui->tabWidget_2->currentIndex();
+        if (report == 0){//отчёты о кдд
+            gifPath = "";
+        } else if (report == 1){//отчёты о пользователях
+            gifPath = "";
+        } else if (report == 2){//доп страница
+            gifPath = "";
+        }
     }
+    if (use == 0){} else if (use == 1){} else if (use == 2){} else if (use == 3){}
 
 
 

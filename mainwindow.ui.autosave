@@ -2095,7 +2095,7 @@ QStatusBar
             <item row="0" column="0">
              <widget class="QTabWidget" name="tabWidget_7">
               <property name="currentIndex">
-               <number>2</number>
+               <number>0</number>
               </property>
               <widget class="QWidget" name="tab_28">
                <attribute name="title">
@@ -3314,7 +3314,7 @@ QStatusBar
                               <rect>
                                <x>0</x>
                                <y>0</y>
-                               <width>336</width>
+                               <width>536</width>
                                <height>422</height>
                               </rect>
                              </property>
@@ -3709,7 +3709,7 @@ QStatusBar
           <item row="0" column="0">
            <widget class="QTabWidget" name="tabWidget_16">
             <property name="currentIndex">
-             <number>1</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="tab_16">
              <attribute name="title">
@@ -3725,7 +3725,7 @@ QStatusBar
                  </size>
                 </property>
                 <property name="currentIndex">
-                 <number>2</number>
+                 <number>0</number>
                 </property>
                 <widget class="QWidget" name="tab_13">
                  <attribute name="title">
@@ -4686,7 +4686,7 @@ QStatusBar
                  </size>
                 </property>
                 <property name="currentIndex">
-                 <number>0</number>
+                 <number>2</number>
                 </property>
                 <widget class="QWidget" name="tab_45">
                  <attribute name="title">
@@ -5632,7 +5632,7 @@ QStatusBar
           <item row="1" column="0">
            <widget class="QTabWidget" name="tabWidget_4">
             <property name="currentIndex">
-             <number>3</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="tab_18">
              <attribute name="title">
@@ -7577,7 +7577,7 @@ QStatusBar
           <item row="0" column="0">
            <widget class="QTabWidget" name="tabWidget_3">
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="tab_11">
              <attribute name="title">
@@ -7711,7 +7711,7 @@ QStatusBar
           <item row="0" column="0">
            <widget class="QTabWidget" name="tabWidget_2">
             <property name="currentIndex">
-             <number>2</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="tab_7">
              <attribute name="title">

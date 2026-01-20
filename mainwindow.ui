@@ -1217,7 +1217,7 @@ QStatusBar
          </size>
         </property>
         <property name="currentIndex">
-         <number>3</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -1235,7 +1235,7 @@ QStatusBar
                <x>0</x>
                <y>0</y>
                <width>1203</width>
-               <height>798</height>
+               <height>690</height>
               </rect>
              </property>
              <layout class="QGridLayout" name="gridLayout_32">
@@ -1270,6 +1270,9 @@ QStatusBar
                     </item>
                     <item row="0" column="5">
                      <spacer name="horizontalSpacer_31">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -1283,6 +1286,9 @@ QStatusBar
                     </item>
                     <item row="0" column="0">
                      <spacer name="horizontalSpacer_29">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -1328,6 +1334,9 @@ QStatusBar
                          <layout class="QHBoxLayout" name="horizontalLayout_11">
                           <item>
                            <spacer name="horizontalSpacer_24">
+                            <property name="orientation">
+                             <enum>Qt::Vertical</enum>
+                            </property>
                             <property name="sizeHint" stdset="0">
                              <size>
                               <width>40</width>
@@ -1345,6 +1354,9 @@ QStatusBar
                           </item>
                           <item>
                            <spacer name="horizontalSpacer_25">
+                            <property name="orientation">
+                             <enum>Qt::Vertical</enum>
+                            </property>
                             <property name="sizeHint" stdset="0">
                              <size>
                               <width>40</width>
@@ -1359,6 +1371,9 @@ QStatusBar
                          <layout class="QHBoxLayout" name="horizontalLayout_10">
                           <item>
                            <spacer name="horizontalSpacer_32">
+                            <property name="orientation">
+                             <enum>Qt::Vertical</enum>
+                            </property>
                             <property name="sizeType">
                              <enum>QSizePolicy::Fixed</enum>
                             </property>
@@ -1422,6 +1437,9 @@ QStatusBar
                           </item>
                           <item>
                            <spacer name="horizontalSpacer_23">
+                            <property name="orientation">
+                             <enum>Qt::Vertical</enum>
+                            </property>
                             <property name="sizeType">
                              <enum>QSizePolicy::Fixed</enum>
                             </property>
@@ -1479,6 +1497,9 @@ QStatusBar
                           </item>
                           <item>
                            <spacer name="horizontalSpacer_33">
+                            <property name="orientation">
+                             <enum>Qt::Vertical</enum>
+                            </property>
                             <property name="sizeType">
                              <enum>QSizePolicy::Fixed</enum>
                             </property>
@@ -1507,6 +1528,9 @@ QStatusBar
                          <layout class="QHBoxLayout" name="horizontalLayout_23">
                           <item>
                            <spacer name="horizontalSpacer_36">
+                            <property name="orientation">
+                             <enum>Qt::Vertical</enum>
+                            </property>
                             <property name="sizeHint" stdset="0">
                              <size>
                               <width>40</width>
@@ -1523,6 +1547,9 @@ QStatusBar
                           </item>
                           <item>
                            <spacer name="horizontalSpacer_37">
+                            <property name="orientation">
+                             <enum>Qt::Vertical</enum>
+                            </property>
                             <property name="sizeHint" stdset="0">
                              <size>
                               <width>40</width>
@@ -1537,6 +1564,9 @@ QStatusBar
                       </item>
                       <item row="2" column="0">
                        <spacer name="horizontalSpacer_21">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
                         <property name="sizeHint" stdset="0">
                          <size>
                           <width>40</width>
@@ -1549,6 +1579,9 @@ QStatusBar
                        <layout class="QHBoxLayout" name="areaAddPhoto">
                         <item>
                          <spacer name="horizontalSpacer_34">
+                          <property name="orientation">
+                           <enum>Qt::Vertical</enum>
+                          </property>
                           <property name="sizeHint" stdset="0">
                            <size>
                             <width>40</width>
@@ -1570,6 +1603,9 @@ QStatusBar
                         </item>
                         <item>
                          <spacer name="horizontalSpacer_35">
+                          <property name="orientation">
+                           <enum>Qt::Vertical</enum>
+                          </property>
                           <property name="sizeHint" stdset="0">
                            <size>
                             <width>40</width>
@@ -1582,6 +1618,9 @@ QStatusBar
                       </item>
                       <item row="0" column="3">
                        <spacer name="horizontalSpacer_22">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
                         <property name="sizeHint" stdset="0">
                          <size>
                           <width>40</width>
@@ -1875,6 +1914,9 @@ QStatusBar
                           </item>
                           <item>
                            <spacer name="horizontalSpacer_45">
+                            <property name="orientation">
+                             <enum>Qt::Vertical</enum>
+                            </property>
                             <property name="sizeHint" stdset="0">
                              <size>
                               <width>40</width>
@@ -2053,7 +2095,7 @@ QStatusBar
             <item row="0" column="0">
              <widget class="QTabWidget" name="tabWidget_7">
               <property name="currentIndex">
-               <number>1</number>
+               <number>2</number>
               </property>
               <widget class="QWidget" name="tab_28">
                <attribute name="title">
@@ -2063,7 +2105,7 @@ QStatusBar
                 <item row="0" column="0">
                  <widget class="QTabWidget" name="tabWidget_8">
                   <property name="currentIndex">
-                   <number>1</number>
+                   <number>0</number>
                   </property>
                   <widget class="QWidget" name="tab_31">
                    <attribute name="title">
@@ -2300,7 +2342,7 @@ QStatusBar
                           <rect>
                            <x>0</x>
                            <y>0</y>
-                           <width>376</width>
+                           <width>1149</width>
                            <height>788</height>
                           </rect>
                          </property>
@@ -2311,6 +2353,9 @@ QStatusBar
                              <layout class="QHBoxLayout" name="horizontalLayout_27">
                               <item>
                                <spacer name="horizontalSpacer_57">
+                                <property name="orientation">
+                                 <enum>Qt::Vertical</enum>
+                                </property>
                                 <property name="sizeHint" stdset="0">
                                  <size>
                                   <width>40</width>
@@ -2332,6 +2377,9 @@ QStatusBar
                              <layout class="QHBoxLayout" name="horizontalLayout_30">
                               <item>
                                <spacer name="horizontalSpacer_55">
+                                <property name="orientation">
+                                 <enum>Qt::Vertical</enum>
+                                </property>
                                 <property name="sizeHint" stdset="0">
                                  <size>
                                   <width>40</width>
@@ -2625,6 +2673,9 @@ QStatusBar
                               </item>
                               <item>
                                <spacer name="horizontalSpacer_56">
+                                <property name="orientation">
+                                 <enum>Qt::Vertical</enum>
+                                </property>
                                 <property name="sizeHint" stdset="0">
                                  <size>
                                   <width>40</width>
@@ -2800,6 +2851,9 @@ QStatusBar
                            <layout class="QHBoxLayout" name="horizontalLayout_19">
                             <item>
                              <spacer name="horizontalSpacer_30">
+                              <property name="orientation">
+                               <enum>Qt::Vertical</enum>
+                              </property>
                               <property name="sizeHint" stdset="0">
                                <size>
                                 <width>40</width>
@@ -2947,6 +3001,9 @@ QStatusBar
                         </item>
                         <item row="0" column="3">
                          <spacer name="horizontalSpacer_6">
+                          <property name="orientation">
+                           <enum>Qt::Vertical</enum>
+                          </property>
                           <property name="sizeType">
                            <enum>QSizePolicy::Fixed</enum>
                           </property>
@@ -2960,6 +3017,9 @@ QStatusBar
                         </item>
                         <item row="1" column="0">
                          <spacer name="horizontalSpacer_3">
+                          <property name="orientation">
+                           <enum>Qt::Vertical</enum>
+                          </property>
                           <property name="sizeType">
                            <enum>QSizePolicy::Fixed</enum>
                           </property>
@@ -2975,6 +3035,9 @@ QStatusBar
                       </item>
                       <item>
                        <spacer name="verticalSpacer_4">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
                         <property name="sizeHint" stdset="0">
                          <size>
                           <width>20</width>
@@ -2998,6 +3061,9 @@ QStatusBar
                     <layout class="QGridLayout" name="gridLayout_34">
                      <item row="0" column="4">
                       <spacer name="horizontalSpacer_8">
+                       <property name="orientation">
+                        <enum>Qt::Vertical</enum>
+                       </property>
                        <property name="sizeHint" stdset="0">
                         <size>
                          <width>40</width>
@@ -3008,6 +3074,9 @@ QStatusBar
                      </item>
                      <item row="0" column="0">
                       <spacer name="horizontalSpacer_19">
+                       <property name="orientation">
+                        <enum>Qt::Vertical</enum>
+                       </property>
                        <property name="sizeHint" stdset="0">
                         <size>
                          <width>40</width>
@@ -3134,6 +3203,9 @@ QStatusBar
                          <layout class="QGridLayout" name="gridLayout_68">
                           <item row="0" column="6">
                            <spacer name="horizontalSpacer_106">
+                            <property name="orientation">
+                             <enum>Qt::Vertical</enum>
+                            </property>
                             <property name="sizeHint" stdset="0">
                              <size>
                               <width>40</width>
@@ -3154,6 +3226,9 @@ QStatusBar
                           </item>
                           <item row="0" column="0">
                            <spacer name="horizontalSpacer_107">
+                            <property name="orientation">
+                             <enum>Qt::Vertical</enum>
+                            </property>
                             <property name="sizeHint" stdset="0">
                              <size>
                               <width>40</width>
@@ -3194,6 +3269,9 @@ QStatusBar
                          <layout class="QGridLayout" name="gridLayout_69">
                           <item row="2" column="0" colspan="2">
                            <spacer name="horizontalSpacer_108">
+                            <property name="orientation">
+                             <enum>Qt::Vertical</enum>
+                            </property>
                             <property name="sizeType">
                              <enum>QSizePolicy::Fixed</enum>
                             </property>
@@ -3426,6 +3504,9 @@ QStatusBar
                                 </item>
                                 <item row="0" column="0">
                                  <spacer name="horizontalSpacer_11">
+                                  <property name="orientation">
+                                   <enum>Qt::Vertical</enum>
+                                  </property>
                                   <property name="sizeType">
                                    <enum>QSizePolicy::Fixed</enum>
                                   </property>
@@ -3467,6 +3548,9 @@ QStatusBar
                           </item>
                           <item row="3" column="3" colspan="2">
                            <spacer name="horizontalSpacer_109">
+                            <property name="orientation">
+                             <enum>Qt::Vertical</enum>
+                            </property>
                             <property name="sizeType">
                              <enum>QSizePolicy::Fixed</enum>
                             </property>
@@ -3678,6 +3762,9 @@ QStatusBar
                       <layout class="QHBoxLayout" name="horizontalLayout_12">
                        <item>
                         <spacer name="horizontalSpacer_26">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -3688,6 +3775,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="horizontalSpacer_50">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -3702,6 +3792,9 @@ QStatusBar
                           <layout class="QHBoxLayout" name="horizontalLayout_8">
                            <item>
                             <spacer name="horizontalSpacer_18">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -3777,6 +3870,9 @@ QStatusBar
                            </item>
                            <item>
                             <spacer name="horizontalSpacer_49">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -3847,6 +3943,9 @@ QStatusBar
                            </item>
                            <item>
                             <spacer name="horizontalSpacer_20">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -3872,6 +3971,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="horizontalSpacer_51">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -3882,6 +3984,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="horizontalSpacer_27">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -3909,6 +4014,9 @@ QStatusBar
                       <layout class="QHBoxLayout" name="horizontalLayout_20">
                        <item>
                         <spacer name="horizontalSpacer_60">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -3919,6 +4027,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="horizontalSpacer_61">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -3936,6 +4047,9 @@ QStatusBar
                           <layout class="QHBoxLayout" name="horizontalLayout_32">
                            <item>
                             <spacer name="horizontalSpacer_63">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -4004,6 +4118,9 @@ QStatusBar
                            </item>
                            <item>
                             <spacer name="horizontalSpacer_64">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -4077,6 +4194,9 @@ QStatusBar
                            </item>
                            <item>
                             <spacer name="horizontalSpacer_65">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -4102,6 +4222,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="horizontalSpacer_66">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -4112,6 +4235,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="horizontalSpacer_67">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -4185,6 +4311,9 @@ QStatusBar
                          </item>
                          <item>
                           <spacer name="horizontalSpacer">
+                           <property name="orientation">
+                            <enum>Qt::Vertical</enum>
+                           </property>
                            <property name="sizeType">
                             <enum>QSizePolicy::Fixed</enum>
                            </property>
@@ -4248,6 +4377,9 @@ QStatusBar
                       <layout class="QHBoxLayout" name="horizontalLayout_13">
                        <item>
                         <spacer name="horizontalSpacer_28">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -4258,6 +4390,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="horizontalSpacer_68">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -4275,6 +4410,9 @@ QStatusBar
                           <layout class="QHBoxLayout" name="horizontalLayout_35">
                            <item>
                             <spacer name="horizontalSpacer_70">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -4381,6 +4519,9 @@ QStatusBar
                            </item>
                            <item>
                             <spacer name="horizontalSpacer_71">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -4455,6 +4596,9 @@ QStatusBar
                            </item>
                            <item>
                             <spacer name="horizontalSpacer_72">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -4480,6 +4624,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="verticalSpacer_9">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>20</width>
@@ -4490,6 +4637,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="horizontalSpacer_73">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -4509,6 +4659,9 @@ QStatusBar
               </item>
               <item row="1" column="0">
                <spacer name="verticalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
                 <property name="sizeHint" stdset="0">
                  <size>
                   <width>20</width>
@@ -4570,6 +4723,9 @@ QStatusBar
                       <layout class="QHBoxLayout" name="horizontalLayout_22">
                        <item>
                         <spacer name="horizontalSpacer_46">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -4580,6 +4736,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="horizontalSpacer_52">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -4594,6 +4753,9 @@ QStatusBar
                           <layout class="QHBoxLayout" name="horizontalLayout_9">
                            <item>
                             <spacer name="horizontalSpacer_47">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -4669,6 +4831,9 @@ QStatusBar
                            </item>
                            <item>
                             <spacer name="horizontalSpacer_53">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -4739,6 +4904,9 @@ QStatusBar
                            </item>
                            <item>
                             <spacer name="horizontalSpacer_48">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -4764,6 +4932,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="horizontalSpacer_54">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -4774,6 +4945,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="horizontalSpacer_62">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -4801,6 +4975,9 @@ QStatusBar
                       <layout class="QHBoxLayout" name="horizontalLayout_26">
                        <item>
                         <spacer name="horizontalSpacer_76">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -4811,6 +4988,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="horizontalSpacer_77">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -4828,6 +5008,9 @@ QStatusBar
                           <layout class="QHBoxLayout" name="horizontalLayout_38">
                            <item>
                             <spacer name="horizontalSpacer_78">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -4896,6 +5079,9 @@ QStatusBar
                            </item>
                            <item>
                             <spacer name="horizontalSpacer_79">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -4969,6 +5155,9 @@ QStatusBar
                            </item>
                            <item>
                             <spacer name="horizontalSpacer_99">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -4994,6 +5183,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="horizontalSpacer_100">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -5004,6 +5196,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="horizontalSpacer_101">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -5077,6 +5272,9 @@ QStatusBar
                          </item>
                          <item>
                           <spacer name="horizontalSpacer_2">
+                           <property name="orientation">
+                            <enum>Qt::Vertical</enum>
+                           </property>
                            <property name="sizeType">
                             <enum>QSizePolicy::Fixed</enum>
                            </property>
@@ -5140,6 +5338,9 @@ QStatusBar
                       <layout class="QHBoxLayout" name="horizontalLayout_50">
                        <item>
                         <spacer name="horizontalSpacer_102">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -5150,6 +5351,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="horizontalSpacer_103">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -5167,6 +5371,9 @@ QStatusBar
                           <layout class="QHBoxLayout" name="horizontalLayout_52">
                            <item>
                             <spacer name="horizontalSpacer_104">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -5273,6 +5480,9 @@ QStatusBar
                            </item>
                            <item>
                             <spacer name="horizontalSpacer_105">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -5347,6 +5557,9 @@ QStatusBar
                            </item>
                            <item>
                             <spacer name="horizontalSpacer_110">
+                             <property name="orientation">
+                              <enum>Qt::Vertical</enum>
+                             </property>
                              <property name="sizeHint" stdset="0">
                               <size>
                                <width>40</width>
@@ -5372,6 +5585,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="verticalSpacer_10">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>20</width>
@@ -5382,6 +5598,9 @@ QStatusBar
                        </item>
                        <item>
                         <spacer name="horizontalSpacer_111">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
                          <property name="sizeHint" stdset="0">
                           <size>
                            <width>40</width>
@@ -5424,6 +5643,9 @@ QStatusBar
                <layout class="QHBoxLayout" name="horizontalLayout_39">
                 <item>
                  <spacer name="horizontalSpacer_69">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
                   <property name="sizeType">
                    <enum>QSizePolicy::Fixed</enum>
                   </property>
@@ -5479,6 +5701,9 @@ QStatusBar
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_12">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
                   <property name="sizeType">
                    <enum>QSizePolicy::Fixed</enum>
                   </property>
@@ -5510,6 +5735,9 @@ QStatusBar
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_17">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
                   <property name="sizeType">
                    <enum>QSizePolicy::Fixed</enum>
                   </property>
@@ -5569,6 +5797,9 @@ QStatusBar
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_74">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
                   <property name="sizeType">
                    <enum>QSizePolicy::Fixed</enum>
                   </property>
@@ -5613,6 +5844,9 @@ QStatusBar
                    <layout class="QHBoxLayout" name="horizontalLayout_43">
                     <item>
                      <spacer name="horizontalSpacer_81">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -5668,6 +5902,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_58">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -5699,6 +5936,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_82">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -5768,6 +6008,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_83">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -5801,6 +6044,9 @@ QStatusBar
                      <layout class="QHBoxLayout" name="horizontalLayout_42">
                       <item>
                        <spacer name="horizontalSpacer_75">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
                         <property name="sizeType">
                          <enum>QSizePolicy::Fixed</enum>
                         </property>
@@ -5856,6 +6102,9 @@ QStatusBar
                       </item>
                       <item>
                        <spacer name="horizontalSpacer_15">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
                         <property name="sizeType">
                          <enum>QSizePolicy::Fixed</enum>
                         </property>
@@ -5887,6 +6136,9 @@ QStatusBar
                       </item>
                       <item>
                        <spacer name="horizontalSpacer_42">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
                         <property name="sizeType">
                          <enum>QSizePolicy::Fixed</enum>
                         </property>
@@ -5946,6 +6198,9 @@ QStatusBar
                       </item>
                       <item>
                        <spacer name="horizontalSpacer_80">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
                         <property name="sizeType">
                          <enum>QSizePolicy::Fixed</enum>
                         </property>
@@ -5979,6 +6234,9 @@ QStatusBar
                    <layout class="QHBoxLayout" name="horizontalLayout_47">
                     <item>
                      <spacer name="horizontalSpacer_96">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6034,6 +6292,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_59">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6065,6 +6326,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_97">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6134,6 +6398,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_98">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6186,6 +6453,9 @@ QStatusBar
                    <layout class="QHBoxLayout" name="horizontalLayout_44">
                     <item>
                      <spacer name="horizontalSpacer_84">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6241,6 +6511,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_85">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6272,6 +6545,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_86">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6336,6 +6612,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_87">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6367,6 +6646,9 @@ QStatusBar
                    <layout class="QHBoxLayout" name="horizontalLayout_45">
                     <item>
                      <spacer name="horizontalSpacer_88">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6422,6 +6704,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_89">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6453,6 +6738,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_90">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6500,6 +6788,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_91">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6524,6 +6815,9 @@ QStatusBar
                    <layout class="QHBoxLayout" name="horizontalLayout_46">
                     <item>
                      <spacer name="horizontalSpacer_92">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6579,6 +6873,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_93">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6610,6 +6907,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_94">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6667,6 +6967,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_95">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6719,6 +7022,9 @@ QStatusBar
                    <layout class="QHBoxLayout" name="horizontalLayout_54">
                     <item>
                      <spacer name="horizontalSpacer_112">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6774,6 +7080,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_113">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6805,6 +7114,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_114">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6869,6 +7181,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_115">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6900,6 +7215,9 @@ QStatusBar
                    <layout class="QHBoxLayout" name="horizontalLayout_55">
                     <item>
                      <spacer name="horizontalSpacer_116">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6955,6 +7273,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_117">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -6986,6 +7307,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_118">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -7033,6 +7357,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_119">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -7057,6 +7384,9 @@ QStatusBar
                    <layout class="QHBoxLayout" name="horizontalLayout_56">
                     <item>
                      <spacer name="horizontalSpacer_120">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -7112,6 +7442,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_121">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -7143,6 +7476,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_122">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -7200,6 +7536,9 @@ QStatusBar
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_123">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
                       <property name="sizeType">
                        <enum>QSizePolicy::Fixed</enum>
                       </property>
@@ -7383,6 +7722,9 @@ QStatusBar
                <layout class="QHBoxLayout" name="horizontalLayout_15">
                 <item>
                  <spacer name="horizontalSpacer_38">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
                   <property name="sizeType">
                    <enum>QSizePolicy::Fixed</enum>
                   </property>
@@ -7428,6 +7770,9 @@ QStatusBar
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_9">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
                   <property name="sizeType">
                    <enum>QSizePolicy::Fixed</enum>
                   </property>
@@ -7473,6 +7818,9 @@ QStatusBar
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_14">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
                   <property name="sizeType">
                    <enum>QSizePolicy::Fixed</enum>
                   </property>
@@ -7554,6 +7902,9 @@ QStatusBar
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_39">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
                   <property name="sizeType">
                    <enum>QSizePolicy::Fixed</enum>
                   </property>
@@ -7766,6 +8117,9 @@ QStatusBar
                <layout class="QHBoxLayout" name="horizontalLayout_16">
                 <item>
                  <spacer name="horizontalSpacer_40">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
                   <property name="sizeType">
                    <enum>QSizePolicy::Fixed</enum>
                   </property>
@@ -7811,6 +8165,9 @@ QStatusBar
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_7">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
                   <property name="sizeType">
                    <enum>QSizePolicy::Fixed</enum>
                   </property>
@@ -7856,6 +8213,9 @@ QStatusBar
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_41">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
                   <property name="sizeType">
                    <enum>QSizePolicy::Fixed</enum>
                   </property>
@@ -7873,6 +8233,9 @@ QStatusBar
                <layout class="QHBoxLayout" name="horizontalLayout_21">
                 <item>
                  <spacer name="horizontalSpacer_43">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
                   <property name="sizeType">
                    <enum>QSizePolicy::Fixed</enum>
                   </property>
@@ -7896,6 +8259,9 @@ QStatusBar
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_44">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
                   <property name="sizeType">
                    <enum>QSizePolicy::Fixed</enum>
                   </property>
@@ -8147,6 +8513,9 @@ QStatusBar
       </item>
       <item>
        <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
         <property name="sizeHint" stdset="0">
          <size>
           <width>40</width>
