@@ -28,12 +28,18 @@ QString MeshStatusModel::detectOS() const
 
 void MeshStatusModel::loadIcons()
 {
-    QString os = detectOS();
-    QString iconPath, iconDoz;
 
-    if (os == "Windows") {/*
+    QString currentFile = __FILE__;
+    QFileInfo fileInfo(currentFile);
+    QDir sourceDir = fileInfo.dir();
+    sourceDir.cdUp();
+    QString iconPath = sourceDir.absolutePath() + "/img/hum.png";
+    QString iconDoz = sourceDir.absolutePath() + "/img/doz.png";
+
+    /*QString os = detectOS();
+    if (os == "Windows") {
         iconPath = "C:/Users/sophi/Documents/kdd-folder/kdd_nice/img/hum.png";
-        iconDoz = "C:/Users/sophi/Documents/kdd-folder/kdd_nice/img/doz.png";*/
+        iconDoz = "C:/Users/sophi/Documents/kdd-folder/kdd_nice/img/doz.png";
         iconPath = "C:/Users/sophia/Documents/work work work/kdd/img/hum.png";
         iconDoz = "C:/Users/sophia/Documents/work work work/kdd/img/doz.png";
     } else if (os == "Linux") {
@@ -42,7 +48,7 @@ void MeshStatusModel::loadIcons()
     } else {
         iconPath = ":/default/img/hum.png";
         iconDoz = ":/default/img/doz.png";
-    }
+    }*/
 
     if (m_showUserIcon) {
         m_humIcon = QIcon(iconPath);

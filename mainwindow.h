@@ -89,12 +89,17 @@
 #include <QTextDocument>       // Для форматирования текста
 #include <QTextCursor>         // Для позиционирования в документе
 #include <QTextTable>          // Для создания таблиц в Word
+#include <QException>          // Обработчик ошибок для try
 
 //#include <QAxObject>
 //#include <QAxWidget>
 
 #include <QDateTime>
 //#include <QDomDocument>        // Для работы с XML (альтернатива QXmlStreamWriter)
+#include <QPixmap>
+#include <QBuffer>
+#include <QByteArray>
+#include <QSqlQuery>
 
 // Пространство имен UI
 QT_BEGIN_NAMESPACE

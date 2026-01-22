@@ -8,7 +8,7 @@
 ##} else {
 #    !contains(LIBS, .*pq.*):LIBS += -llibpq -lws2_32 -ladvapi32
 #}
-
+#include(path/to/QtXlsx/QtXlsx.pri)
 # Определяем путь к исходникам
 SOURCES_DIR = $$PWD
 
@@ -31,6 +31,7 @@ exists($$PWD/QXlsx/qxlsx.pri) {
 }
 
 CONFIG += c++11
+CONFIG += utf8_source
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -57,9 +58,18 @@ FORMS += \
 
 # PostgreSQL подключение (только для Windows)
 win32 {
-    INCLUDEPATH += "C:/Program Files/PostgreSQL/12/include"
-    LIBS += -L"C:/Program Files/PostgreSQL/12/lib" -llibpq
+    PG_PATH = "C:/Program Files/PostgreSQL/18"
+
+    INCLUDEPATH += "$$PG_PATH/include"
+    LIBS += -L"$$PG_PATH/lib"
+    LIBS += -llibpq
+    LIBS += -lws2_32
+    LIBS += -lsecur32
+    LIBS += -lcrypt32
+
+#RC_FILE = app.rc
 }
+
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

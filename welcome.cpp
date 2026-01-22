@@ -2,6 +2,7 @@
 #include "ui_welcome.h"
 
 #include "mainwindow.h"
+#include <QStringConverter>
 
 Welcome::Welcome(QWidget *parent)
     : QDialog(parent)
@@ -15,6 +16,7 @@ Welcome::Welcome(QWidget *parent)
     QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL"); //QSQLITE - да, QPSQL - нет
     //createConnection();
     //db.close();
+    db.setConnectOptions("client_encoding=UTF8");
     ui->lineEdit_ip->hide();
 
     QString os = detectOS();
@@ -127,7 +129,13 @@ void Welcome::on_pushButton_help_pressed()
 
     // Çàãðóæàåì GIF
     QMovie *movie = new QMovie(gifLabel);
-    QString gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";//"C:/Users/sophia/Documents/work work work/kdd/img/help.gif";
+
+    QString currentFile = __FILE__;
+    QFileInfo fileInfo(currentFile);
+    QDir sourceDir = fileInfo.dir();
+    sourceDir.cdUp();
+    QString gifPath = sourceDir.absolutePath() + "/img/help.gif";
+    //QString gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";//"C:/Users/sophia/Documents/work work work/kdd/img/help.gif";
 
     if (!QFile::exists(gifPath)) {
         QMessageBox::warning(this, "Îøèáêà", "Ôàéë ïîìîùè íå íàéäåí: " + gifPath);
@@ -267,13 +275,13 @@ void Welcome::readDatabaseSettings(QString &user, QString &password,
     }
 
     //qDebug() << "Источник - ini";
-   /* // Отладочный вывод
+    // Отладочный вывод
     qDebug() << "Прочитаны настройки:";
     qDebug() << "  User:" << user;
     qDebug() << "  Password:" << (password.isEmpty() ? "не задан" : "[установлен]");
     qDebug() << "  Database:" << database;
     qDebug() << "  Host:" << host;
-    qDebug() << "  Port:" << port;*/
+    qDebug() << "  Port:" << port;
 }
 
 void Welcome::on_pushButton_pressed()
@@ -315,8 +323,8 @@ void Welcome::on_pushButton_pressed()
         if (os == "Windows") {
             this->showNormal();
             dbUser = "postgres";
-            dbPassword = "postgres";
-            dbName = "newdb";
+            dbPassword = "0";
+            dbName = "postgres";
             dbHost = "localhost";
         } else if (os == "Linux") {
             this->showFullScreen();
@@ -339,6 +347,8 @@ void Welcome::on_pushButton_pressed()
     // Проверяем подключение к серверу PostgreSQL (к базе postgres)
     QString testConnectionName = "test_connection_" + QString::number(QDateTime::currentMSecsSinceEpoch());
     QSqlDatabase testDb = QSqlDatabase::addDatabase("QPSQL", testConnectionName);
+
+    testDb.setConnectOptions("client_encoding=UTF8");
 
     testDb.setHostName(dbHost);
     testDb.setPort(dbPort);
@@ -850,6 +860,14 @@ void Welcome::on_pushButton_pressed()
 
 bool Welcome::createConnection()
 {
+    // Перед подключением к БД
+   // QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+    /// или для Windows
+    //QTextCodec::setCodecForLocale(QTextCodec::codecForName("Windows-1251"));
+
+
+
+
     QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
     QString dbUser, dbPassword, dbName, dbHost;
     int dbPort = 5432;
@@ -880,9 +898,9 @@ bool Welcome::createConnection()
         QString os = detectOS();
         if (os == "Windows") {
             this->showNormal();
-            dbUser = "postgres_new";
-            dbPassword = "123";
-            dbName = "newdb";
+            dbUser = "postgres";
+            dbPassword = "0";
+            dbName = "postgres";
             dbHost = "localhost";
         } else if (os == "Linux") {
             this->showFullScreen();
@@ -1119,6 +1137,9 @@ QList<DatabaseInfo> Welcome::connectToDatabases()
 
         QString connectionName = QString("db_connection_%1").arg(i);
         dbInfo.db = QSqlDatabase::addDatabase("QPSQL", connectionName);
+
+        dbInfo.db.setConnectOptions("client_encoding=UTF8");
+
         dbInfo.db.setHostName(dbInfo.host);
         dbInfo.db.setPort(dbInfo.port);
         dbInfo.db.setDatabaseName(dbInfo.database);

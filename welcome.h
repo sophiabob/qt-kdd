@@ -132,6 +132,8 @@ private:
     QString getSetKidHistorySQL();
     QString getKasKidHistorySQL();
     QString getMeshKidHistorySQL();
+
+    QString fixEncoding(const QString &text);
 };
 
 #endif // WELCOME_H

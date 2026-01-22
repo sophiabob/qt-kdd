@@ -768,15 +768,14 @@ void MainWindow::on_btnCreateNewUser_pressed() //создаём нового п�
     }
 
 
-    const QPixmap* pixmapPtr = ui->labelPhoto->pixmap();
-    QByteArray imageData;
-    if (pixmapPtr && !pixmapPtr->isNull()) {
-        QPixmap pixmap = *pixmapPtr;
-        // Преобразуем изображение в массив байтов
+    //const QPixmap* pixmapPtr = ui->labelPhoto->pixmap();
 
+    QByteArray imageData;
+    QPixmap pixmap = ui->labelPhoto->pixmap(Qt::ReturnByValue);
+    if (!pixmap.isNull()) {
         QBuffer buffer(&imageData);
-        buffer.open(QIODevice::WriteOnly);
-        pixmap.save(&buffer, "PNG"); // Сохраняем в формате PNG (можно выбрать другой формат)
+        pixmap = pixmap.scaled(100, 100, Qt::KeepAspectRatio);
+        ui->labelPhoto->setPixmap(pixmap);
     }
 
 
@@ -5617,61 +5616,27 @@ bool MainWindow::saveTableToCSV(QTableWidget *table, const QString &filePath)
     return true;
 }
 
+
 bool MainWindow::saveTableToExcel(QTableWidget *table, const QString &filePath)
 {
-    if (!table) {
-        QMessageBox::critical(this, "Ошибка", "Таблица не передана");
+    /*// Сначала сохраняем в CSV
+    QString csvPath = QFileInfo(filePath).path() + "/temp.csv";
+    if (!saveTableToCSV(table, csvPath)) {
         return false;
     }
 
-    int rowCount = table->rowCount();
-    int columnCount = table->columnCount();
-
-    if (rowCount == 0 || columnCount == 0) {
-        QMessageBox::warning(this, "Предупреждение", "Таблица пуста");
+    // Используем QAxObject для конвертации CSV в Excel
+    QAxObject* excel = new QAxObject("Excel.Application", this);
+    if (!excel) {
+        QMessageBox::warning(this, "Предупреждение",
+            "Excel не установлен. Файл сохранен как CSV.");
         return false;
     }
 
-    QString xlsxPath = filePath;
-    if (!xlsxPath.endsWith(".xlsx", Qt::CaseInsensitive)) {
-        xlsxPath += ".xlsx";
-    }
-
-    QXlsx::Document xlsx;
-
-    // Создаем форматы
-    QXlsx::Format headerFormat;
-    headerFormat.setFontBold(true);
-    headerFormat.setFillPattern(QXlsx::Format::PatternSolid);
-    headerFormat.setPatternBackgroundColor(QColor(200, 220, 240));
-
-    QXlsx::Format cellFormat;
-    cellFormat.setBorderStyle(QXlsx::Format::BorderThin);
-
-    // Заголовок документа
-    xlsx.write(1, 1, "История изменений пользователей");
-    xlsx.write(2, 1, QString("Дата экспорта: %1").arg(QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm")));
-    xlsx.write(3, 1, QString("Всего записей: %1").arg(rowCount));
-
-    // Заголовки столбцов (начиная с 5 строки)
-    int dataStartRow = 5;
-
-    for (int col = 0; col < columnCount; ++col) {
-        QTableWidgetItem *header = table->horizontalHeaderItem(col);
-        QString headerText = header ? header->text() : QString("Столбец %1").arg(col + 1);
-        xlsx.write(dataStartRow, col + 1, headerText, headerFormat);
-    }
-
-    // Данные таблицы
-    for (int row = 0; row < rowCount; ++row) {
-        for (int col = 0; col < columnCount; ++col) {
-            QTableWidgetItem *item = table->item(row, col);
-            QString cellText = item ? item->text() : "";
-            xlsx.write(dataStartRow + row + 1, col + 1, cellText, cellFormat);
-        }
-    }
-
-    return xlsx.saveAs(xlsxPath);
+    excel->setProperty("Visible", false);
+*/
+    QMessageBox::critical(this, "Ошибка", "Функция в разработке");
+    return true;
 }
 
 bool MainWindow::saveTableToWord(QTableWidget *table, const QString &filePath)
@@ -6113,8 +6078,9 @@ void MainWindow::on_pushButton_dutyUsersFile_2_pressed()
         success = saveTableToCSV(table, filePath);
         resultMessage = "CSV файл успешно создан";
     } else if (format == "xlsx") {
+        QMessageBox::critical(this, "Ошибка", "Функция в разработке");
         success = saveTableToExcel(table, filePath);
-        resultMessage = "Excel файл успешно создан";
+        //resultMessage = "Excel файл успешно создан";
     } else if (format == "doc") {
         success = saveTableToWord(table, filePath);
         resultMessage = "Word файл успешно создан";
@@ -8625,7 +8591,7 @@ void MainWindow::on_pushButton_help_pressed()
 
     // Создаем label для GIF
     QLabel *gifLabel = new QLabel(overlay);
-    gifLabel->setFixedSize(600, 400);
+    gifLabel->setFixedSize(600, 400);   //для 600 на 800
     gifLabel->setStyleSheet("background-color: white; border-radius: 10px;");
     gifLabel->setAlignment(Qt::AlignCenter);
 
@@ -8633,11 +8599,36 @@ void MainWindow::on_pushButton_help_pressed()
     QMovie *movie = new QMovie(gifLabel);
     QString gifPath = "";
 
+    QString currentFile = __FILE__;
+    QFileInfo fileInfo(currentFile);
+    QDir sourceDir = fileInfo.dir();
+    sourceDir.cdUp();
+    gifPath = sourceDir.absolutePath() + "/video/help/";
+
+    /*Welcome welcome;
+    bool connected = welcome.createConnection();
+
+    QString os = detectOS();
+    if (os == "Windows") {
+        //gifPath = "C:/Users/User/Documents/kdd_nice/video/help/";
+        QString currentFile = __FILE__;
+        QFileInfo fileInfo(currentFile);
+        QDir sourceDir = fileInfo.dir();
+        sourceDir.cdUp();
+        gifPath = sourceDir.absolutePath() + "/video/help/";
+        //qDebug() << "Итоговый путь:" << gifPath;
+    } else if (os == "Linux") {
+        gifPath = "/home/sds/sh18/kdd_17.11.25/";
+    } else {
+        qDebug() << "ОС не распознана для gif";
+    }*/
+
 
     //tabWidget//проверить на пользователей
     int same = ui->tabWidget->currentIndex();
     if (same == 0) { //пользователи
-        gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";//"C:/Users/sophia/Documents/work work work/kdd/img/help.gif";
+        //gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";//"C:/Users/sophia/Documents/work work work/kdd/img/help.gif";
+        gifPath += "help_users.gif";
         if (!QFile::exists(gifPath)) {
             QMessageBox::warning(this, "Ошибка", "Файл помощи пользователям не найден: " + gifPath);
             delete overlay;
@@ -8648,9 +8639,9 @@ void MainWindow::on_pushButton_help_pressed()
         if (idk == 0){ //наряды
             int duty = ui->tabWidget_8->currentIndex();
             if (duty == 0){//наряды
-                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+                gifPath += "help_idkDutyDuty.gif";
             } else if (duty == 1){ //наряды пользователей
-                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+                gifPath += "help_idkDutyUsersduty";
             }
         } else if (idk == 1){ //эксплуатация
             int use = ui->tabWidget_9->currentIndex();
@@ -8666,7 +8657,7 @@ void MainWindow::on_pushButton_help_pressed()
             if (dose == 0){//ппд
                 int dose2 = ui->tabWidget_15->currentIndex();
                 if (dose2 == 0){ //дозы
-                    gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+                    gifPath = "help_idkDosePpdDose.gif";
                 }
             } else if (dose == 1){//тлд
                 int dose3 = ui->tabWidget_11->currentIndex();
@@ -8695,50 +8686,49 @@ void MainWindow::on_pushButton_help_pressed()
                     gifPath = "";
                 }
             }
-
         }
     } else if (same == 2){ //системы хранения
         int sist = ui->tabWidget_7->currentIndex();
         if (sist == 0){//увд гамма
             int set = ui->tabWidget_kas->currentIndex();
-            if (set == 0){//комплектов
-                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
-            } else if (set == 1){//блоков хранения
-                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
-            } else if (set == 2){//ячеек
-                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+            if (set == 0){//комплектов - один на всех
+                gifPath += "help_uvdSet.gif";
+            } else if (set == 1){//блоков хранения - один на всех
+                gifPath += "help_uvdSet.gif";
+            } else if (set == 2){//ячеек - один на всех
+                gifPath += "help_uvdSet.gif";
             }
         } else if (sist == 1){//кид
             int set2 = ui->tabWidget_kas_kid->currentIndex();
-            if (set2 == 0){//комплектов
-                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
-            } else if (set2 == 1){//блоков хранения
-                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
-            } else if (set2 == 2){//ячеек
-                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+            if (set2 == 0){//комплектов - один на всех как для увд
+                gifPath += "help_uvdSet.gif";
+            } else if (set2 == 1){//блоков хранения - один на всех как для увд
+                gifPath += "help_uvdSet.gif";
+            } else if (set2 == 2){//ячеек - один на всех как для увд
+                gifPath += "help_uvdSet.gif";
             }
         }
     } else if (same == 3){ //история
         int history = ui->tabWidget_4->currentIndex();
         if (history == 0){//пользователей
-            gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+            gifPath += "help_historyUsers.gif";
         } else if (history == 1){//нарядов
             int duty = ui->tabWidget_5->currentIndex();
             if (duty == 0){//нарядов
-                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
-            } else if (duty == 1){//нарядов пользователей
-                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
-            } else if (duty == 2){//доз
-                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+                gifPath += "help_historyDuty.gif";
+            } else if (duty == 1){//нарядов пользователей - один на всех как для нарядов
+                gifPath += "help_historyDuty.gif";
+            } else if (duty == 2){//доз - один на всех как для нарядов
+                gifPath += "help_historyDuty.gif";
             }
         } else if (history == 2){//история комплектов
             int set3 = ui->tabWidget_6->currentIndex();
             if (set3 == 0){//комплектов
-                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
-            } else if (set3 == 1){//блоков хранения
-                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
-            } else if (set3 == 2){//ячеек
-                gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";
+                gifPath += "help_historySet.gif";
+            } else if (set3 == 1){//блоков хранения - один на всех как для комплектов
+                gifPath += "help_historySet.gif";
+            } else if (set3 == 2){//ячеек - один на всех как для комплектов
+                gifPath += "help_historySet.gif";
             }
         } else if (history == 3){//история кид
         }
@@ -8759,8 +8749,6 @@ void MainWindow::on_pushButton_help_pressed()
             gifPath = "";
         }
     }
-    if (use == 0){} else if (use == 1){} else if (use == 2){} else if (use == 3){}
-
 
 
     movie->setFileName(gifPath);
