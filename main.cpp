@@ -13,6 +13,16 @@
 
 int main(int argc, char *argv[])
 {
+#ifdef Q_OS_LINUX
+    qputenv("QT_QPA_PLATFORM", "xcb");
+#endif
+
+    QApplication a(argc, argv);
+
+    // Проверка
+    qDebug() << "Platform plugin:" << qgetenv("QT_QPA_PLATFORM");
+
+
     // Установите переменную окружения перед созданием QApplication
     qputenv("QT_LOGGING_RULES", "qt.core.qmetaobject.connectslotsbyname=false");
     qputenv("QT_LOGGING_RULES", "qt.sql.*=false");
@@ -21,7 +31,7 @@ int main(int argc, char *argv[])
 
 
     QLocale::setDefault(QLocale(QLocale::Russian, QLocale::Russia));
-    QApplication a(argc, argv);
+    //QApplication a(argc, argv);
 
     // Настройка шрифта с поддержкой кириллицы
     QFont font("Arial", 10);

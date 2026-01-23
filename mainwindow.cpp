@@ -18,7 +18,7 @@ MainWindow::MainWindow(int userId, QWidget *parent)
     ui->statusbar->showMessage("Добро пожаловать в систему!");
 
     Helpers::startInactivityTimer(60, [this]() {//помощь по таймеру
-        QMessageBox::warning(this, "Внимание", "Прошло 60 сек");
+        //QMessageBox::warning(this, "Внимание", "Прошло 60 сек");
         on_pushButton_help_pressed();
     }, this);
 
@@ -8578,38 +8578,22 @@ void MainWindow::on_pushButton_help_pressed()
 
     // Загружаем GIF
     QMovie *movie = new QMovie(gifLabel);
-    QString gifPath = "";
 
+    QString gifPath = "";
     QString currentFile = __FILE__;
     QFileInfo fileInfo(currentFile);
     QDir sourceDir = fileInfo.dir();
-    sourceDir.cdUp();
-    gifPath = sourceDir.absolutePath() + "/video/help/";
-
-    /*Welcome welcome;
-    bool connected = welcome.createConnection();
-
     QString os = detectOS();
     if (os == "Windows") {
-        //gifPath = "C:/Users/User/Documents/kdd_nice/video/help/";
-        QString currentFile = __FILE__;
-        QFileInfo fileInfo(currentFile);
-        QDir sourceDir = fileInfo.dir();
         sourceDir.cdUp();
-        gifPath = sourceDir.absolutePath() + "/video/help/";
-        //qDebug() << "Итоговый путь:" << gifPath;
-    } else if (os == "Linux") {
-        gifPath = "/home/sds/sh18/kdd_17.11.25/";
-    } else {
-        qDebug() << "ОС не распознана для gif";
-    }*/
+    }
+    gifPath = sourceDir.absolutePath() +"/video/help/";
 
-
-    //tabWidget//проверить на пользователей
     int same = ui->tabWidget->currentIndex();
     if (same == 0) { //пользователи
         //gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";//"C:/Users/sophia/Documents/work work work/kdd/img/help.gif";
-        gifPath += "help_users.gif";
+        gifPath += "help_historySet.gif";//"help_users.gif";
+        //gifPath = "/home/sds/AAAAA/kdd_nice/video/help/help_historySet.gif"; //работает
         if (!QFile::exists(gifPath)) {
             QMessageBox::warning(this, "Ошибка", "Файл помощи пользователям не найден: " + gifPath);
             delete overlay;

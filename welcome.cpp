@@ -2,7 +2,7 @@
 #include "ui_welcome.h"
 
 #include "mainwindow.h"
-#include <QStringConverter>
+//#include <QStringConverter>
 
 Welcome::Welcome(QWidget *parent)
     : QDialog(parent)
@@ -76,6 +76,8 @@ bool Welcome::on_btnSignIn_clicked()
     //QMessageBox::information(this, "данные", "Логин: :Login, пароль: :Password .");
 
     query.prepare("SELECT user_id FROM users WHERE login = :login AND password = :password AND role != :role LIMIT 1");
+
+    //query.prepare("SELECT user_id FROM users WHERE login = :login AND password = :password AND role != :role LIMIT 1");
     query.bindValue(":login", Login);
     query.bindValue(":password", Password);
     query.bindValue(":role", "Пользователь");
@@ -129,13 +131,18 @@ void Welcome::on_pushButton_help_pressed()
 
     // Çàãðóæàåì GIF
     QMovie *movie = new QMovie(gifLabel);
-
     QString currentFile = __FILE__;
     QFileInfo fileInfo(currentFile);
     QDir sourceDir = fileInfo.dir();
-    sourceDir.cdUp();
+    QString os = detectOS();
+    if (os == "Windows") {
+        sourceDir.cdUp();
+    }
+
     QString gifPath = sourceDir.absolutePath() + "/img/help.gif";
     //QString gifPath = "/home/sds/sh18/kdd_17.11.25/img/help.gif";//"C:/Users/sophia/Documents/work work work/kdd/img/help.gif";
+//т
+
 
     if (!QFile::exists(gifPath)) {
         QMessageBox::warning(this, "Îøèáêà", "Ôàéë ïîìîùè íå íàéäåí: " + gifPath);
@@ -185,30 +192,27 @@ bool Welcome::eventFilter(QObject *obj, QEvent *event)
 // Функция поиска файла настроек
 QString Welcome::findSettingsFile()
 {
+    QString currentFile = __FILE__;
+    QFileInfo fileInfo(currentFile);
+    QDir sourceDir = fileInfo.dir();
+    QString os = detectOS();
+    if (os == "Windows") {
+        sourceDir.cdUp();
+    }
+
+    QString pathFromSource = sourceDir.absolutePath() + "/config/settings.ini";
     QStringList searchPaths = {
-        QCoreApplication::applicationDirPath() + "/settings.ini",
-        QDir::currentPath() + "/settings.ini",
-        QDir::homePath() + "/.config/" + QCoreApplication::applicationName() + "/settings.ini",
-        "./settings.ini"
+        pathFromSource
     };
 
     for (const QString &path : searchPaths) {
         if (QFileInfo::exists(path)) {
-            return path;
+            return path;  // Возвращаем найденный путь
         }
     }
-         // Создаем файл с настройками по умолчанию
-    QString defaultPath = QCoreApplication::applicationDirPath() + "/settings.ini";
-    QSettings defaultSettings(defaultPath, QSettings::IniFormat);
-    defaultSettings.beginGroup("Database");
-    defaultSettings.setValue("UserName", "postgres");
-    defaultSettings.setValue("Password", "postgres1");
-    defaultSettings.setValue("Name", "newdb");
-    defaultSettings.setValue("Host", "localhost");
-    defaultSettings.setValue("Port", 5432);
-    defaultSettings.endGroup();
-    defaultSettings.sync();
 
+    // Если файл не найден, возвращаем путь по умолчанию
+    QString defaultPath = QCoreApplication::applicationDirPath() + "/settings.ini";
     return defaultPath;
 }
 
@@ -290,8 +294,8 @@ void Welcome::on_pushButton_pressed()
     QStringList connections = QSqlDatabase::connectionNames();
     for (const QString &connectionName : connections) {
         QSqlDatabase::removeDatabase(connectionName);
-    }
-
+    }//
+/*
     // Получаем параметры подключения как в createConnection()
     QString dbUser, dbPassword, dbName, dbHost;
     int dbPort = 5432;
@@ -413,9 +417,11 @@ void Welcome::on_pushButton_pressed()
         QSqlDatabase::removeDatabase(connectionName);
         return;
     }
+*/
 
-    // Используем одно соединение для всех операций
-    QSqlQuery query(db);
+    createConnection();
+    //QSqlQuery query(db);
+    QSqlQuery query;
 
     // Отключаем проверку внешних ключей для безопасного удаления
     if (!query.exec("SET session_replication_role = 'replica'")) {
@@ -432,8 +438,8 @@ void Welcome::on_pushButton_pressed()
         qDebug() << "Найдено таблиц для удаления:" << tablesToDrop.size();
     } else {
         QMessageBox::critical(this, "Ошибка", "Ошибка получения списка таблиц: " + query.lastError().text());
-        db.close();
-        QSqlDatabase::removeDatabase(connectionName);
+        query.finish();
+        //QSqlDatabase::removeDatabase(connectionName);
         return;
     }
 
@@ -820,7 +826,7 @@ void Welcome::on_pushButton_pressed()
     }
 
     // Создаем администратора
-    QSqlQuery insertQuery(db);
+    QSqlQuery insertQuery(query);
     insertQuery.prepare("INSERT INTO users (user_id, login, password, name_0, name_1, name_2, role, tab_num, card_id, doz_tld_id, set_id, kas_id, mesh_id) "
                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     insertQuery.addBindValue("1");
@@ -854,20 +860,12 @@ void Welcome::on_pushButton_pressed()
         QMessageBox::warning(this, "Ошибка", message);
     }
 
-    db.close();
-    QSqlDatabase::removeDatabase(connectionName);
+    query.finish();
+    //QSqlDatabase::removeDatabase(connectionName);
 }
 
 bool Welcome::createConnection()
 {
-    // Перед подключением к БД
-   // QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
-    /// или для Windows
-    //QTextCodec::setCodecForLocale(QTextCodec::codecForName("Windows-1251"));
-
-
-
-
     QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
     QString dbUser, dbPassword, dbName, dbHost;
     int dbPort = 5432;
@@ -893,12 +891,12 @@ bool Welcome::createConnection()
         qDebug() << "ПЕРВАЯ попытка: Используются настройки из settings.ini";
     }
 
-    // 1.3. Если хост все еще пустой, используем OS-специфичные настройки
-    if (dbHost.isEmpty()) {
+
+    if (dbHost.isEmpty()) {//если без ini
         QString os = detectOS();
         if (os == "Windows") {
             this->showNormal();
-            dbUser = "postgres";
+            dbUser = "postgres123";
             dbPassword = "0";
             dbName = "postgres";
             dbHost = "localhost";
@@ -913,6 +911,8 @@ bool Welcome::createConnection()
         }
         dataSource = "OS-специфичные настройки";
         qDebug() << "ПЕРВАЯ попытка: Используются OS-специфичные настройки для" << os;
+    } else { //из ini
+        //qDebug() << "Хост0:" << dbHost << "Порт:" << dbPort << "Пользователь:" << dbUser << "База:" << dbName;
     }
 
     // 1.4. Пытаемся подключиться с первыми параметрами
@@ -923,7 +923,7 @@ bool Welcome::createConnection()
     db.setDatabaseName(dbName);
 
     //qDebug() << "Источник:" << dataSource;
-    qDebug() << "Хост:" << dbHost << "Порт:" << dbPort
+    qDebug() << "Хост1:" << dbHost << "Порт:" << dbPort
              << "Пользователь:" << dbUser << "База:" << dbName;
 
     if (db.open()) {
@@ -938,31 +938,24 @@ bool Welcome::createConnection()
 
     // Закрываем предыдущее подключение если оно открыто
     if (db.isOpen()) {
+        if (db.isValid()) {
+            // Подключение валидно
+            qDebug() << "Подключение валидно";
+        } else {
+            qDebug() << "Подключение невалидно";
+        }
         db.close();
     } else {
-        QMessageBox::critical(this, "Ошибка подключения 1",
-                              QString("Не удалось подключиться к базе данных после двух попыток:\n\n"
-                                      "ПЕРВАЯ попытка (%1):\n"
-                                      "Хост: %2\nПорт: %3\nПользователь: %4\nБаза: %5\n"
-                                      "Ошибка: %6\n\n"
-                                      "ВТОРАЯ попытка (%7):\n"
-                                      "Хост: %8\nПорт: %9\nПользователь: %10\nБаза: %11\n"
-                                      "Ошибка: %12")
-                                  .arg(dataSource)
-                                  .arg(dbHost).arg(dbPort).arg(dbUser).arg(dbName)
-                                  .arg(db.lastError().text())
-                                  //.arg(newDataSource)
-                                  .arg(dbHost).arg(dbPort).arg(dbUser).arg(dbName)
-                                  .arg(db.lastError().text()));
+        //QMessageBox::critical(this, "Ошибка подключения 1", QString("Не удалось подключиться к базе от ini"));
     }
 
     // 2.1. Получаем локальные настройки для второй попытки
     QString os = detectOS();
     QString newDataSource = "ВТОРАЯ попытка: локальные настройки из кода";
 
-    if (os == "Windows") {
-        dbUser = "postgres_local";
-        dbPassword = "postgres";
+    if (os == "Windows") {//при второй попытке
+        dbUser = "postgres";
+        dbPassword = "0";
         dbName = "postgres"; // Или ваша база по умолчанию
         dbHost = "localhost";
         dbPort = 5432;
@@ -985,11 +978,12 @@ bool Welcome::createConnection()
 
     //qDebug() << "\nВТОРАЯ попытка подключения с параметрами:";
     //qDebug() << "Источник:" << newDataSource;
-    qDebug() << "Хост:" << dbHost << "Порт:" << dbPort << "Пользователь:" << dbUser << "База:" << dbName;
+    qDebug() << "Хост2:" << dbHost << "Порт:" << dbPort << "Пользователь:" << dbUser << "База:" << dbName;
 
     // 2.3. Пытаемся подключиться второй раз
     if (db.open()) {
         qDebug() << "Успешное подключение (вторая попытка) \n-";
+       // QMessageBox::critical(this, "Успех","Успешное подключение (локальные настройки)");
         //qDebug() << "Итоговый источник данных:" << newDataSource;
         return true;
     }
@@ -1012,6 +1006,7 @@ bool Welcome::createConnection()
                               .arg(newDataSource)
                               .arg(dbHost).arg(dbPort).arg(dbUser).arg(dbName)
                               .arg(db.lastError().text()));
+
 
 
     //query.clear();
@@ -1984,105 +1979,6 @@ QString Welcome::getCreateTableSQL(const QString &tableName)
 
     return "";
 }
-/*
-// Вспомогательные функции
-QString Welcome::detectOS()
-{
-#ifdef Q_OS_WIN
-    return "Windows";
-#elif defined(Q_OS_LINUX)
-    return "Linux";
-#elif defined(Q_OS_MAC)
-    return "macOS";
-#else
-    return "Unknown";
-#endif
-}
-
-QString Welcome::findSettingsFile()
-{
-    QStringList searchPaths = {
-        QCoreApplication::applicationDirPath() + "/settings.ini",
-        QDir::currentPath() + "/settings.ini",
-        QDir::homePath() + "/.config/" + QCoreApplication::applicationName() + "/settings.ini",
-        "./settings.ini"
-    };
-
-    for (const QString &path : searchPaths) {
-        if (QFileInfo::exists(path)) {
-            return path;
-        }
-    }
-
-    // Создаем файл с настройками по умолчанию
-    QString defaultPath = QCoreApplication::applicationDirPath() + "/settings.ini";
-    QSettings defaultSettings(defaultPath, QSettings::IniFormat);
-    defaultSettings.beginGroup("Database");
-    defaultSettings.setValue("UserName", "postgres");
-    defaultSettings.setValue("Password", "postgres1");
-    defaultSettings.setValue("Name", "newdb");
-    defaultSettings.setValue("Host", "localhost");
-    defaultSettings.setValue("Port", 5432);
-    defaultSettings.endGroup();
-    defaultSettings.sync();
-
-    return defaultPath;
-}
-
-void Welcome::readDatabaseSettings(QString &user, QString &password,
-                                   QString &database, QString &host, int &port,
-                                   bool keepHost)
-{
-    QString settingsPath = findSettingsFile();
-
-    if (settingsPath.isEmpty()) {
-        qDebug() << "Файл settings.ini не найден";
-        return;
-    }
-
-    QSettings settings(settingsPath, QSettings::IniFormat);
-
-    // Читаем настройки из секции [Settings]
-    if (user.isEmpty()) {
-        user = settings.value("Settings/UserName",
-                              settings.value("Settings/Server_UserName",
-                                             settings.value("UserName", ""))).toString();
-    }
-
-    if (password.isEmpty()) {
-        password = settings.value("Settings/Password",
-                                  settings.value("Settings/Server_Password",
-                                                 settings.value("Password", ""))).toString();
-    }
-
-    if (database.isEmpty()) {
-        database = settings.value("Settings/DatabaseName",
-                                  settings.value("Settings/Server_DatabaseName",
-                                                 settings.value("DatabaseName", "newdb"))).toString();
-    }
-
-    // Хост читаем только если keepHost = false или host еще не установлен
-    if (!keepHost && host.isEmpty()) {
-        // Пробуем разные варианты ключей для хоста
-        QString hostWithPort = settings.value("Settings/ip_database",
-                                              settings.value("Settings/Server_ip_database",
-                                                             settings.value("ip_database", ""))).toString();
-
-        // Разделяем хост и порт, если они вместе
-        if (hostWithPort.contains(':')) {
-            QStringList parts = hostWithPort.split(':');
-            host = parts[0];
-            bool ok;
-            port = (parts.size() > 1) ? parts[1].toInt(&ok) : port;
-            if (!ok) port = 5432;
-        } else {
-            host = hostWithPort;
-            // Пробуем прочитать порт отдельно (если есть)
-            int savedPort = settings.value("Settings/Port", port).toInt();
-            if (savedPort > 0) port = savedPort;
-        }
-    }
-}*/
 
 
 QList<ColumnInfo> Welcome::getExpectedTableStructure(const QString &tableName)

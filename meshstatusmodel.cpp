@@ -28,11 +28,14 @@ QString MeshStatusModel::detectOS() const
 
 void MeshStatusModel::loadIcons()
 {
-
     QString currentFile = __FILE__;
     QFileInfo fileInfo(currentFile);
     QDir sourceDir = fileInfo.dir();
-    sourceDir.cdUp();
+    QString os = detectOS();
+    if (os == "Windows") {
+        sourceDir.cdUp();
+    }
+
     QString iconPath = sourceDir.absolutePath() + "/img/hum.png";
     QString iconDoz = sourceDir.absolutePath() + "/img/doz.png";
 

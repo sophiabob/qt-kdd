@@ -68,6 +68,21 @@ win32 {
     LIBS += -lcrypt32
 
 #RC_FILE = app.rc
+}  else:unix:!macx {
+# Настройки для Linux
+# Проверяем различные возможные пути установки PostgreSQL
+exists(/usr/include/postgresql) {
+    INCLUDEPATH += /usr/include/postgresql
+} else:exists(/usr/include/pgsql) {
+    INCLUDEPATH += /usr/include/pgsql
+} else:exists(/usr/local/include/postgresql) {
+    INCLUDEPATH += /usr/local/include/postgresql
+}
+
+# Добавляем библиотеки
+LIBS += -lpq
+CONFIG += link_pkgconfig
+PKGCONFIG += libpq
 }
 
 
