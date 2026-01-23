@@ -5,11 +5,6 @@
 #include "ui_welcome.h"
 #include "helpers.h"
 
-#ifdef WITH_QXLSX
-#include "xlsxdocument.h"
-#include "xlsxformat.h"
-#endif
-
 
 MainWindow::MainWindow(int userId, QWidget *parent)
     : QMainWindow(parent),
@@ -19,19 +14,13 @@ MainWindow::MainWindow(int userId, QWidget *parent)
     , clearUserDutySearchButton(nullptr)
 {
     ui->setupUi(this);
-    //qDebug() << "Текущий пользователь ID:" << currentUserId;
-    //ui->statusbar->showMessage("f,hfrflfmhf");
-    //ui->statusbar->setVisible(true);
-    //setStatusBar(new QStatusBar(this));  // Восстановление
-    setStatusBar(new QStatusBar(this)); // Создаём статусбар программно
     ui->statusbar->setVisible(true);
     ui->statusbar->showMessage("Добро пожаловать в систему!");
 
-    if (ui->statusbar->isVisible()) {
-        //qDebug() << "Статусбар veden";
-    } else {
-        //qDebug() << "Статусбар not viden"; //почему??
-    }
+    Helpers::startInactivityTimer(60, [this]() {//помощь по таймеру
+        QMessageBox::warning(this, "Внимание", "Прошло 60 сек");
+        on_pushButton_help_pressed();
+    }, this);
 
     //query.value("max_id").toInt();
    // this->showFullScreen(); //на очень полный экран
@@ -81,15 +70,7 @@ MainWindow::MainWindow(int userId, QWidget *parent)
         ui->tabWidget_kas->setCurrentIndex(nextIndex);
     });
 
-    //  создаём виджеты: идк -> наряды -> наряды
-    QPushButton* rightButton = new QPushButton("Действие", this);
-    rightButton->setFixedSize(100, 30); // Фиксированный размер
 
-    // Размещаем кнопку в правом верхнем углу
-    ui->tabWidget_7->setCornerWidget(rightButton, Qt::TopRightCorner);
-
-
-    //убрать ограничения на числа
 
     QList<QSpinBox*> spinBoxes = findChildren<QSpinBox*>();
     foreach(QSpinBox* spinBox, spinBoxes) {

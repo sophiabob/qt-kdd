@@ -22,6 +22,11 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDateTime>
+#include <functional>
+
+#include <QTimer>
+#include <QApplication>
+#include <QEvent>
 
 struct TableSearchConfig {
     bool caseSensitive = false;        // чувствительность к регистру
@@ -42,11 +47,23 @@ namespace ExportHelper {
     QString convertToWordHTML(const TableData& data);
 }
 
-class Helpers {
-public:
-    static QString timeDateMoscow(); //присваивает строке текущее ("yyyy-MM-dd HH:mm:ss")
-    static bool searchInLayout(QVBoxLayout* layout, const QString& searchText, QPushButton* clearButton = nullptr); //поиск в области
-    static bool searchInTable(QTableWidget* table, const QString& searchText, QPushButton* clearButton = nullptr, const TableSearchConfig& config = TableSearchConfig());
+class Helpers : public QObject {
+    Q_OBJECT
+
+    public:
+        static QString timeDateMoscow(); //присваивает строке текущее ("yyyy-MM-dd HH:mm:ss")
+        static bool searchInLayout(QVBoxLayout* layout, const QString& searchText, QPushButton* clearButton = nullptr); //поиск в области
+        static bool searchInTable(QTableWidget* table, const QString& searchText, QPushButton* clearButton = nullptr, const TableSearchConfig& config = TableSearchConfig());
+       // void startInactivityTimer(int seconds, std::function<void()> callback);
+
+        static void startInactivityTimer(int seconds, std::function<void()> callback, QObject *parent = nullptr);
+
+
+
+    private:
+        QTimer* inactivityTimer = nullptr;
+        bool eventFilter(QObject *obj, QEvent *event);
+        void stopInactivityTimer();
 };
 
 #endif // HELPERS_H

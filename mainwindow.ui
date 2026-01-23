@@ -3128,8 +3128,7 @@ QStatusBar
                        <item>
                         <widget class="QPushButton" name="pushButton">
                          <property name="text">
-                          <string>завершить работы 
- с дозиметром</string>
+                          <string>завершить работы с дозиметром</string>
                          </property>
                         </widget>
                        </item>

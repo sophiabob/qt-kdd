@@ -100,6 +100,8 @@
 #include <QBuffer>
 #include <QByteArray>
 #include <QSqlQuery>
+#include <QTimer>
+#include <QMainWindow>
 
 // Пространство имен UI
 QT_BEGIN_NAMESPACE

@@ -119,4 +119,47 @@ bool Helpers::searchInTable(QTableWidget* table, const QString& searchText, QPus
     return foundCount > 0;
 }
 
+static QTimer *globalTimer = nullptr;
+void Helpers::startInactivityTimer(int seconds, std::function<void()> callback, QObject *parent)
+{
+    // Останавливаем и удаляем предыдущий таймер
+    if (globalTimer) {
+        if (globalTimer->isActive()) {
+            globalTimer->stop();
+        }
+        globalTimer->deleteLater();
+        globalTimer = nullptr;
+    }
+
+    // Создаем новый таймер
+    globalTimer = new QTimer(parent ? parent : qApp);
+    globalTimer->setSingleShot(true);
+    globalTimer->setInterval(seconds * 1000);
+
+    // Подключаем callback
+    QObject::connect(globalTimer, &QTimer::timeout, [callback]() {
+        callback();
+    });
+
+    globalTimer->start();
+}
+
+void Helpers::stopInactivityTimer()
+{
+    if (inactivityTimer) {
+        inactivityTimer->stop();
+        inactivityTimer->deleteLater();
+        inactivityTimer = nullptr;
+    }
+}
+
+bool Helpers::eventFilter(QObject*, QEvent* event)
+{
+    if (inactivityTimer && inactivityTimer->isActive() &&
+        (event->type() == QEvent::MouseMove ||
+         event->type() == QEvent::KeyPress)) {
+        inactivityTimer->start();
+    }
+    return false;
+}
 
