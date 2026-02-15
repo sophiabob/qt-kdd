@@ -27,6 +27,12 @@
 #include <QTimer>
 #include <QApplication>
 #include <QEvent>
+#include <QApplication>
+#include <QMediaPlayer>
+#include <QVideoWidget>
+#include <QUrl>
+#include <QVBoxLayout>
+#include <QWidget>
 
 struct TableSearchConfig {
     bool caseSensitive = false;        // чувствительность к регистру
@@ -57,6 +63,7 @@ class Helpers : public QObject {
        // void startInactivityTimer(int seconds, std::function<void()> callback);
 
         static void startInactivityTimer(int seconds, std::function<void()> callback, QObject *parent = nullptr);
+        void playVideoInWindow(QString videoPath);
 
 
 
