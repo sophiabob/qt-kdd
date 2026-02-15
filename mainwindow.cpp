@@ -8598,6 +8598,8 @@ void MainWindow::on_pushButton_help_pressed()
             QMessageBox::warning(this, "Ошибка", "Файл помощи пользователям не найден: " + gifPath);
             delete overlay;
             return;
+        } else {
+            playVideoInWindow(gifPath += "help_users.mp4");
         }
     } else if (same == 1){ //идк
         int idk = ui->tabWidget_7->currentIndex();

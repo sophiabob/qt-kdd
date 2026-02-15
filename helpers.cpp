@@ -163,3 +163,32 @@ bool Helpers::eventFilter(QObject*, QEvent* event)
     return false;
 }
 
+void Helpers::readMP4(QString mp4)
+{
+    if (mp4) {
+        // Создаем виджет, который будет главным окном
+        QWidget window;
+        QVBoxLayout *layout = new QVBoxLayout(&window);
+
+        // 1. Создаем плеер
+        QMediaPlayer *player = new QMediaPlayer(&window);
+
+        // 2. Создаем виджет для видео
+        QVideoWidget *videoWidget = new QVideoWidget(&window);
+        layout->addWidget(videoWidget); // Добавляем виджет в окно
+
+        // 3. Связываем плеер и виджет (самое главное!)
+        player->setVideoOutput(videoWidget);
+
+        // 4. Указываем источник (файл или URL)
+        player->setSource(QUrl::fromLocalFile("/path/to/your/video.mp4"));
+
+        // 5. Запускаем воспроизведение
+        player->play();
+
+        window.resize(800, 600);
+        window.show();
+
+    }
+}
+
