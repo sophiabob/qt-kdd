@@ -102,6 +102,7 @@
 #include <QSqlQuery>
 #include <QTimer>
 #include <QMainWindow>
+#include <array>
 
 // Пространство имен UI
 QT_BEGIN_NAMESPACE
@@ -152,6 +153,11 @@ struct UserDataSearsh {
     QString id;
     QString displayText;
     QString searchText;
+};
+
+struct FileRecord {
+    QString description;
+    QString path;
 };
 
 // Определение типов для массивов

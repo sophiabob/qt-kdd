@@ -15,7 +15,8 @@ SOURCES_DIR = $$PWD
 # Передаем в код как define
 DEFINES += SOURCE_CODE_PATH=\"\\\"$$SOURCES_DIR\\\"\"
 
-QT += core gui sql quick widgets
+#QT += core gui sql quick widgets
+QT += core gui sql multimedia multimediawidgets
 
 # Проверка подключения QXlsx
 exists($$PWD/QXlsx/qxlsx.pri) {

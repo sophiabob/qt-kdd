@@ -1,38 +1,36 @@
-// helpers.h
 #ifndef HELPERS_H
 #define HELPERS_H
+#include "welcome.h"
 
+// Qt Core
 #include <QString>
 #include <QDateTime>
 #include <QTimeZone>
-#include <QMessageBox>
 #include <QDebug>
-#include <QString>
-#include <QVBoxLayout>
-#include <QPushButton>
-#include <QWidget>
-#include <QLayoutItem>
-#include <QTableWidget>
-#include <stdexcept>
-#include <memory>
-#include <QString>
-#include <QTableWidget>
-#include <QVector>
-#include <QPair>
-#include <QFile>
-#include <QTextStream>
-#include <QDateTime>
-#include <functional>
-
 #include <QTimer>
-#include <QApplication>
 #include <QEvent>
-#include <QApplication>
+#include <functional>
+// Qt GUI
+#include <QWidget>
+#include <QPushButton>
+#include <QLabel>
+#include <QLayoutItem>
+#include <QVBoxLayout>
+// Qt Multimedia
 #include <QMediaPlayer>
 #include <QVideoWidget>
 #include <QUrl>
-#include <QVBoxLayout>
-#include <QWidget>
+// Qt Dialogs
+#include <QMessageBox>
+// Qt Tables
+#include <QTableWidget>
+// Qt File
+#include <QFile>
+#include <QTextStream>
+// STL
+#include <stdexcept>
+#include <memory>
+#include <vector>
 
 struct TableSearchConfig {
     bool caseSensitive = false;        // чувствительность к регистру
@@ -60,10 +58,10 @@ class Helpers : public QObject {
         static QString timeDateMoscow(); //присваивает строке текущее ("yyyy-MM-dd HH:mm:ss")
         static bool searchInLayout(QVBoxLayout* layout, const QString& searchText, QPushButton* clearButton = nullptr); //поиск в области
         static bool searchInTable(QTableWidget* table, const QString& searchText, QPushButton* clearButton = nullptr, const TableSearchConfig& config = TableSearchConfig());
-       // void startInactivityTimer(int seconds, std::function<void()> callback);
 
         static void startInactivityTimer(int seconds, std::function<void()> callback, QObject *parent = nullptr);
-        void playVideoInWindow(QString videoPath);
+        static void playVideoInWindow(QWidget* parent, QString videoPath);
+        static QString dialogWithVariatives(QWidget* parent, QString forDialogTitle, QString forDialogText, const std::vector<FileRecord>& options);
 
 
 

@@ -304,12 +304,11 @@ Makefile: ../../kdd.pro C:/Qt/qt_2/6.10.1/mingw_64/mkspecs/win32-g++/qmake.conf 
 		C:/Qt/qt_2/6.10.1/mingw_64/mkspecs/features/yacc.prf \
 		C:/Qt/qt_2/6.10.1/mingw_64/mkspecs/features/lex.prf \
 		../../kdd.pro \
-		C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6Quick.prl \
-		C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6OpenGL.prl \
+		C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6MultimediaWidgets.prl \
+		C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6Multimedia.prl \
 		C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6Widgets.prl \
 		C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6Gui.prl \
 		C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6Sql.prl \
-		C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6Qml.prl \
 		C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6Network.prl \
 		C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6Core.prl \
 		C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6EntryPoint.prl \
@@ -549,12 +548,11 @@ C:/Qt/qt_2/6.10.1/mingw_64/mkspecs/features/exceptions.prf:
 C:/Qt/qt_2/6.10.1/mingw_64/mkspecs/features/yacc.prf:
 C:/Qt/qt_2/6.10.1/mingw_64/mkspecs/features/lex.prf:
 ../../kdd.pro:
-C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6Quick.prl:
-C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6OpenGL.prl:
+C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6MultimediaWidgets.prl:
+C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6Multimedia.prl:
 C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6Widgets.prl:
 C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6Gui.prl:
 C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6Sql.prl:
-C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6Qml.prl:
 C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6Network.prl:
 C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6Core.prl:
 C:/Qt/qt_2/6.10.1/mingw_64/lib/Qt6EntryPoint.prl:

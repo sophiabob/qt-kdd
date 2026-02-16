@@ -69,6 +69,8 @@ public:
                               bool keepHost = false);
     bool createConnection();
     void checkAndSyncDatabases();
+    // Функция определения операционной системы
+    static QString detectOS();
 
 private slots:
     void on_btnCencel_pressed();
@@ -84,8 +86,6 @@ private:
     Ui::Welcome *ui;
     MainWindow *window;
 
-    // Функция определения операционной системы
-    QString detectOS();
 
     // Основные функции управления БД
     QList<DatabaseInfo> connectToDatabases();
