@@ -96,3 +96,12 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 #    LIBS += -lkernel32 -luser32 -lshell32
 #    QMAKE_LFLAGS += /ENTRY:mainCRTStartup
 #}
+
+
+# Определяем версию Qt
+greaterThan(QT_MAJOR_VERSION, 4) {
+    # Qt5 или Qt6
+    QT += widgets multimedia multimediawidgets
+    greaterThan(QT_MINOR_VERSION, 9): QT6 = true
+}
+DEFINES += QT_DEPRECATED_WARNINGS

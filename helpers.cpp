@@ -267,7 +267,12 @@ void Helpers::playVideoInWindow(QWidget* parent, QString videoPath)
     // 11. ПЛЕЕР
     QMediaPlayer* player = new QMediaPlayer(overlay);
     player->setVideoOutput(videoWidget);
+
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
     player->setSource(QUrl::fromLocalFile(videoPath));
+#else
+    player->setMedia(QUrl::fromLocalFile(videoPath));
+#endif
 
     // 12. КНОПКА ЗАКРЫТИЯ
     QPushButton* closeBtn = new QPushButton("×", overlay);
@@ -291,7 +296,13 @@ void Helpers::playVideoInWindow(QWidget* parent, QString videoPath)
 
     // Play/Pause
     QObject::connect(playPauseBtn, &QPushButton::clicked, [player, playPauseBtn]() {
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+        // Qt6
         if (player->playbackState() == QMediaPlayer::PlayingState) {
+#else
+            // Qt5
+        if (player->state() == QMediaPlayer::PlayingState) {
+#endif
             player->pause();
             playPauseBtn->setText("▶");
         } else {
@@ -334,18 +345,29 @@ void Helpers::playVideoInWindow(QWidget* parent, QString videoPath)
     });
 
     // Перемотка
-    bool wasPlayingBeforeSeek = false;
-    QObject::connect(seekSlider, &QSlider::sliderPressed, [player, &wasPlayingBeforeSeek]() {
-        wasPlayingBeforeSeek = (player->playbackState() == QMediaPlayer::PlayingState);
+    overlay->setProperty("wasPlayingBeforeSeek", false);
+
+    QObject::connect(seekSlider, &QSlider::sliderPressed, [player, overlay]() {
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+        bool wasPlaying = (player->playbackState() == QMediaPlayer::PlayingState);
+#else
+        bool wasPlaying = (player->state() == QMediaPlayer::PlayingState);
+#endif
+        overlay->setProperty("wasPlayingBeforeSeek", wasPlaying);
         player->pause();
     });
-
-    QObject::connect(seekSlider, &QSlider::sliderReleased, [player, seekSlider, &wasPlayingBeforeSeek]() {
+    QObject::connect(seekSlider, &QSlider::sliderReleased, [player, seekSlider, overlay]() {
         player->setPosition(seekSlider->value());
-        if (wasPlayingBeforeSeek) {
+        bool wasPlaying = overlay->property("wasPlayingBeforeSeek").toBool();
+        if (wasPlaying) {
             player->play();
         }
     });
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+    QObject::connect(seekSlider, &QSlider::sliderMoved, [player](int position) {
+        player->setPosition(position);  // Обновляем позицию при движении
+    });
+#endif
 
     // Окончание видео
     QObject::connect(player, &QMediaPlayer::mediaStatusChanged, [overlay, playPauseBtn](QMediaPlayer::MediaStatus status) {
@@ -355,9 +377,21 @@ void Helpers::playVideoInWindow(QWidget* parent, QString videoPath)
     });
 
     // Ошибки
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+    // Qt6
     QObject::connect(player, &QMediaPlayer::errorOccurred, [](QMediaPlayer::Error error, const QString& errorString) {
-        qDebug() << "Ошибка видео:" << error << errorString;
+        qDebug() << "Ошибка видео (Qt6):" << error << errorString;
     });
+#else
+    // Qt5 - используем старый синтаксис
+    QObject::connect(player, SIGNAL(error(QMediaPlayer::Error)), player, SLOT(/* нужен слот */));
+    // Проще использовать лямбду через старый синтаксис нельзя, поэтому добавим отдельный слот
+    // Временно просто выведем через обработчик
+    QObject::connect(player, static_cast<void(QMediaPlayer::*)(QMediaPlayer::Error)>(&QMediaPlayer::error),
+                     [player](QMediaPlayer::Error /*error*/) {
+                         qDebug() << "Ошибка видео (Qt5):" << player->errorString();
+                     });
+#endif
 
     // 14. ЗАПУСК
     player->play();
