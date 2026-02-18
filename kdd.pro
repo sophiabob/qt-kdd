@@ -29,22 +29,40 @@ CONFIG += c++11
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+
 SOURCES += \
-    doubleclickbutton.cpp \
     main.cpp \
-    mainwindow.cpp \
-    meshstatusmodel.cpp \
-    welcome.cpp
+    src/ui/mainwindow.cpp \
+    src/ui/welcome.cpp \
+    src/ui/widgets/doubleclickbutton.cpp \
+    src/ui/model/meshmodel.cpp \
+    src/ui/model/meshstatusmodel.cpp
 
 HEADERS += \
-    doubleclickbutton.h \
-    mainwindow.h \
-    meshstatusmodel.h \
-    welcome.h
+    src/ui/mainwindow.h \
+    src/ui/welcome.h \
+    src/ui/widgets/doubleclickbutton.h \
+    src/ui/model/meshmodel.h \
+    src/ui/model/meshstatusmodel.h
 
 FORMS += \
-    mainwindow.ui \
-    welcome.ui
+    src/ui/mainwindow.ui \
+    src/ui/welcome.ui
+
+# Пути для поиска заголовков
+INCLUDEPATH += $$PWD/src/ui \
+               $$PWD/src/ui/widgets \
+               $$PWD/src/models
+
+# Конфигурационный файл
+OTHER_FILES += \
+    settings.ini
+
+
+
+
+
+
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
