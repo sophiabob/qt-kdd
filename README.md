@@ -8,7 +8,7 @@
 ```bash
 git clone https://gitlab.com/sophiabob/qt-kdd.git
 cd qt-kdd
-```bash
+```
 
 
 ## 🛠️ Сборка
