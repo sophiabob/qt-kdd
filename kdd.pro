@@ -36,16 +36,20 @@ SOURCES += \
     src/ui/model/user.cpp \
     src/ui/welcome.cpp \
     src/ui/widgets/doubleclickbutton.cpp \
-    src/ui/model/meshmodel.cpp \
-    src/ui/model/meshstatusmodel.cpp
+    src/models/meshmodel.cpp \
+    src/models/meshstatusmodel.cpp \
+    src/models/user.cpp \
+    src/repositories/user_repository.cpp
 
 HEADERS += \
     src/ui/mainwindow.h \
     src/ui/model/user.h \
     src/ui/welcome.h \
     src/ui/widgets/doubleclickbutton.h \
-    src/ui/model/meshmodel.h \
-    src/ui/model/meshstatusmodel.h
+    src/models/meshmodel.h \
+    src/models/meshstatusmodel.h \
+    src/models/user.h \
+    src/repositories/user_repository.h
 
 FORMS += \
     src/ui/mainwindow.ui \
