@@ -43,4 +43,4 @@ kdd-project/
 
 
 ## 📞 Контакты
-Telegram: @sophiabob
+Telegram: telegram.org/sophiabob

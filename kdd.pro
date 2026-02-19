@@ -33,6 +33,7 @@ CONFIG += c++11
 SOURCES += \
     main.cpp \
     src/ui/mainwindow.cpp \
+    src/ui/model/user.cpp \
     src/ui/welcome.cpp \
     src/ui/widgets/doubleclickbutton.cpp \
     src/ui/model/meshmodel.cpp \
@@ -40,6 +41,7 @@ SOURCES += \
 
 HEADERS += \
     src/ui/mainwindow.h \
+    src/ui/model/user.h \
     src/ui/welcome.h \
     src/ui/widgets/doubleclickbutton.h \
     src/ui/model/meshmodel.h \
