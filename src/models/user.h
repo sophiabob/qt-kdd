@@ -9,6 +9,9 @@
 
 class User
 {
+
+    friend class UserRepository;
+
 public:
     User() = default;
     User(
