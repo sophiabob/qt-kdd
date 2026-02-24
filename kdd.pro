@@ -32,20 +32,20 @@ CONFIG += c++11
 
 SOURCES += \
     main.cpp \
+    src/repositories/result.cpp \
     src/ui/mainwindow.cpp \
-    src/ui/model/user.cpp \
     src/ui/welcome.cpp \
-    src/ui/widgets/doubleclickbutton.cpp \
+    src/ui/doubleclickbutton.cpp \
     src/models/meshmodel.cpp \
     src/models/meshstatusmodel.cpp \
     src/models/user.cpp \
     src/repositories/user_repository.cpp
 
 HEADERS += \
+    src/repositories/result.h \
     src/ui/mainwindow.h \
-    src/ui/model/user.h \
     src/ui/welcome.h \
-    src/ui/widgets/doubleclickbutton.h \
+    src/ui/doubleclickbutton.h \
     src/models/meshmodel.h \
     src/models/meshstatusmodel.h \
     src/models/user.h \

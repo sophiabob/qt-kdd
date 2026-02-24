@@ -1,15 +1,44 @@
-#ifndef USER_H //#pragma once - современная альтернатива
-#define USER_H
+#ifndef USER_H
+#define USER_H //#pragma once - современная альтернатива
 
 #include <QMainWindow>
 
 #include <QString>
 #include <QDateTime>
 #include <QMetaType> //регистрация типа
+#include <QSqlQuery>
+#include <QObject>
 
 class User
-{
+    : public QObject {
+    Q_OBJECT //Qt Meta-Object System (MOC)
+    // Макрос: тип, имя, геттер, сеттер, имя колонки в БД (user_data)
+    Q_PROPERTY(QString login READ login WRITE setLogin USER "login")
+    Q_PROPERTY(QString passwordHash READ passwordHash WRITE setPasswordHash USER "password")
+    Q_PROPERTY(QString firstName READ firstName WRITE setFirstName USER "name_0")
+    Q_PROPERTY(QString surname READ surname WRITE setSurname USER "name_1")
+    Q_PROPERTY(QString patronymic READ patronymic WRITE setPatronymic USER "name_2")
+    Q_PROPERTY(QString gender READ gender WRITE setGender USER "gender")
+    Q_PROPERTY(QDateTime birthDate READ birthDate WRITE setBirthDate USER "birthday")
+    Q_PROPERTY(QString role READ role WRITE setRole USER "role")
+    Q_PROPERTY(int snils READ snils WRITE setSnils USER "snils")
+    Q_PROPERTY(int employeeNumber READ employeeNumber WRITE setEmployeeNumber USER "tab_num")
+    Q_PROPERTY(QString department READ department WRITE setDepartment USER "department")
+    Q_PROPERTY(QString cardId READ cardId WRITE setCardId USER "card_id")
+    Q_PROPERTY(int setId READ setId WRITE setSetId USER "set_id")
+    Q_PROPERTY(int kasId READ kasId WRITE setKasId USER "kas_id")
+    Q_PROPERTY(int  meshId READ meshId WRITE setMeshId USER "mesh_id")
+    Q_PROPERTY(QString dosimetrTldId READ dosimetrTldId WRITE dosimetrTldId USER "doz_tld_id")
+    Q_PROPERTY(QDateTime lastCellUpdate READ lastCellUpdate WRITE setLastCellUpdate USER "cell_date")
+    Q_PROPERTY(float annualDose READ annualDose WRITE setAnnualDose USER "dose_year")
+    Q_PROPERTY(float currentYearDose READ currentYearDose WRITE setCurrentYearDose USER "dose_year_now")
+    Q_PROPERTY(float currentYearDosePPD READ currentYearDosePPD WRITE setCurrentYearDosePPD USER "dose_year_now_ppd")
+    Q_PROPERTY(QString accessCode READ accessCode WRITE setAccessCode USER "code")
+    Q_PROPERTY(QString blockReason READ blockReason WRITE setBlockReason USER "block")
+    Q_PROPERTY(QDateTime lastUpdate READ lastUpdate WRITE setLastUpdate USER "last_update")
 
+
+//проверить
     friend class UserRepository;
 
 public:
@@ -19,7 +48,7 @@ public:
         const QString& firstName = QString(),
         const QString& surname = QString(),
         const QString& patronymic = QString(),
-        const QString& login = QString(),
+        const QString& login = QString(), //
         const QString& passwordHash = QString(),
         int snils = 0,
         const QString& accessCode = QString(),
@@ -47,7 +76,6 @@ public:
     int id() const { return m_id; }
 
     const QString& login() const { return m_login; }
-    const QString& email() const { return m_email; }
 
     const QString& firstName() const { return m_firstName; }
     const QString& surname() const { return m_surname; }
@@ -68,6 +96,7 @@ public:
     int kasId() const { return m_kasId; }
     int meshId() const { return m_meshId; }
     int dosimetrTldId() const { return m_dosimetrTldId; }
+    QDateTime lastCellUpdate() const { return m_lastCellUpdate; }
 
     float annualDose() const { return m_annualDose; }
     float currentYearDose() const { return m_currentYearDose; }
@@ -80,7 +109,7 @@ public:
     //сеттеры - БД
 
     void setLogin(const QString& login) { m_login = login; }
-    void setEmail(const QString& email) { m_email = email; }
+    void setPasswordHash(const QString& v) { m_passwordHash = v; }
 
     void setFirstName(const QString& firstName) { m_firstName = firstName; }
     void setSurname(const QString& surname) { m_surname = surname; }
@@ -101,15 +130,23 @@ public:
     void setKasId(int kasId) { m_kasId = kasId; }
     void setMeshId(int meshId) { m_meshId = meshId; }
     void setDosimetrTldId(int dosimetrTldId) { m_dosimetrTldId = dosimetrTldId; }
+    void setLastCellUpdate(const QDateTime& lastCellUpdate) { m_lastCellUpdate = lastCellUpdate; }
 
     void setAnnualDose(float annualDose) { m_annualDose = annualDose; }
     void setCurrentYearDose(float currentYearDose) { m_currentYearDose = currentYearDose; }
     void setCurrentYearDosePPD(float currentYearDosePPD) { m_currentYearDosePPD = currentYearDosePPD; }
 
+    void setLastUpdate(const QDateTime& lastUpdate) { m_lastUpdate = lastUpdate; }
 
 
     //вспомогательные методы
 
+    //привязка переменных к полям sql
+    void bindToQuery(QSqlQuery& query) const;
+    static User fromQuery(const QSqlQuery& row);
+
+
+/*
     void touch() { m_lastUpdate = QDateTime::currentDateTime(); }
 
     bool isValid() const {
@@ -132,7 +169,7 @@ public:
         return m_surname + (initials.isEmpty() ? "" : " " + initials);
     }
 
-
+*/
 
 private:
     Q_DISABLE_COPY(User) //защита от случайного копирования
@@ -165,6 +202,7 @@ private:
     int m_kasId;                 // ID системы КАС
     int m_meshId;                // ID сетки
     int m_dosimetrTldId;         // ID дозиметра TLD (было doz_tld_id)
+    QDateTime m_lastCellUpdate;  // Дата последнего обновления ячейки (было cell_date)
 
     // --- Дозиметрия (Radiation Dose) ---
     float m_annualDose;          // Доза за год (было dose_year)
@@ -173,6 +211,8 @@ private:
 
     // --- Время ---
     QDateTime m_lastUpdate;      // Время последнего обновления (было timestamp)
+
 };
 
 Q_DECLARE_METATYPE(User)  //Signal/slot (между потоками, queued) — ТРЕБУЕТ,   QVariant — ТРЕБУЕТ
+#endif // USER_H
