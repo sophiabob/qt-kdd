@@ -1,12 +1,14 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+class UserRepository;
+class User;
+
 // ==================== подключаемые библиотеки ====================
 
-// наши собственные классы
-#include "doubleclickbutton.h"
-#include "meshstatusmodel.h"
-// #include "welcome.h"  // раскомментировать если нужно
+
+#include <QMessageBox>
+#include <QCryptographicHash>
 
 #include <QMainWindow>
 #include <QWidget>
@@ -66,6 +68,11 @@
 #include <QApplication>
 #include <QScreen>
 #include <QMouseEvent>
+
+
+#include <QCryptographicHash>
+#include <QRandomGenerator>
+
 
 // объявление пространства имён для UI, сгенерированного из .ui файла
 QT_BEGIN_NAMESPACE
@@ -475,6 +482,7 @@ private slots:
     void showAllPpdRows();
 
 private:
+    UserRepository* m_repo;
     // ==================== члены класса ====================
 
     // интерфейс и окна
@@ -529,6 +537,41 @@ private:
     // для обработки двойного клика
     QTimer m_doubleClickTimer;
     bool m_waitingForSecondClick = false;
+
+
+
+    // Хэширование с солью и key stretching (защита от перебора)
+    QString hashPasswordSecure(const QString& password);
+
+    // Проверка пароля против сохранённого хэша
+    bool verifyPasswordSecure(const QString& password, const QString& storedHash);
+
+
+
+
+
+    // структура привязки для виджетов
+    struct FieldMap {
+        QString name;
+        QWidget* widget;
+        enum Type { Text, Int, Float, DateTime, Bool } type;
+        // Лямбда: ВИДЖЕТ → User (чтение из формы)
+        std::function<void(User&, const QVariant&)> readToUser;
+        // Лямбда: User → ВИДЖЕТ (запись в форму)
+        std::function<void(QWidget*, const QVariant&)> writeFromUser;
+    };
+    QVector<FieldMap> m_fieldMaps;
+
+    void initFieldMapsUser();
+
+    User formToUser() const;           // Считать все поля из формы в User
+    void userToForm(const User& user); // Записать все поля из User в форму
+
+    // работа с одним полем (если нужно точечно)
+    QVariant readField(const QString& fieldName) const;
+    void writeField(const QString& fieldName, const QVariant& value);
+
+
 
 protected:
     // фильтр событий (например, для обработки специальных кликов)

@@ -1,3 +1,4 @@
+#include "result.h"
 #include "user_repository.h"
 
 #include <QSqlRecord>
@@ -48,14 +49,6 @@ void UserRepository::updateDateTime()
     lastUpdate = QDateTime::currentDateTime();//решить проблему
 }
 
-RepoResult<int> UserRepository::checkValid(){ //мб в ui
-
-    // Логин - только латиница, цифры, подчёркивание, 3-20 символов
-    static const QRegularExpression re("^[a-zA-Z0-9_]{3,20}$");
-    return re.match(login).hasMatch();
-
-}
-
 //создать пользователя
 RepoResult<int> UserRepository::createUser(const User& user)
 {
@@ -94,6 +87,7 @@ RepoResult<int> UserRepository::createUser(const User& user)
     )");
 
     user.bindToQuery(q); //query.bindValue(":login", QVariant("admin")) и тд
+    q.bindValue(":last_update", QDateTime::currentDateTime());
 
     if (!q.exec()) {
         logDatabaseError("UserRepository::createUser", q.lastError());

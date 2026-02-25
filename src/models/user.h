@@ -75,6 +75,7 @@ public:
     int id() const { return m_id; }
 
     const QString& login() const { return m_login; }
+    //(const User&) { return QString(); } - для пароля
 
     const QString& firstName() const { return m_firstName; }
     const QString& surname() const { return m_surname; }
