@@ -1,7 +1,6 @@
 #ifndef USER_H
 #define USER_H //#pragma once - современная альтернатива
 
-#include <QMainWindow>
 
 #include <QString>
 #include <QDateTime>
@@ -145,31 +144,6 @@ public:
     void bindToQuery(QSqlQuery& query) const;
     static User fromQuery(const QSqlQuery& row);
 
-
-/*
-    void touch() { m_lastUpdate = QDateTime::currentDateTime(); }
-
-    bool isValid() const {
-        return m_id > 0 && !m_login.isEmpty();
-    }
-
-    QString fullName() const { // полное ФИО одной строкой, если не заполнено - логин
-        if (m_surname.isEmpty() && m_firstName.isEmpty() && m_patronymic.isEmpty()) return m_login;
-        QString result = m_surname;
-        if (!m_firstName.isEmpty()) result += " " + m_firstName;
-        if (!m_patronymic.isEmpty()) result += " " + m_patronymic;
-        return result.trimmed();
-    }
-
-    QString shortName() const { // короткое ФИО: "Иванов И.И." (логин)
-        if (m_surname.isEmpty()) return m_login;
-        QString initials;
-        if (!m_firstName.isEmpty()) initials += m_firstName[0] + ".";
-        if (!m_patronymic.isEmpty()) initials += m_patronymic[0] + ".";
-        return m_surname + (initials.isEmpty() ? "" : " " + initials);
-    }
-
-*/
 
 private:
     Q_DISABLE_COPY(User) //защита от случайного копирования
