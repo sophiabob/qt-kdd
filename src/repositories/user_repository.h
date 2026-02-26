@@ -11,6 +11,8 @@
 #include <optional>
 #include "../models/user.h"
 
+#include "../repositories/result.h"
+
 /*
 // === Результат операции с возможностью ошибки ===
 template<typename T>
@@ -40,6 +42,5 @@ private:
     void logDatabaseError(const QString& context, const QSqlError& error) const;
 };
 
-#endif // USER_REPOSITORY_H
 
 #endif // USER_REPOSITORY_H

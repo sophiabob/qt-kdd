@@ -11,9 +11,9 @@
 #include "../repositories/user_repository.h"
 
 
-#include "result.h"
-#include "repositories/user_repository.h"
-#include "models/user.h"
+#include "../repositories/result.h"
+#include "../repositories/user_repository.h"
+#include "../models/user.h"
 
 
 
@@ -55,6 +55,49 @@ MainWindow::MainWindow(int userId, QWidget *parent)
     } else {
         qDebug() << "ОС не распознана";
     }
+
+
+    //========================================== Начало работы с пользователями ======================================================================
+
+    // Вектор всех полей формы
+    const std::vector<FieldRecord> userFormFields = {
+        // === ОСНОВНЫЕ ПОЛЯ ===
+        {"id",            ui->label_51,         FieldRecord::Label},
+        {"surname",       ui->inputName0,       FieldRecord::Text},
+        {"firstName",     ui->inputName1,       FieldRecord::Text},
+        {"patronymic",    ui->inputName2,       FieldRecord::Text},
+        {"login",         ui->inputLogin,       FieldRecord::Text},
+        {"password",      ui->inputPassword,    FieldRecord::Text},
+        {"accessCode",    ui->inputCode,        FieldRecord::Text},
+        {"snils",         ui->inputSnils,       FieldRecord::Text},
+        {"blockReason",   ui->selectUserBlock,  FieldRecord::Text},
+
+        // === ЧИСЛОВЫЕ ПОЛЯ (SpinBox) ===
+        {"employeeNumber", ui->inputIntTab,     FieldRecord::Int},
+        {"cardId",         ui->inputCardId,     FieldRecord::Text},
+        {"dosimetrTldId",  ui->inputIntDoz,     FieldRecord::Text},  // Если текст, или Int если число
+        {"startDoz",       ui->inputUserStartDoz, FieldRecord::Int},
+        {"finishDoz",      ui->inputUserFinishDoz, FieldRecord::Int},
+
+        // === ДОЗИМЕТРИЯ (Float) ===
+        {"annualDose",     ui->spinUserDoseYear,    FieldRecord::Float},
+        {"currentYearDose", ui->spinUserDoseYearNow, FieldRecord::Float},
+        {"currentYearDosePPD", ui->spinUserDoseYearPpd, FieldRecord::Float},
+
+        // === ДАТЫ ===
+        {"lastCellUpdate", ui->inputDateCellDate, FieldRecord::Date},
+        {"birthDate",      ui->dateUserBirthday,  FieldRecord::Date},
+        {"lastUpdate",     ui->dateUserLastUpdate, FieldRecord::Label}, // Если QLabel с текстом
+        {"startUsed",      ui->dateUserSrart,     FieldRecord::Date},
+        {"finishUsed",     ui->dateUserFinish,    FieldRecord::Date},
+
+        // === КОМБОБОКСЫ ===
+        {"role",           ui->selectRole,        FieldRecord::ComboBox},
+        {"gender",         ui->selectGender,      FieldRecord::ComboBox},
+        {"department",     ui->selectDepartment,  FieldRecord::ComboBox},
+    };
+
+    //=========================================== Конец работы с пользователями =====================================================================
 
 
     ui->tabWidget_3->setTabVisible(2, false);
@@ -606,11 +649,9 @@ void MainWindow::on_btnChangePhoto_pressed(){
     }
 }
 
-#pragma region "Работа с пользователями"
-// соединяющий поля и атрибуты юзера
+#pragma region "Работа с пользователями" //======================== Начало пользователя ====================================================================================================================
 
-
-//инициализация модели
+// инициализация модели
 MainWindow::MainWindow(UserRepository* repo, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), m_repo(repo)  // ← Инициализация указателя
 {
@@ -638,6 +679,7 @@ QString hashPasswordSecure(const QString& password)
     // 3. Возвращаем соль + хэш (чтобы потом проверить)
     return salt.toBase64() + ":" + hash.toHex();
 }
+
 bool verifyPassword(const QString& password, const QString& storedHash)
 {
     // Разделяем соль и хэш
@@ -657,31 +699,92 @@ bool verifyPassword(const QString& password, const QString& storedHash)
 }
 
 
-// проверка валидности и заполнения обязательных полей
-void UserRepository::checkValidForUser(const User& user)
+// проверка валидности и заполнения обязательных полей - доделать
+QString checkValidForUser(const User& user)
 {
-    User user;
+    // === ОБЯЗАТЕЛЬНЫЕ ПОЛЯ ===
+    if (user.login().isEmpty()) return "Введите логин";
+    if (user.surname().isEmpty()) return "Введите фамилию";
+    if (user.passwordHash().isEmpty()) return "Введите пароль";
 
-    if (!User::isValid()){
-        return;
+    // === ФОРМАТ ЛОГИНА ===
+    if (user.login().length() < 3)
+        return "Логин должен быть не менее 3 символов";
+    if (user.login().length() > 20)
+        return "Логин не должен превышать 20 символов";
+    if (!QRegularExpression("^[a-zA-Z0-9_]+$").match(user.login()).hasMatch())
+        return "Логин: только латиница, цифры, подчёркивание";
+
+    // === ПАРОЛЬ (проверяем хэш — длина исходного пароля) ===
+    // ⚠️ В модели храним хэш, поэтому проверку длины пароля лучше делать ДО хэширования!
+    // Но если очень нужно: мин. длина хэша SHA-256 = 64 символа (hex)
+    if (user.passwordHash().length() < 64)
+        return "Пароль слишком короткий (минимум 8 символов)";
+
+    // === СНИЛС ===
+    if (user.snils() > 0) {  // Если указан
+        QString snilsStr = QString::number(user.snils());
+        if (snilsStr.length() != 11)
+            return "СНИЛС должен содержать 11 цифр";\
     }
 
-    // логин - Проверка формата: только латиница, 3-20 символов
-    if (!QRegularExpression("^[a-zA-Z0-9_]{3,20}$").match(user.login).hasMatch() &&
-            !login.isEmpty()) {
-        QMessageBox::critical(this, "Ошибка", "Неверный формат логина");//warning, information, critical
-        return;
+    // === ДАТА РОЖДЕНИЯ ===
+    if (user.birthDate().isValid()) {
+        if (user.birthDate() > QDate::currentDate())
+            return "Дата рождения не может быть в будущем";
+        if (user.birthDate() < QDate(1900, 1, 1))
+            return "Неверная дата рождения";
     }
 
+    // === ДОЗИМЕТРИЯ (логические проверки) ===
+    if (user.annualDose() < 0)
+        return "Годовая доза не может быть отрицательной";
+    if (user.currentYearDose() > user.annualDose() && user.annualDose() > 0)
+        return "Текущая доза не может превышать годовую";
+
+    // === ПЕРИОДЫ (startUsed / finishUsed) ===
+    if (user.startUsed().isValid() && user.finishUsed().isValid()) {
+        if (user.finishUsed() < user.startUsed())
+            return "Дата окончания не может быть раньше даты начала";
+    }
+
+    // === РОЛЬ ===
+    if (!user.role().isEmpty())
+        return "Неверная роль пользователя";
+
+    // === ВСЁ ОК ===
+    return {};
 }
 
 
 void MainWindow::on_btnCreateNewUser_pressed() //создаём нового пользователя
 {
-    User newUser;
-    //User newUser = formToUser();
 
-    checkValidForUser(newUser);
+    User newUser;
+    newUser.fillFromMap(readFieldsFromForm(m_userFormFields));  // ← ВСЁ!
+
+    // Пароль хэшируем отдельно (безопасность!)
+    newUser.setPasswordHash(hashPasswordSecure(readFieldsFromForm(m_userFormFields)["password"].toString()));
+
+    // User → Репозиторий
+    auto result = m_repo->createUser(newUser);
+
+    // Обработка результата
+    result.success
+        ? QMessageBox::information(this, "Успех", "ID: " + QString::number(result.data))
+        : QMessageBox::critical(this, "Ошибка", result.errorMessage);
+
+
+
+
+
+   /* //-------------------------------------
+    User newUser;
+
+    formToUser(this); //читаем данные формы
+
+    // чтение данных из формы и запись
+    bindUserToQuery(query, m_userFormFields);
 
     // хэширование пароля
     QString rawPassword = ui->lineEditPassword->text();
@@ -701,153 +804,8 @@ void MainWindow::on_btnCreateNewUser_pressed() //создаём нового п�
     } else {
         QMessageBox::critical(this, "Ошибка", result.errorMessage);
     }
-
-
-
-
-    /*QSqlQuery query;
-
-    int user_id = 1; // Значение по умолчанию, если таблица пуста
-    if (query.exec("SELECT MAX(user_id) AS max_id FROM users;")) {
-        if (query.next()) {
-            user_id = query.value("max_id").toInt() + 1;
-        } else {
-            //qDebug() << "Таблица пуста, используем user_id = 1";
-        }
-    } else {
-        //qDebug() << "Ошибка выполнения запроса4:" << query.lastError().text();
-    }
-
-    QString name0 = ui->inputName0->text();
-    QString name1 = ui->inputName1->text();
-    QString name2 = ui->inputName2->text();
-    QString Login = ui->inputLogin->text();
-    QString Password = ui->inputPassword->text();
-    QString Code = ui->inputCode->text();
-    QString Snils = ui->inputSnils->text();
-
-    int IntTab = ui->inputIntTab->value();
-    QString CardId = ui->inputCardId->text();
-    QString IntDoz = ui->inputIntDoz->text();
-    int UserStartDoz = ui->inputUserStartDoz->value();
-    int UserFinishDoz = ui->inputUserFinishDoz->value();
-
-    int UserDoseYear = ui->spinUserDoseYear->value();
-    int UserDoseYearNow = ui->spinUserDoseYearNow->value();
-    int UserDoseYearPpd = ui->spinUserDoseYearPpd->value();
-
-    QDate DateCellDate = ui->inputDateCellDate->date();
-    QDate UserBirthday = ui->dateUserBirthday->date();
-
-    //QDate UserLastUpdate = ui->dateUserLastUpdate->date();
-    QTimeZone moscowTimeZone("Europe/Moscow");
-    QDateTime utcDateTime = QDateTime::currentDateTimeUtc();
-    QDateTime moscowDateTime = utcDateTime.toTimeZone(moscowTimeZone);
-    QString UserLastUpdate = moscowDateTime.toString("yyyy-MM-dd HH:mm:ss");
-
-
-    QDate UserSrart = ui->dateUserSrart->date();
-    QDate UserFinish = ui->dateUserFinish->date();
-
-    QString Role = ui->selectRole->currentText();
-    QString Gender = ui->selectGender->currentText();
-    QString Department = ui->selectDepartment->currentText();
-    QString UserBlock = ui->selectUserBlock->text();
-
-    QString Set_1 = ui->selectSet->currentText();
-    int Set_2 = Set_1.toInt();
-    QString Set = QString::number(Set_2);
-
-    QString Kas = ui->selectKas->currentText();
-    Kas.toInt();
-
-    QString Mesh = ui->selectMesh->currentText();
-    Mesh.toInt();
-
-
-    if (name0.isEmpty()) {
-        QMessageBox::warning(this, "Ошибка03", "Поле 'Фамилия' не может быть пустым!");
-        return;
-    }
-    if (name1.isEmpty()) {
-        QMessageBox::warning(this, "Ошибка04", "Поле 'Имя' не может быть пустым!");
-        return;
-    }
-    if (name2.isEmpty()) {
-        QMessageBox::warning(this, "Ошибка05", "Поле 'Отчество' не может быть пустым!");
-        return;
-    }
-    if (Login.isEmpty()) {
-        QMessageBox::warning(this, "Ошибка06", "Поле 'Логин' не может быть пустым!");
-        return;
-    }
-    if (Password.isEmpty()) {
-        QMessageBox::warning(this, "Ошибка006", "Поле 'Пароль' не может быть пустым!");
-        return;
-    }
-    if (CardId.isEmpty()) {
-        QMessageBox::warning(this, "Ошибка006", "Поле 'Идентификатор карты' не может быть пустым!");
-        return;
-    }
-    if (IntTab == 0) {
-        QMessageBox::warning(this, "Ошибка006", "Поле 'Таб № работника' не может быть равным 0!");
-        return;
-    }
-    if (Code.isEmpty()) {
-        QMessageBox::warning(this, "Ошибка07", "Поле 'Код пропуска' не может быть пустым!");
-        return;
-    }
-    if (IntDoz.isEmpty()) {
-        QMessageBox::warning(this, "Ошибка006", "Поле 'Номер дозимерта' не может быть пустым!");
-        return;
-    }
-
-    query.prepare("INSERT INTO users(user_id, login, password, name_0, name_1, name_2, snils, gender, birthday, role, tab_num, department, card_id, set_ID, kas_ID, mesh_ID, doz_tld_id, cell_date, dose_year, dose_year_now, dose_year_now_ppd, code, block, last_update) VALUES (:user_id, :login, :password, :name_0, :name_1, :name_2, :snils, :gender, :birthday, :role, :tab_num, :department, :card_id, :set_ID, :kas_ID, :mesh_ID, :doz_tld_id, :cell_date, :dose_year, :dose_year_now, :dose_year_now_ppd, :code, :block, :last_update)");
-
-    query.bindValue(":user_id", user_id);
-    query.bindValue(":name_0", name0);
-    query.bindValue(":name_1", name1);
-    query.bindValue(":name_2", name2);
-    query.bindValue(":login", Login);
-    query.bindValue(":password", Password);
-    query.bindValue(":code", Code);
-    query.bindValue(":snils", Snils);
-
-    query.bindValue(":tab_num", IntTab);
-    query.bindValue(":card_id", CardId);
-    query.bindValue(":doz_tld_id", IntDoz);
-
-    query.bindValue(":dose_year", UserDoseYear);
-    query.bindValue(":dose_year_now", UserDoseYearNow);
-    query.bindValue(":dose_year_now_ppd", UserDoseYearPpd);
-
-    query.bindValue(":cell_date", DateCellDate);
-    query.bindValue(":birthday", UserBirthday);
-    query.bindValue(":last_update", UserLastUpdate);
-
-    query.bindValue(":role", Role);
-    query.bindValue(":gender", Gender);
-    query.bindValue(":department", Department);
-    query.bindValue(":set_ID", Set);
-    query.bindValue(":kas_ID", Kas);
-    query.bindValue(":mesh_ID", Mesh);
-    query.bindValue(":block", UserBlock);
-
-    query.bindValue(":start_used_date", UserSrart);
-    query.bindValue(":finish_used_date", UserFinish);
-    query.bindValue(":start_doz", UserStartDoz);
-    query.bindValue(":finish_doz", UserFinishDoz);
-
-    // Выполняем первый запрос
-    if (!query.exec()) {
-        if (query.lastError().text().contains("повторяющееся значение ключа нарушает ограничение уникальности \"users_tab_num_key\"")){
-            QMessageBox::critical(this, "Ошибка01", "Табельный номер работника должен быть уникальным");
-        } else {
-            QMessageBox::critical(this, "Ошибка1", "Ошибка при вставке в users2:", query.lastError().text());
-        }
-        QSqlDatabase::database().rollback();  // Откатываем транзакцию
-        return;
-    }*/
+*/
+//----------------------------------------------
 
 
     QSqlQuery query;
@@ -1774,7 +1732,111 @@ void MainWindow::on_btnCreateUser_pressed()
         connect(btnCreateNewUser, &QPushButton::pressed, this, &MainWindow::on_btnCreateNewUser_pressed);//не забыть по h
     }
 }
-#pragma endregion
+
+#pragma endregion //========================================== Конец пользователя ====================================
+
+
+// === ЗАПИСЬ: User/данные → Виджеты формы ===
+void writeFieldsToForm(const std::vector<FieldRecord>& fields, const QMap<QString, QVariant>& data)
+{
+    for (const auto& field : fields) {
+        if (!field.widget || !data.contains(field.fieldName)) continue;
+
+        QVariant value = data[field.fieldName];
+
+        switch (field.type) {
+            case FieldRecord::Text:
+                if (auto* line = qobject_cast<QLineEdit*>(field.widget))
+                    line->setText(value.toString());
+                break;
+
+            case FieldRecord::Int:
+                if (auto* spin = qobject_cast<QSpinBox*>(field.widget))
+                    spin->setValue(value.toInt());
+                else if (auto* line = qobject_cast<QLineEdit*>(field.widget))
+                    line->setText(QString::number(value.toInt()));
+                break;
+
+            case FieldRecord::Float:
+                if (auto* dspin = qobject_cast<QDoubleSpinBox*>(field.widget))
+                    dspin->setValue(value.toFloat());
+                break;
+
+            case FieldRecord::Date:
+                if (auto* dateEdit = qobject_cast<QDateEdit*>(field.widget))
+                    dateEdit->setDate(value.toDate());
+                break;
+
+            case FieldRecord::ComboBox:
+                if (auto* combo = qobject_cast<QComboBox*>(field.widget))
+                    combo->setCurrentText(value.toString());
+                break;
+
+            case FieldRecord::Label:
+                if (auto* label = qobject_cast<QLabel*>(field.widget)) {
+                    if (value.type() == QVariant::DateTime)
+                        label->setText(value.toDateTime().toString("dd.MM.yyyy hh:mm"));
+                    else
+                        label->setText(value.toString());
+                }
+                break;
+        }
+    }
+}
+
+// === ЧТЕНИЕ: Виджеты формы → QMap с данными ===
+QMap<QString, QVariant> readFieldsFromForm(const std::vector<FieldRecord>& fields)
+{
+    QMap<QString, QVariant> data;
+
+    for (const auto& field : fields) {
+        if (!field.widget) continue;
+
+        QVariant value;
+
+        switch (field.type) {
+            case FieldRecord::Text:
+                if (auto* line = qobject_cast<QLineEdit*>(field.widget))
+                    value = line->text();
+                break;
+
+            case FieldRecord::Int:
+                if (auto* spin = qobject_cast<QSpinBox*>(field.widget))
+                    value = spin->value();
+                else if (auto* line = qobject_cast<QLineEdit*>(field.widget))
+                    value = line->text().toInt();
+                break;
+
+            case FieldRecord::Float:
+                if (auto* dspin = qobject_cast<QDoubleSpinBox*>(field.widget))
+                    value = dspin->value();
+                break;
+
+            case FieldRecord::Date:
+                if (auto* dateEdit = qobject_cast<QDateEdit*>(field.widget))
+                    value = dateEdit->date();
+                break;
+
+            case FieldRecord::ComboBox:
+                if (auto* combo = qobject_cast<QComboBox*>(field.widget))
+                    value = combo->currentText();
+                break;
+
+            case FieldRecord::Label:
+                if (auto* label = qobject_cast<QLabel*>(field.widget))
+                    value = label->text();
+                break;
+        }
+
+        data[field.fieldName] = value;
+    }
+
+    return data;
+}
+
+
+//=========================================== Общие функции закончились =====================================
+
 
 void MainWindow::on_btnSetSave_pressed() //новый set
 {

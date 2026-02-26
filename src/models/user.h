@@ -146,6 +146,23 @@ public:
     static User fromQuery(const QSqlQuery& row);
 
 
+    //для взиамодействия форма и юзера
+    void fillFromMap(const QMap<QString, QVariant>& data) {
+        const QMetaObject* meta = this->metaObject();
+        for (auto it = data.begin(); it != data.end(); ++it) {
+            // Ищем свойство с таким же именем, как ключ в QMap
+            int idx = meta->indexOfProperty(it.key().toUtf8().constData());
+            if (idx >= 0) {
+                QMetaProperty prop = meta->property(idx);
+                // Записываем, если свойство доступно для записи
+                if (prop.isWritable()) {
+                    prop.write(this, it.value());
+                }
+            }
+        }
+    }
+
+
 private:
     Q_DISABLE_COPY(User) //защита от случайного копирования
 
@@ -186,6 +203,8 @@ private:
 
     // --- Время ---
     QDateTime m_lastUpdate;      // Время последнего обновления (было timestamp)
+
+
 
 };
 

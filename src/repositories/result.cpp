@@ -3,7 +3,7 @@
 //Result::Result() {}
 
 
-Result<int> UserRepository::insert(const User& user)
+Result<int> Result::insert(const User& user)
 {
     // Проверка уникальности
     if (loginExists(user.login())) {

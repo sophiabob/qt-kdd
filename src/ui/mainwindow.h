@@ -73,6 +73,9 @@ class User;
 #include <QCryptographicHash>
 #include <QRandomGenerator>
 
+#include <iostream>
+#include <vector>
+
 
 // объявление пространства имён для UI, сгенерированного из .ui файла
 QT_BEGIN_NAMESPACE
@@ -551,14 +554,13 @@ private:
 
 
     // структура привязки для виджетов
-    struct FieldMap {
-        QString name;
-        QWidget* widget;
-        enum Type { Text, Int, Float, DateTime, Bool } type;
-        // Лямбда: ВИДЖЕТ → User (чтение из формы)
-        std::function<void(User&, const QVariant&)> readToUser;
-        // Лямбда: User → ВИДЖЕТ (запись в форму)
-        std::function<void(QWidget*, const QVariant&)> writeFromUser;
+    struct FieldRecord {
+        QString fieldName;    // Имя поля в БД: "login", "name_0"...
+        QString dbColumn;     // Имя колонки в таблице: "login", "name_0"...
+        QWidget* widget;      // Указатель на виджет
+        enum Type { Text, Int, Float, Date, DateTime, ComboBox, Label } type;
+        bool writable;        // Можно ли записывать в это поле (для INSERT/UPDATE)
+        bool readable;        // Можно ли читать из этого поля (для SELECT)
     };
     QVector<FieldMap> m_fieldMaps;
 
@@ -572,6 +574,28 @@ private:
     void writeField(const QString& fieldName, const QVariant& value);
 
 
+
+    struct FieldRecord {
+        QString fieldName;           // Имя поля: "login", "surname"...
+        QWidget* widget;             // Указатель на виджет
+        enum Type { Text, Int, Float, Date, ComboBox, Label } type;
+    };
+
+    QString checkValidForUser(const User& user);
+
+    // Вектор полей (заполняется в конструкторе)
+    std::vector<FieldRecord> m_userFormFields;
+
+    // Универсальные функции
+    void writeFieldsToForm(const std::vector<FieldRecord>& fields, const QMap<QString, QVariant>& data);
+    QMap<QString, QVariant> readFieldsFromForm(const std::vector<FieldRecord>& fields);
+
+    // Валидация данных из формы
+    QString validateFormData(const QMap<QString, QVariant>& data);
+
+    // передача данных из пользователя в форму и обратно
+    void userToForm(QWidget *parent);
+    void formToUser(QWidget *parent);
 
 protected:
     // фильтр событий (например, для обработки специальных кликов)
