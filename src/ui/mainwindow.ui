@@ -1217,7 +1217,7 @@ QStatusBar
          </size>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -2083,7 +2083,7 @@ QStatusBar
             <item row="0" column="0">
              <widget class="QTabWidget" name="tabWidget_7">
               <property name="currentIndex">
-               <number>0</number>
+               <number>2</number>
               </property>
               <widget class="QWidget" name="tab_28">
                <attribute name="title">
@@ -3104,7 +3104,7 @@ QStatusBar
                 <item row="0" column="0">
                  <widget class="QTabWidget" name="tabWidget_9">
                   <property name="currentIndex">
-                   <number>0</number>
+                   <number>1</number>
                   </property>
                   <widget class="QWidget" name="tab_33">
                    <attribute name="title">
@@ -3152,32 +3152,137 @@ QStatusBar
                    <attribute name="title">
                     <string>ТЛД</string>
                    </attribute>
-                   <widget class="QLabel" name="label_166">
-                    <property name="geometry">
-                     <rect>
-                      <x>80</x>
-                      <y>70</y>
-                      <width>171</width>
-                      <height>16</height>
-                     </rect>
-                    </property>
-                    <property name="text">
-                     <string>Текущий пользователь</string>
-                    </property>
-                   </widget>
-                   <widget class="QLabel" name="label_167">
-                    <property name="geometry">
-                     <rect>
-                      <x>380</x>
-                      <y>50</y>
-                      <width>141</width>
-                      <height>16</height>
-                     </rect>
-                    </property>
-                    <property name="text">
-                     <string>Текущий додиметр</string>
-                    </property>
-                   </widget>
+                   <layout class="QGridLayout" name="gridLayout_61">
+                    <item row="0" column="0">
+                     <layout class="QGridLayout" name="gridLayout_62">
+                      <item row="1" column="0" colspan="3">
+                       <widget class="QTableView" name="tableView_2"/>
+                      </item>
+                      <item row="2" column="1">
+                       <spacer name="verticalSpacer_5">
+                        <property name="orientation">
+                         <enum>Qt::Orientation::Vertical</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>20</width>
+                          <height>40</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item row="3" column="0">
+                       <spacer name="horizontalSpacer_127">
+                        <property name="orientation">
+                         <enum>Qt::Orientation::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item row="3" column="1">
+                       <widget class="QPushButton" name="pushButton_dozSearch_3">
+                        <property name="text">
+                         <string>Перейти на страницу редактирования доз</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="3" column="2">
+                       <spacer name="horizontalSpacer_128">
+                        <property name="orientation">
+                         <enum>Qt::Orientation::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item row="4" column="1">
+                       <spacer name="verticalSpacer_6">
+                        <property name="orientation">
+                         <enum>Qt::Orientation::Vertical</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>20</width>
+                          <height>40</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item row="0" column="0" colspan="3">
+                       <layout class="QHBoxLayout" name="horizontalLayout_59">
+                        <item>
+                         <widget class="QLabel" name="label_192">
+                          <property name="text">
+                           <string>Пользователь: </string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QComboBox" name="comboBox_dozListUsers_2"/>
+                        </item>
+                        <item>
+                         <spacer name="horizontalSpacer_125">
+                          <property name="orientation">
+                           <enum>Qt::Orientation::Horizontal</enum>
+                          </property>
+                          <property name="sizeType">
+                           <enum>QSizePolicy::Policy::Minimum</enum>
+                          </property>
+                          <property name="sizeHint" stdset="0">
+                           <size>
+                            <width>40</width>
+                            <height>20</height>
+                           </size>
+                          </property>
+                         </spacer>
+                        </item>
+                        <item>
+                         <widget class="QLabel" name="label_193">
+                          <property name="text">
+                           <string>Дозиметр: </string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QComboBox" name="comboBox_dozListDoses_2"/>
+                        </item>
+                        <item>
+                         <spacer name="horizontalSpacer_126">
+                          <property name="orientation">
+                           <enum>Qt::Orientation::Horizontal</enum>
+                          </property>
+                          <property name="sizeType">
+                           <enum>QSizePolicy::Policy::Preferred</enum>
+                          </property>
+                          <property name="sizeHint" stdset="0">
+                           <size>
+                            <width>40</width>
+                            <height>20</height>
+                           </size>
+                          </property>
+                         </spacer>
+                        </item>
+                        <item>
+                         <widget class="QPushButton" name="pushButton_dozSearch_2">
+                          <property name="text">
+                           <string>Найти</string>
+                          </property>
+                         </widget>
+                        </item>
+                       </layout>
+                      </item>
+                     </layout>
+                    </item>
+                   </layout>
                   </widget>
                   <widget class="QWidget" name="tab_35">
                    <attribute name="title">
@@ -3196,7 +3301,7 @@ QStatusBar
                 <item row="0" column="0">
                  <widget class="QTabWidget" name="tabWidget_10">
                   <property name="currentIndex">
-                   <number>0</number>
+                   <number>4</number>
                   </property>
                   <widget class="QWidget" name="tab_36">
                    <attribute name="title">
@@ -3204,383 +3309,369 @@ QStatusBar
                    </attribute>
                    <layout class="QGridLayout" name="gridLayout_74">
                     <item row="0" column="0">
-                     <widget class="QTabWidget" name="tabWidget_15">
-                      <property name="currentIndex">
-                       <number>0</number>
-                      </property>
-                      <widget class="QWidget" name="tab_47">
-                       <attribute name="title">
-                        <string>Дозы</string>
-                       </attribute>
-                       <layout class="QGridLayout" name="gridLayout_73">
-                        <item row="0" column="0">
-                         <layout class="QGridLayout" name="gridLayout_68">
-                          <item row="0" column="6">
-                           <spacer name="horizontalSpacer_106">
-                            <property name="orientation">
-                             <enum>Qt::Orientation::Horizontal</enum>
-                            </property>
-                            <property name="sizeHint" stdset="0">
-                             <size>
-                              <width>40</width>
-                              <height>20</height>
-                             </size>
-                            </property>
-                           </spacer>
-                          </item>
-                          <item row="0" column="7">
-                           <widget class="QPushButton" name="pushButton_ppdFilterClean">
-                            <property name="text">
-                             <string>Сбросить фильтр и сортировку</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="0" column="3">
-                           <widget class="QDateTimeEdit" name="dateEdit_ppdSearchData1"/>
-                          </item>
-                          <item row="0" column="0">
-                           <spacer name="horizontalSpacer_107">
-                            <property name="orientation">
-                             <enum>Qt::Orientation::Horizontal</enum>
-                            </property>
-                            <property name="sizeHint" stdset="0">
-                             <size>
-                              <width>40</width>
-                              <height>20</height>
-                             </size>
-                            </property>
-                           </spacer>
-                          </item>
-                          <item row="0" column="4">
-                           <widget class="QDateTimeEdit" name="dateEdit_ppdSearchData2"/>
+                     <layout class="QGridLayout" name="gridLayout_68">
+                      <item row="0" column="6">
+                       <spacer name="horizontalSpacer_106">
+                        <property name="orientation">
+                         <enum>Qt::Orientation::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item row="0" column="7">
+                       <widget class="QPushButton" name="pushButton_ppdFilterClean">
+                        <property name="text">
+                         <string>Сбросить фильтр и сортировку</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="0" column="3">
+                       <widget class="QDateTimeEdit" name="dateEdit_ppdSearchData1"/>
+                      </item>
+                      <item row="0" column="0">
+                       <spacer name="horizontalSpacer_107">
+                        <property name="orientation">
+                         <enum>Qt::Orientation::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item row="0" column="4">
+                       <widget class="QDateTimeEdit" name="dateEdit_ppdSearchData2"/>
+                      </item>
+                      <item row="0" column="1">
+                       <widget class="QLineEdit" name="line_ppdSearch"/>
+                      </item>
+                      <item row="0" column="5">
+                       <widget class="QPushButton" name="pushButton_ppdFilter">
+                        <property name="text">
+                         <string>Фильтровать по датам</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="0" column="2">
+                       <widget class="QPushButton" name="btn_ppdSearch">
+                        <property name="cursor">
+                         <cursorShape>PointingHandCursor</cursorShape>
+                        </property>
+                        <property name="mouseTracking">
+                         <bool>true</bool>
+                        </property>
+                        <property name="text">
+                         <string>Найти по пользователю</string>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                    <item row="1" column="0">
+                     <layout class="QGridLayout" name="gridLayout_69">
+                      <item row="2" column="0" colspan="2">
+                       <spacer name="horizontalSpacer_108">
+                        <property name="orientation">
+                         <enum>Qt::Orientation::Horizontal</enum>
+                        </property>
+                        <property name="sizeType">
+                         <enum>QSizePolicy::Policy::Minimum</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item row="1" column="2" rowspan="4">
+                       <widget class="QScrollArea" name="scrollArea_8">
+                        <property name="minimumSize">
+                         <size>
+                          <width>450</width>
+                          <height>0</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>550</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="frameShape">
+                         <enum>QFrame::Shape::StyledPanel</enum>
+                        </property>
+                        <property name="horizontalScrollBarPolicy">
+                         <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                        </property>
+                        <property name="sizeAdjustPolicy">
+                         <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustIgnored</enum>
+                        </property>
+                        <property name="widgetResizable">
+                         <bool>true</bool>
+                        </property>
+                        <widget class="QWidget" name="scrollAreaWidgetContents_9">
+                         <property name="geometry">
+                          <rect>
+                           <x>0</x>
+                           <y>0</y>
+                           <width>534</width>
+                           <height>468</height>
+                          </rect>
+                         </property>
+                         <layout class="QGridLayout" name="gridLayout_70">
+                          <item row="1" column="1">
+                           <layout class="QVBoxLayout" name="verticalLayout_ForDoseBtn">
+                            <item>
+                             <widget class="QPushButton" name="pushButton_DoseSaveNew">
+                              <property name="text">
+                               <string>Сохранить новое показание</string>
+                              </property>
+                             </widget>
+                            </item>
+                           </layout>
                           </item>
                           <item row="0" column="1">
-                           <widget class="QLineEdit" name="line_ppdSearch"/>
-                          </item>
-                          <item row="0" column="5">
-                           <widget class="QPushButton" name="pushButton_ppdFilter">
-                            <property name="text">
-                             <string>Фильтровать по датам</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="0" column="2">
-                           <widget class="QPushButton" name="btn_ppdSearch">
-                            <property name="cursor">
-                             <cursorShape>PointingHandCursor</cursorShape>
-                            </property>
-                            <property name="mouseTracking">
-                             <bool>true</bool>
-                            </property>
-                            <property name="text">
-                             <string>Найти по пользователю</string>
-                            </property>
-                           </widget>
-                          </item>
-                         </layout>
-                        </item>
-                        <item row="1" column="0">
-                         <layout class="QGridLayout" name="gridLayout_69">
-                          <item row="2" column="0" colspan="2">
-                           <spacer name="horizontalSpacer_108">
-                            <property name="orientation">
-                             <enum>Qt::Orientation::Horizontal</enum>
-                            </property>
-                            <property name="sizeType">
-                             <enum>QSizePolicy::Policy::Minimum</enum>
-                            </property>
-                            <property name="sizeHint" stdset="0">
-                             <size>
-                              <width>40</width>
-                              <height>20</height>
-                             </size>
-                            </property>
-                           </spacer>
-                          </item>
-                          <item row="1" column="2" rowspan="4">
-                           <widget class="QScrollArea" name="scrollArea_8">
-                            <property name="minimumSize">
-                             <size>
-                              <width>450</width>
-                              <height>0</height>
-                             </size>
-                            </property>
-                            <property name="maximumSize">
-                             <size>
-                              <width>550</width>
-                              <height>16777215</height>
-                             </size>
-                            </property>
-                            <property name="frameShape">
-                             <enum>QFrame::Shape::StyledPanel</enum>
-                            </property>
-                            <property name="horizontalScrollBarPolicy">
-                             <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-                            </property>
-                            <property name="sizeAdjustPolicy">
-                             <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustIgnored</enum>
-                            </property>
-                            <property name="widgetResizable">
-                             <bool>true</bool>
-                            </property>
-                            <widget class="QWidget" name="scrollAreaWidgetContents_9">
-                             <property name="geometry">
-                              <rect>
-                               <x>0</x>
-                               <y>0</y>
-                               <width>434</width>
-                               <height>468</height>
-                              </rect>
-                             </property>
-                             <layout class="QGridLayout" name="gridLayout_70">
-                              <item row="1" column="1">
-                               <layout class="QVBoxLayout" name="verticalLayout_ForDoseBtn">
-                                <item>
-                                 <widget class="QPushButton" name="pushButton_DoseSaveNew">
-                                  <property name="text">
-                                   <string>Сохранить новое показание</string>
-                                  </property>
-                                 </widget>
-                                </item>
-                               </layout>
-                              </item>
+                           <layout class="QGridLayout" name="gridLayout_71">
+                            <item row="0" column="1">
+                             <widget class="QPushButton" name="pushButton_DoseCleanInput">
+                              <property name="text">
+                               <string>Очистить поля</string>
+                              </property>
+                             </widget>
+                            </item>
+                            <item row="1" column="0" colspan="2">
+                             <layout class="QGridLayout" name="gridLayout_72">
                               <item row="0" column="1">
-                               <layout class="QGridLayout" name="gridLayout_71">
-                                <item row="0" column="1">
-                                 <widget class="QPushButton" name="pushButton_DoseCleanInput">
-                                  <property name="text">
-                                   <string>Очистить поля</string>
-                                  </property>
-                                 </widget>
+                               <widget class="QLabel" name="label_DoseId">
+                                <property name="text">
+                                 <string>-</string>
+                                </property>
+                               </widget>
+                              </item>
+                              <item row="8" column="0">
+                               <widget class="QLabel" name="label_177">
+                                <property name="text">
+                                 <string>Тип дозиметра:</string>
+                                </property>
+                               </widget>
+                              </item>
+                              <item row="13" column="0">
+                               <widget class="QLabel" name="label_186">
+                                <property name="text">
+                                 <string>Старт работы (время):</string>
+                                </property>
+                               </widget>
+                              </item>
+                              <item row="5" column="1">
+                               <widget class="QDateTimeEdit" name="timeEdit_Time"/>
+                              </item>
+                              <item row="3" column="1">
+                               <widget class="QLineEdit" name="spinBox_DoseNomerPdd"/>
+                              </item>
+                              <item row="3" column="0">
+                               <widget class="QLabel" name="label_176">
+                                <property name="text">
+                                 <string>Номер дозиметра:</string>
+                                </property>
+                               </widget>
+                              </item>
+                              <item row="12" column="0">
+                               <widget class="QLabel" name="label_181">
+                                <property name="text">
+                                 <string>Комментарий:</string>
+                                </property>
+                               </widget>
+                              </item>
+                              <item row="16" column="0">
+                               <widget class="QLabel" name="label_184">
+                                <property name="text">
+                                 <string>Завершена работа (время):</string>
+                                </property>
+                               </widget>
+                              </item>
+                              <item row="17" column="1">
+                               <widget class="QLabel" name="label_DoseLastUpdate">
+                                <property name="text">
+                                 <string>-</string>
+                                </property>
+                               </widget>
+                              </item>
+                              <item row="8" column="1">
+                               <widget class="QComboBox" name="comboBox_TypePpd">
+                                <item>
+                                 <property name="text">
+                                  <string>0 - альфа</string>
+                                 </property>
                                 </item>
-                                <item row="1" column="0" colspan="2">
-                                 <layout class="QGridLayout" name="gridLayout_72">
-                                  <item row="0" column="1">
-                                   <widget class="QLabel" name="label_DoseId">
-                                    <property name="text">
-                                     <string>-</string>
-                                    </property>
-                                   </widget>
-                                  </item>
-                                  <item row="8" column="0">
-                                   <widget class="QLabel" name="label_177">
-                                    <property name="text">
-                                     <string>Тип дозиметра:</string>
-                                    </property>
-                                   </widget>
-                                  </item>
-                                  <item row="13" column="0">
-                                   <widget class="QLabel" name="label_186">
-                                    <property name="text">
-                                     <string>Старт работы (время):</string>
-                                    </property>
-                                   </widget>
-                                  </item>
-                                  <item row="5" column="1">
-                                   <widget class="QDateTimeEdit" name="timeEdit_Time"/>
-                                  </item>
-                                  <item row="3" column="1">
-                                   <widget class="QLineEdit" name="spinBox_DoseNomerPdd"/>
-                                  </item>
-                                  <item row="3" column="0">
-                                   <widget class="QLabel" name="label_176">
-                                    <property name="text">
-                                     <string>Номер дозиметра:</string>
-                                    </property>
-                                   </widget>
-                                  </item>
-                                  <item row="12" column="0">
-                                   <widget class="QLabel" name="label_181">
-                                    <property name="text">
-                                     <string>Комментарий:</string>
-                                    </property>
-                                   </widget>
-                                  </item>
-                                  <item row="16" column="0">
-                                   <widget class="QLabel" name="label_184">
-                                    <property name="text">
-                                     <string>Завершена работа (время):</string>
-                                    </property>
-                                   </widget>
-                                  </item>
-                                  <item row="17" column="1">
-                                   <widget class="QLabel" name="label_DoseLastUpdate">
-                                    <property name="text">
-                                     <string>-</string>
-                                    </property>
-                                   </widget>
-                                  </item>
-                                  <item row="8" column="1">
-                                   <widget class="QComboBox" name="comboBox_TypePpd">
-                                    <item>
-                                     <property name="text">
-                                      <string>0 - альфа</string>
-                                     </property>
-                                    </item>
-                                    <item>
-                                     <property name="text">
-                                      <string>1 - гамма</string>
-                                     </property>
-                                    </item>
-                                    <item>
-                                     <property name="text">
-                                      <string>2 - нейтроны</string>
-                                     </property>
-                                    </item>
-                                    <item>
-                                     <property name="text">
-                                      <string>3 - бета</string>
-                                     </property>
-                                    </item>
-                                   </widget>
-                                  </item>
-                                  <item row="11" column="0">
-                                   <widget class="QLabel" name="label_178">
-                                    <property name="text">
-                                     <string>Mаксимальная мощность дозы, мЗв/ч:</string>
-                                    </property>
-                                   </widget>
-                                  </item>
-                                  <item row="12" column="1">
-                                   <widget class="QLineEdit" name="lineEdit_DoseNote"/>
-                                  </item>
-                                  <item row="11" column="1">
-                                   <widget class="QDoubleSpinBox" name="spinBox_DoseRateMax"/>
-                                  </item>
-                                  <item row="2" column="1">
-                                   <widget class="QComboBox" name="comboBox_DoseUsersDutyId"/>
-                                  </item>
-                                  <item row="5" column="0">
-                                   <widget class="QLabel" name="label_179">
-                                    <property name="text">
-                                     <string>Время работы c дозиметром</string>
-                                    </property>
-                                   </widget>
-                                  </item>
-                                  <item row="0" column="0">
-                                   <widget class="QLabel" name="label_183">
-                                    <property name="text">
-                                     <string> ID выполняемой работы:</string>
-                                    </property>
-                                   </widget>
-                                  </item>
-                                  <item row="13" column="1">
-                                   <widget class="QDateTimeEdit" name="timeEdit_DoseStartWork"/>
-                                  </item>
-                                  <item row="7" column="0">
-                                   <widget class="QLabel" name="label_180">
-                                    <property name="text">
-                                     <string>Время максивального значения</string>
-                                    </property>
-                                   </widget>
-                                  </item>
-                                  <item row="2" column="0">
-                                   <widget class="QLabel" name="label_182">
-                                    <property name="text">
-                                     <string>ID наряда пользователя:</string>
-                                    </property>
-                                   </widget>
-                                  </item>
-                                  <item row="1" column="0">
-                                   <widget class="QLabel" name="label_175">
-                                    <property name="text">
-                                     <string>ID Пользователя:</string>
-                                    </property>
-                                   </widget>
-                                  </item>
-                                  <item row="9" column="0">
-                                   <widget class="QLabel" name="label_174">
-                                    <property name="text">
-                                     <string>Доза мЗв:</string>
-                                    </property>
-                                   </widget>
-                                  </item>
-                                  <item row="16" column="1">
-                                   <widget class="QDateTimeEdit" name="timeEdit_FinishWork"/>
-                                  </item>
-                                  <item row="1" column="1">
-                                   <widget class="QComboBox" name="comboBox_DoseUserId"/>
-                                  </item>
-                                  <item row="17" column="0">
-                                   <widget class="QLabel" name="label_185">
-                                    <property name="text">
-                                     <string>Последнее обновление:</string>
-                                    </property>
-                                   </widget>
-                                  </item>
-                                  <item row="9" column="1">
-                                   <widget class="QDoubleSpinBox" name="doubleSpinBox_DoseDose"/>
-                                  </item>
-                                  <item row="7" column="1">
-                                   <widget class="QDateTimeEdit" name="timeEdit_DoseTimeMax"/>
-                                  </item>
-                                 </layout>
+                                <item>
+                                 <property name="text">
+                                  <string>1 - гамма</string>
+                                 </property>
                                 </item>
-                                <item row="0" column="0">
-                                 <spacer name="horizontalSpacer_11">
-                                  <property name="orientation">
-                                   <enum>Qt::Orientation::Horizontal</enum>
-                                  </property>
-                                  <property name="sizeType">
-                                   <enum>QSizePolicy::Policy::Minimum</enum>
-                                  </property>
-                                  <property name="sizeHint" stdset="0">
-                                   <size>
-                                    <width>40</width>
-                                    <height>20</height>
-                                   </size>
-                                  </property>
-                                 </spacer>
+                                <item>
+                                 <property name="text">
+                                  <string>2 - нейтроны</string>
+                                 </property>
                                 </item>
-                               </layout>
+                                <item>
+                                 <property name="text">
+                                  <string>3 - бета</string>
+                                 </property>
+                                </item>
+                               </widget>
+                              </item>
+                              <item row="11" column="0">
+                               <widget class="QLabel" name="label_178">
+                                <property name="text">
+                                 <string>Mаксимальная мощность дозы, мЗв/ч:</string>
+                                </property>
+                               </widget>
+                              </item>
+                              <item row="12" column="1">
+                               <widget class="QLineEdit" name="lineEdit_DoseNote"/>
+                              </item>
+                              <item row="11" column="1">
+                               <widget class="QDoubleSpinBox" name="spinBox_DoseRateMax"/>
+                              </item>
+                              <item row="2" column="1">
+                               <widget class="QComboBox" name="comboBox_DoseUsersDutyId"/>
+                              </item>
+                              <item row="5" column="0">
+                               <widget class="QLabel" name="label_179">
+                                <property name="text">
+                                 <string>Время работы c дозиметром</string>
+                                </property>
+                               </widget>
+                              </item>
+                              <item row="0" column="0">
+                               <widget class="QLabel" name="label_183">
+                                <property name="text">
+                                 <string> ID выполняемой работы:</string>
+                                </property>
+                               </widget>
+                              </item>
+                              <item row="13" column="1">
+                               <widget class="QDateTimeEdit" name="timeEdit_DoseStartWork"/>
+                              </item>
+                              <item row="7" column="0">
+                               <widget class="QLabel" name="label_180">
+                                <property name="text">
+                                 <string>Время максивального значения</string>
+                                </property>
+                               </widget>
+                              </item>
+                              <item row="2" column="0">
+                               <widget class="QLabel" name="label_182">
+                                <property name="text">
+                                 <string>ID наряда пользователя:</string>
+                                </property>
+                               </widget>
+                              </item>
+                              <item row="1" column="0">
+                               <widget class="QLabel" name="label_175">
+                                <property name="text">
+                                 <string>ID Пользователя:</string>
+                                </property>
+                               </widget>
+                              </item>
+                              <item row="9" column="0">
+                               <widget class="QLabel" name="label_174">
+                                <property name="text">
+                                 <string>Доза мЗв:</string>
+                                </property>
+                               </widget>
+                              </item>
+                              <item row="16" column="1">
+                               <widget class="QDateTimeEdit" name="timeEdit_FinishWork"/>
+                              </item>
+                              <item row="1" column="1">
+                               <widget class="QComboBox" name="comboBox_DoseUserId"/>
+                              </item>
+                              <item row="17" column="0">
+                               <widget class="QLabel" name="label_185">
+                                <property name="text">
+                                 <string>Последнее обновление:</string>
+                                </property>
+                               </widget>
+                              </item>
+                              <item row="9" column="1">
+                               <widget class="QDoubleSpinBox" name="doubleSpinBox_DoseDose"/>
+                              </item>
+                              <item row="7" column="1">
+                               <widget class="QDateTimeEdit" name="timeEdit_DoseTimeMax"/>
                               </item>
                              </layout>
-                            </widget>
-                           </widget>
-                          </item>
-                          <item row="0" column="0" colspan="5">
-                           <widget class="QTableWidget" name="tableWidget_Dose">
-                            <property name="minimumSize">
-                             <size>
-                              <width>0</width>
-                              <height>150</height>
-                             </size>
-                            </property>
-                            <property name="maximumSize">
-                             <size>
-                              <width>16777215</width>
-                              <height>250</height>
-                             </size>
-                            </property>
-                            <attribute name="horizontalHeaderVisible">
-                             <bool>true</bool>
-                            </attribute>
-                            <attribute name="verticalHeaderVisible">
-                             <bool>false</bool>
-                            </attribute>
-                           </widget>
-                          </item>
-                          <item row="3" column="3" colspan="2">
-                           <spacer name="horizontalSpacer_109">
-                            <property name="orientation">
-                             <enum>Qt::Orientation::Horizontal</enum>
-                            </property>
-                            <property name="sizeType">
-                             <enum>QSizePolicy::Policy::Minimum</enum>
-                            </property>
-                            <property name="sizeHint" stdset="0">
-                             <size>
-                              <width>40</width>
-                              <height>20</height>
-                             </size>
-                            </property>
-                           </spacer>
+                            </item>
+                            <item row="0" column="0">
+                             <spacer name="horizontalSpacer_11">
+                              <property name="orientation">
+                               <enum>Qt::Orientation::Horizontal</enum>
+                              </property>
+                              <property name="sizeType">
+                               <enum>QSizePolicy::Policy::Minimum</enum>
+                              </property>
+                              <property name="sizeHint" stdset="0">
+                               <size>
+                                <width>40</width>
+                                <height>20</height>
+                               </size>
+                              </property>
+                             </spacer>
+                            </item>
+                           </layout>
                           </item>
                          </layout>
-                        </item>
-                       </layout>
-                      </widget>
-                     </widget>
+                        </widget>
+                       </widget>
+                      </item>
+                      <item row="0" column="0" colspan="5">
+                       <widget class="QTableWidget" name="tableWidget_Dose">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>150</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>250</height>
+                         </size>
+                        </property>
+                        <attribute name="horizontalHeaderVisible">
+                         <bool>true</bool>
+                        </attribute>
+                        <attribute name="verticalHeaderVisible">
+                         <bool>false</bool>
+                        </attribute>
+                       </widget>
+                      </item>
+                      <item row="3" column="3" colspan="2">
+                       <spacer name="horizontalSpacer_109">
+                        <property name="orientation">
+                         <enum>Qt::Orientation::Horizontal</enum>
+                        </property>
+                        <property name="sizeType">
+                         <enum>QSizePolicy::Policy::Minimum</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                     </layout>
                     </item>
                    </layout>
                   </widget>
@@ -3590,82 +3681,42 @@ QStatusBar
                    </attribute>
                    <layout class="QGridLayout" name="gridLayout_54">
                     <item row="0" column="0">
-                     <widget class="QTabWidget" name="tabWidget_11">
-                      <property name="currentIndex">
-                       <number>0</number>
-                      </property>
-                      <widget class="QWidget" name="tab_41">
-                       <attribute name="title">
-                        <string>Дозы</string>
-                       </attribute>
-                       <layout class="QGridLayout" name="gridLayout_61">
-                        <item row="0" column="0">
-                         <layout class="QGridLayout" name="gridLayout_60">
-                          <item row="0" column="0" colspan="3">
-                           <layout class="QHBoxLayout" name="horizontalLayout_57">
-                            <item>
-                             <widget class="QLabel" name="label_165">
-                              <property name="text">
-                               <string>Пользователь: </string>
-                              </property>
-                             </widget>
-                            </item>
-                            <item>
-                             <widget class="QComboBox" name="comboBox_dozListUsers"/>
-                            </item>
-                            <item>
-                             <spacer name="horizontalSpacer_124">
-                              <property name="orientation">
-                               <enum>Qt::Orientation::Horizontal</enum>
-                              </property>
-                              <property name="sizeType">
-                               <enum>QSizePolicy::Policy::Minimum</enum>
-                              </property>
-                              <property name="sizeHint" stdset="0">
-                               <size>
-                                <width>40</width>
-                                <height>20</height>
-                               </size>
-                              </property>
-                             </spacer>
-                            </item>
-                            <item>
-                             <widget class="QLabel" name="label_168">
-                              <property name="text">
-                               <string>Дозиметр: </string>
-                              </property>
-                             </widget>
-                            </item>
-                            <item>
-                             <widget class="QComboBox" name="comboBox_dozListDoses"/>
-                            </item>
-                            <item>
-                             <spacer name="horizontalSpacer_16">
-                              <property name="orientation">
-                               <enum>Qt::Orientation::Horizontal</enum>
-                              </property>
-                              <property name="sizeType">
-                               <enum>QSizePolicy::Policy::Preferred</enum>
-                              </property>
-                              <property name="sizeHint" stdset="0">
-                               <size>
-                                <width>40</width>
-                                <height>20</height>
-                               </size>
-                              </property>
-                             </spacer>
-                            </item>
-                            <item>
-                             <widget class="QPushButton" name="pushButton_dozSearch">
-                              <property name="text">
-                               <string>Найти</string>
-                              </property>
-                             </widget>
-                            </item>
-                           </layout>
-                          </item>
-                          <item row="1" column="0">
-                           <spacer name="horizontalSpacer_4">
+                     <layout class="QGridLayout" name="gridLayout_60">
+                      <item row="3" column="1">
+                       <spacer name="verticalSpacer_3">
+                        <property name="orientation">
+                         <enum>Qt::Orientation::Vertical</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>20</width>
+                          <height>40</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item row="2" column="1">
+                       <layout class="QVBoxLayout" name="verticalLayout_2">
+                        <item>
+                         <spacer name="verticalSpacer_2">
+                          <property name="orientation">
+                           <enum>Qt::Orientation::Vertical</enum>
+                          </property>
+                          <property name="sizeType">
+                           <enum>QSizePolicy::Policy::Minimum</enum>
+                          </property>
+                          <property name="sizeHint" stdset="0">
+                           <size>
+                            <width>20</width>
+                            <height>40</height>
+                           </size>
+                          </property>
+                         </spacer>
+                        </item>
+                        <item>
+                         <layout class="QHBoxLayout" name="horizontalLayout_58">
+                          <item>
+                           <spacer name="horizontalSpacer_13">
                             <property name="orientation">
                              <enum>Qt::Orientation::Horizontal</enum>
                             </property>
@@ -3677,200 +3728,229 @@ QStatusBar
                             </property>
                            </spacer>
                           </item>
-                          <item row="1" column="1">
-                           <layout class="QVBoxLayout" name="verticalLayout_2">
-                            <item>
-                             <spacer name="verticalSpacer_2">
-                              <property name="orientation">
-                               <enum>Qt::Orientation::Vertical</enum>
-                              </property>
-                              <property name="sizeType">
-                               <enum>QSizePolicy::Policy::Minimum</enum>
-                              </property>
-                              <property name="sizeHint" stdset="0">
-                               <size>
-                                <width>20</width>
-                                <height>40</height>
-                               </size>
-                              </property>
-                             </spacer>
-                            </item>
-                            <item>
-                             <layout class="QHBoxLayout" name="horizontalLayout_58">
-                              <item>
-                               <spacer name="horizontalSpacer_13">
-                                <property name="orientation">
-                                 <enum>Qt::Orientation::Horizontal</enum>
-                                </property>
-                                <property name="sizeHint" stdset="0">
-                                 <size>
-                                  <width>40</width>
-                                  <height>20</height>
-                                 </size>
-                                </property>
-                               </spacer>
-                              </item>
-                              <item>
-                               <widget class="QPushButton" name="pushButton_dozClean">
-                                <property name="text">
-                                 <string>Очистить поля</string>
-                                </property>
-                               </widget>
-                              </item>
-                             </layout>
-                            </item>
-                            <item>
-                             <layout class="QGridLayout" name="gridLayout_59">
-                              <item row="0" column="2">
-                               <widget class="QLabel" name="label_187">
-                                <property name="text">
-                                 <string>Дата начала использования: </string>
-                                </property>
-                               </widget>
-                              </item>
-                              <item row="6" column="3">
-                               <widget class="QLabel" name="label_dozLastUpdate">
-                                <property name="text">
-                                 <string>-</string>
-                                </property>
-                               </widget>
-                              </item>
-                              <item row="1" column="0">
-                               <widget class="QLabel" name="label_170">
-                                <property name="text">
-                                 <string>Номер дозиметра:</string>
-                                </property>
-                               </widget>
-                              </item>
-                              <item row="1" column="2">
-                               <widget class="QLabel" name="label_188">
-                                <property name="text">
-                                 <string>Дата завершения использования: </string>
-                                </property>
-                               </widget>
-                              </item>
-                              <item row="3" column="1">
-                               <widget class="QComboBox" name="comboBox_dozSet"/>
-                              </item>
-                              <item row="1" column="1">
-                               <widget class="QSpinBox" name="spinBox_dozNumber"/>
-                              </item>
-                              <item row="5" column="1">
-                               <widget class="QComboBox" name="comboBox_dozKas"/>
-                              </item>
-                              <item row="5" column="2">
-                               <widget class="QLabel" name="label_190">
-                                <property name="text">
-                                 <string>Доза завершения использования: </string>
-                                </property>
-                               </widget>
-                              </item>
-                              <item row="3" column="3">
-                               <widget class="QDoubleSpinBox" name="doubleSpinBox_dozStart"/>
-                              </item>
-                              <item row="6" column="2">
-                               <widget class="QLabel" name="label_191">
-                                <property name="text">
-                                 <string>Последнее обновление: </string>
-                                </property>
-                               </widget>
-                              </item>
-                              <item row="5" column="0">
-                               <widget class="QLabel" name="label_172">
-                                <property name="text">
-                                 <string>ID Кассетницы:</string>
-                                </property>
-                               </widget>
-                              </item>
-                              <item row="3" column="2">
-                               <widget class="QLabel" name="label_189">
-                                <property name="text">
-                                 <string>Доза начала использования дозиметра: </string>
-                                </property>
-                               </widget>
-                              </item>
-                              <item row="0" column="0">
-                               <widget class="QLabel" name="label_169">
-                                <property name="text">
-                                 <string>ID Сотрудника:</string>
-                                </property>
-                               </widget>
-                              </item>
-                              <item row="1" column="3">
-                               <widget class="QDateEdit" name="dateEdit_dozFinish"/>
-                              </item>
-                              <item row="6" column="0">
-                               <widget class="QLabel" name="label_173">
-                                <property name="text">
-                                 <string>ID ячейки: </string>
-                                </property>
-                               </widget>
-                              </item>
-                              <item row="0" column="1">
-                               <widget class="QLabel" name="label_dozIdUser">
-                                <property name="text">
-                                 <string>-</string>
-                                </property>
-                               </widget>
-                              </item>
-                              <item row="6" column="1">
-                               <widget class="QComboBox" name="comboBox_dozMesh"/>
-                              </item>
-                              <item row="0" column="3">
-                               <widget class="QDateEdit" name="dateEdit_dozStart"/>
-                              </item>
-                              <item row="3" column="0">
-                               <widget class="QLabel" name="label_171">
-                                <property name="text">
-                                 <string>ID Комплекта: </string>
-                                </property>
-                               </widget>
-                              </item>
-                              <item row="5" column="3">
-                               <widget class="QDoubleSpinBox" name="doubleSpinBox_dozFinish"/>
-                              </item>
-                             </layout>
-                            </item>
-                            <item>
-                             <widget class="QPushButton" name="pushButton_dozSave">
-                              <property name="text">
-                               <string>Сохранить новый дозиметр</string>
-                              </property>
-                             </widget>
-                            </item>
-                           </layout>
-                          </item>
-                          <item row="1" column="2">
-                           <spacer name="horizontalSpacer_10">
-                            <property name="orientation">
-                             <enum>Qt::Orientation::Horizontal</enum>
+                          <item>
+                           <widget class="QPushButton" name="pushButton_dozClean">
+                            <property name="text">
+                             <string>Очистить поля</string>
                             </property>
-                            <property name="sizeHint" stdset="0">
-                             <size>
-                              <width>40</width>
-                              <height>20</height>
-                             </size>
-                            </property>
-                           </spacer>
-                          </item>
-                          <item row="2" column="1">
-                           <spacer name="verticalSpacer_3">
-                            <property name="orientation">
-                             <enum>Qt::Orientation::Vertical</enum>
-                            </property>
-                            <property name="sizeHint" stdset="0">
-                             <size>
-                              <width>20</width>
-                              <height>40</height>
-                             </size>
-                            </property>
-                           </spacer>
+                           </widget>
                           </item>
                          </layout>
                         </item>
+                        <item>
+                         <layout class="QGridLayout" name="gridLayout_59">
+                          <item row="0" column="2">
+                           <widget class="QLabel" name="label_187">
+                            <property name="text">
+                             <string>Дата начала использования: </string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="6" column="3">
+                           <widget class="QLabel" name="label_dozLastUpdate">
+                            <property name="text">
+                             <string>-</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="1" column="0">
+                           <widget class="QLabel" name="label_170">
+                            <property name="text">
+                             <string>Номер дозиметра:</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="1" column="2">
+                           <widget class="QLabel" name="label_188">
+                            <property name="text">
+                             <string>Дата завершения использования: </string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="3" column="1">
+                           <widget class="QComboBox" name="comboBox_dozSet"/>
+                          </item>
+                          <item row="1" column="1">
+                           <widget class="QSpinBox" name="spinBox_dozNumber"/>
+                          </item>
+                          <item row="5" column="1">
+                           <widget class="QComboBox" name="comboBox_dozKas"/>
+                          </item>
+                          <item row="5" column="2">
+                           <widget class="QLabel" name="label_190">
+                            <property name="text">
+                             <string>Доза завершения использования: </string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="3" column="3">
+                           <widget class="QDoubleSpinBox" name="doubleSpinBox_dozStart"/>
+                          </item>
+                          <item row="6" column="2">
+                           <widget class="QLabel" name="label_191">
+                            <property name="text">
+                             <string>Последнее обновление: </string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="5" column="0">
+                           <widget class="QLabel" name="label_172">
+                            <property name="text">
+                             <string>ID Кассетницы:</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="3" column="2">
+                           <widget class="QLabel" name="label_189">
+                            <property name="text">
+                             <string>Доза начала использования дозиметра: </string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="0" column="0">
+                           <widget class="QLabel" name="label_169">
+                            <property name="text">
+                             <string>ID Сотрудника:</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="1" column="3">
+                           <widget class="QDateEdit" name="dateEdit_dozFinish"/>
+                          </item>
+                          <item row="6" column="0">
+                           <widget class="QLabel" name="label_173">
+                            <property name="text">
+                             <string>ID ячейки: </string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="0" column="1">
+                           <widget class="QLabel" name="label_dozIdUser">
+                            <property name="text">
+                             <string>-</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="6" column="1">
+                           <widget class="QComboBox" name="comboBox_dozMesh"/>
+                          </item>
+                          <item row="0" column="3">
+                           <widget class="QDateEdit" name="dateEdit_dozStart"/>
+                          </item>
+                          <item row="3" column="0">
+                           <widget class="QLabel" name="label_171">
+                            <property name="text">
+                             <string>ID Комплекта: </string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="5" column="3">
+                           <widget class="QDoubleSpinBox" name="doubleSpinBox_dozFinish"/>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <widget class="QPushButton" name="pushButton_dozSave">
+                          <property name="text">
+                           <string>Сохранить новое показание</string>
+                          </property>
+                         </widget>
+                        </item>
                        </layout>
-                      </widget>
-                     </widget>
+                      </item>
+                      <item row="2" column="2">
+                       <spacer name="horizontalSpacer_10">
+                        <property name="orientation">
+                         <enum>Qt::Orientation::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item row="2" column="0">
+                       <spacer name="horizontalSpacer_4">
+                        <property name="orientation">
+                         <enum>Qt::Orientation::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item row="0" column="0" colspan="3">
+                       <layout class="QHBoxLayout" name="horizontalLayout_57">
+                        <item>
+                         <widget class="QLabel" name="label_165">
+                          <property name="text">
+                           <string>Пользователь: </string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QComboBox" name="comboBox_dozListUsers"/>
+                        </item>
+                        <item>
+                         <spacer name="horizontalSpacer_124">
+                          <property name="orientation">
+                           <enum>Qt::Orientation::Horizontal</enum>
+                          </property>
+                          <property name="sizeType">
+                           <enum>QSizePolicy::Policy::Minimum</enum>
+                          </property>
+                          <property name="sizeHint" stdset="0">
+                           <size>
+                            <width>40</width>
+                            <height>20</height>
+                           </size>
+                          </property>
+                         </spacer>
+                        </item>
+                        <item>
+                         <widget class="QLabel" name="label_168">
+                          <property name="text">
+                           <string>Дозиметр: </string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QComboBox" name="comboBox_dozListDoses"/>
+                        </item>
+                        <item>
+                         <spacer name="horizontalSpacer_16">
+                          <property name="orientation">
+                           <enum>Qt::Orientation::Horizontal</enum>
+                          </property>
+                          <property name="sizeType">
+                           <enum>QSizePolicy::Policy::Preferred</enum>
+                          </property>
+                          <property name="sizeHint" stdset="0">
+                           <size>
+                            <width>40</width>
+                            <height>20</height>
+                           </size>
+                          </property>
+                         </spacer>
+                        </item>
+                        <item>
+                         <widget class="QPushButton" name="pushButton_dozSearch">
+                          <property name="text">
+                           <string>Найти</string>
+                          </property>
+                         </widget>
+                        </item>
+                       </layout>
+                      </item>
+                      <item row="1" column="0" colspan="3">
+                       <widget class="QTableView" name="tableView"/>
+                      </item>
+                     </layout>
                     </item>
                    </layout>
                   </widget>
@@ -3878,39 +3958,13 @@ QStatusBar
                    <attribute name="title">
                     <string>СИЧ</string>
                    </attribute>
-                   <layout class="QGridLayout" name="gridLayout_55">
-                    <item row="0" column="0">
-                     <widget class="QTabWidget" name="tabWidget_12">
-                      <property name="currentIndex">
-                       <number>0</number>
-                      </property>
-                      <widget class="QWidget" name="tab_42">
-                       <attribute name="title">
-                        <string>Дозы</string>
-                       </attribute>
-                      </widget>
-                     </widget>
-                    </item>
-                   </layout>
+                   <layout class="QGridLayout" name="gridLayout_55"/>
                   </widget>
                   <widget class="QWidget" name="tab_39">
                    <attribute name="title">
                     <string>Ожидаемые дозы</string>
                    </attribute>
-                   <layout class="QGridLayout" name="gridLayout_56">
-                    <item row="0" column="0">
-                     <widget class="QTabWidget" name="tabWidget_13">
-                      <property name="currentIndex">
-                       <number>0</number>
-                      </property>
-                      <widget class="QWidget" name="tab_43">
-                       <attribute name="title">
-                        <string>Дозы</string>
-                       </attribute>
-                      </widget>
-                     </widget>
-                    </item>
-                   </layout>
+                   <layout class="QGridLayout" name="gridLayout_56"/>
                   </widget>
                   <widget class="QWidget" name="tab_40">
                    <attribute name="title">
