@@ -32,7 +32,6 @@ CONFIG += c++11
 
 SOURCES += \
     main.cpp \
-    src/repositories/result.cpp \
     src/ui/mainwindow.cpp \
     src/ui/welcome.cpp \
     src/ui/doubleclickbutton.cpp \

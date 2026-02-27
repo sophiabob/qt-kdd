@@ -11,7 +11,7 @@
 class User
     : public QObject {
     Q_OBJECT //Qt Meta-Object System (MOC)
-    // Макрос: тип, имя, геттер, сеттер, имя колонки в БД (user_data)
+    /*// Макрос: тип, имя, геттер, сеттер, имя колонки в БД (user_data)
     Q_PROPERTY(QString login READ login WRITE setLogin USER "login")
     Q_PROPERTY(QString passwordHash READ passwordHash WRITE setPasswordHash USER "password")
     Q_PROPERTY(QString firstName READ firstName WRITE setFirstName USER "name_0")
@@ -36,12 +36,39 @@ class User
     Q_PROPERTY(QString blockReason READ blockReason WRITE setBlockReason USER "block")
     Q_PROPERTY(QDateTime lastUpdate READ lastUpdate WRITE setLastUpdate USER "last_update")
 
+*/
 
+    Q_PROPERTY(QString login READ login WRITE setLogin)
+    Q_PROPERTY(QString passwordHash READ passwordHash WRITE setPasswordHash)
+    Q_PROPERTY(QString surname READ surname WRITE setSurname)
+    Q_PROPERTY(QString firstName READ firstName WRITE setFirstName)
+    Q_PROPERTY(QString patronymic READ patronymic WRITE setPatronymic)
+    Q_PROPERTY(int snils READ snils WRITE setSnils)
+    Q_PROPERTY(QString gender READ gender WRITE setGender)
+    Q_PROPERTY(QDateTime birthDate READ birthDate WRITE setBirthDate)
+    Q_PROPERTY(QString role READ role WRITE setRole)
+    Q_PROPERTY(int employeeNumber READ employeeNumber WRITE setEmployeeNumber)
+    Q_PROPERTY(QString department READ department WRITE setDepartment)
+    Q_PROPERTY(QString cardId READ cardId WRITE setCardId)
+    Q_PROPERTY(QString dosimetrTldId READ dosimetrTldId WRITE setDosimetrTldId)
+    Q_PROPERTY(int startDoz READ startDoz WRITE setStartDoz)
+    Q_PROPERTY(int finishDoz READ finishDoz WRITE setFinishDoz)
+    Q_PROPERTY(float annualDose READ annualDose WRITE setAnnualDose)
+    Q_PROPERTY(float currentYearDose READ currentYearDose WRITE setCurrentYearDose)
+    Q_PROPERTY(float currentYearDosePPD READ currentYearDosePPD WRITE setCurrentYearDosePPD)
+    Q_PROPERTY(QDateTime lastCellUpdate READ lastCellUpdate WRITE setLastCellUpdate)
+    Q_PROPERTY(QString accessCode READ accessCode WRITE setAccessCode)
+    Q_PROPERTY(QString blockReason READ blockReason WRITE setBlockReason)
+    Q_PROPERTY(QDateTime lastUpdate READ lastUpdate WRITE setLastUpdate)
 //проверить
     friend class UserRepository;
 
 public:
-    User() = default;
+   // User() = default;
+    //User();
+    //explicit User(QObject* parent = nullptr) : QObject(parent) {}
+
+    explicit User(QObject* parent = nullptr);
     User(
         int id = -1,
         const QString& firstName = QString(),
@@ -75,6 +102,7 @@ public:
     int id() const { return m_id; }
 
     const QString& login() const { return m_login; }
+    const QString& passwordHash() const { return m_passwordHash; }
     //(const User&) { return QString(); } - для пароля
 
     const QString& firstName() const { return m_firstName; }
@@ -143,7 +171,7 @@ public:
 
     //привязка переменных к полям sql
     void bindToQuery(QSqlQuery& query) const;
-    static User fromQuery(const QSqlQuery& row);
+    static std::unique_ptr<User> fromQuery(const QSqlQuery& row);
 
 
     //для взиамодействия форма и юзера
@@ -164,7 +192,8 @@ public:
 
 
 private:
-    Q_DISABLE_COPY(User) //защита от случайного копирования
+   // Q_DISABLE_COPY(User) //защита от случайного копирования
+    static QMap<QString, QString> dbColumnMap();
 
     // --- Основная информация ---
     int m_id;                    // Уникальный ID записи

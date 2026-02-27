@@ -9,8 +9,8 @@
 #include <QString>
 #include <QVariant>
 #include <optional>
-#include "../models/user.h"
 
+#include "../models/user.h"
 #include "../repositories/result.h"
 
 /*
@@ -25,21 +25,25 @@ struct RepoResult {
     static RepoResult<T> err(const QString& msg) { return {false, T{}, msg}; }
 };*/
 
+
+
 class UserRepository
 {
 public:
     explicit UserRepository(QSqlDatabase db);
 
-    User mapQueryToUser(const QSqlQuery& query) const;
+    User* mapQueryToUser(const QSqlQuery& query) const;
     bool loginExists(const QString& login);
-    RepoResult<int> createUser(const User& user); // Create → возвращает ID
-    void UserRepository::updateDateTime(); // есть вопросики
+    Result<int> createUser(const User& user); // Create → возвращает ID
+
 
 
 private:
     QSqlDatabase m_db;
 
     void logDatabaseError(const QString& context, const QSqlError& error) const;
+
+    void logDatabaseError(const QString& context, const QSqlError& error);
 };
 
 

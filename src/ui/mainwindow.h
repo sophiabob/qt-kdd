@@ -76,6 +76,11 @@ class User;
 #include <iostream>
 #include <vector>
 
+#include <QRandomGenerator>      // Для QRandomGenerator::secure()
+#include <QCryptographicHash>    // Для QCryptographicHash
+#include <QDateTime>             // Для QDateTime
+#include <QByteArray>            // Для QByteArray
+
 
 // объявление пространства имён для UI, сгенерированного из .ui файла
 QT_BEGIN_NAMESPACE
@@ -86,6 +91,7 @@ QT_END_NAMESPACE
 
 // предварительное объявление класса Welcome (чтобы избежать циклических включений)
 class Welcome;
+class MeshStatusModel;
 
 // ==================== структуры данных ====================
 
@@ -132,6 +138,12 @@ struct UserDataSearch {
     QString searchText;
 };
 
+struct FieldRecord {
+    QString fieldName;           // Имя поля: "login", "surname"...
+    QWidget* widget;             // Указатель на виджет
+    enum Type { Text, Int, Float, Date, ComboBox, Label } type;
+};
+
 // псевдонимы для удобства
 using KasArray = QMap<int, KasData>;
 using MeshArray = QMap<int, MeshData>;
@@ -170,6 +182,8 @@ public:
         return "Неизвестная ОС";
 #endif
     }
+
+    //void setRepository(UserRepository* repo);
 
 private slots:
     // ==================== основные слоты (обработчики нажатий) ====================
@@ -549,10 +563,11 @@ private:
     // Проверка пароля против сохранённого хэша
     bool verifyPasswordSecure(const QString& password, const QString& storedHash);
 
+    void on_btnUserDutySearch_pressed();
 
 
 
-
+/*
     // структура привязки для виджетов
     struct FieldRecord {
         QString fieldName;    // Имя поля в БД: "login", "name_0"...
@@ -562,7 +577,7 @@ private:
         bool writable;        // Можно ли записывать в это поле (для INSERT/UPDATE)
         bool readable;        // Можно ли читать из этого поля (для SELECT)
     };
-    QVector<FieldMap> m_fieldMaps;
+   // QVector<FieldMap> m_fieldMaps;*/
 
     void initFieldMapsUser();
 
@@ -573,13 +588,6 @@ private:
     QVariant readField(const QString& fieldName) const;
     void writeField(const QString& fieldName, const QVariant& value);
 
-
-
-    struct FieldRecord {
-        QString fieldName;           // Имя поля: "login", "surname"...
-        QWidget* widget;             // Указатель на виджет
-        enum Type { Text, Int, Float, Date, ComboBox, Label } type;
-    };
 
     QString checkValidForUser(const User& user);
 

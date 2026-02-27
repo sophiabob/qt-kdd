@@ -5,7 +5,7 @@
 #include "ui_welcome.h"
 
 #include "doubleclickbutton.h"
-#include "meshstatusmodel.h"
+#include "../models/meshstatusmodel.h"
 
 
 #include "../repositories/user_repository.h"
@@ -24,7 +24,24 @@ MainWindow::MainWindow(int userId, QWidget *parent)
     , ui(new Ui::MainWindow)
     , clearSearchButton(nullptr)
     , clearUserDutySearchButton(nullptr)
-{
+{/*
+    // инициализация модели
+    MainWindow::MainWindow(UserRepository* repo, QWidget *parent)
+        : QMainWindow(parent), ui(new Ui::MainWindow), m_repo(repo)  // ← Инициализация указателя
+    {
+        ui->setupUi(this);
+
+        // Проверка, что репозиторий передан
+        if (!m_repo) {
+            qCritical() << "MainWindow: repository is null!";
+            return;
+        }
+    }*/
+
+
+
+
+
     ui->setupUi(this);
     //qDebug() << "Текущий пользователь ID:" << currentUserId;
     //ui->statusbar->showMessage("f,hfrflfmhf");
@@ -56,6 +73,8 @@ MainWindow::MainWindow(int userId, QWidget *parent)
         qDebug() << "ОС не распознана";
     }
 
+
+   //MeshStatusModel* m_currentMeshModel = nullptr;  // ← Теперь работает
 
     //========================================== Начало работы с пользователями ======================================================================
 
@@ -191,13 +210,12 @@ MainWindow::MainWindow(int userId, QWidget *parent)
     qRegisterMetaType<MeshData>("MeshData");
     qRegisterMetaType<DutyDataSearch>("DutyDataSearch");
     qRegisterMetaType<UsersDutyDataSearch>("UsersDutyDataSearch");
-    qRegisterMetaType<UserDataSearsh>("UserDataSearsh");
+    qRegisterMetaType<UserDataSearch>("UserDataSearsh");
     qRegisterMetaType<QList<KasData>>("QList<KasData>");
     qRegisterMetaType<QList<MeshData>>("QList<MeshData>");
     qRegisterMetaType<QList<DutyDataSearch>>("QList<DutyDataSearch>");
     qRegisterMetaType<QList<UsersDutyDataSearch>>("QList<UsersDutyDataSearch>");
-    qRegisterMetaType<QList<UserDataSearsh>>("QList<UserDataSearsh>");
-
+    qRegisterMetaType<QList<UserDataSearch>>("QList<UserDataSearsh>");
 
     // Вывод пользователей
     QSqlQuery query;
@@ -259,8 +277,12 @@ MainWindow::MainWindow(int userId, QWidget *parent)
 //обновление таблицы нарядов
     refresh_duty_table();
     tableUsersDutyUpd();
-}
+}/*
+void MainWindow::setRepository(UserRepository* repo) {
+   // m_repoLocal = repo;  // Локальная переменная или использование сразу
 
+    this->setProperty("userRepository", QVariant::fromValue(repo));
+}*/
 
 void MainWindow::on_btnSetChange_pressed(){
 
@@ -651,24 +673,14 @@ void MainWindow::on_btnChangePhoto_pressed(){
 
 #pragma region "Работа с пользователями" //======================== Начало пользователя ====================================================================================================================
 
-// инициализация модели
-MainWindow::MainWindow(UserRepository* repo, QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow), m_repo(repo)  // ← Инициализация указателя
-{
-    ui->setupUi(this);
-
-    // Проверка, что репозиторий передан
-    if (!m_repo) {
-        qCritical() << "MainWindow: repository is null!";
-        return;
-    }
-}
-
 // хэширование пароля
-QString hashPasswordSecure(const QString& password)
+QString MainWindow::hashPasswordSecure(const QString& password)
 {
     // 1. Генерируем случайную соль
-    QByteArray salt = QByteArray::number(QRandomGenerator::secure()->generate());
+    QByteArray salt(16, 0);
+    for (int i = 0; i < salt.size(); ++i) {
+        salt[i] = static_cast<char>(QRandomGenerator::system()->generate() % 256);
+    }
 
     // 2. Многократное хэширование (key stretching)
     QByteArray hash = (password + salt).toUtf8();
@@ -730,9 +742,9 @@ QString checkValidForUser(const User& user)
 
     // === ДАТА РОЖДЕНИЯ ===
     if (user.birthDate().isValid()) {
-        if (user.birthDate() > QDate::currentDate())
+        if (user.birthDate() > QDateTime::currentDateTime())
             return "Дата рождения не может быть в будущем";
-        if (user.birthDate() < QDate(1900, 1, 1))
+        if (user.birthDate() < QDateTime(QDate(1900, 1, 1), QTime(0, 0)))
             return "Неверная дата рождения";
     }
 
@@ -742,11 +754,6 @@ QString checkValidForUser(const User& user)
     if (user.currentYearDose() > user.annualDose() && user.annualDose() > 0)
         return "Текущая доза не может превышать годовую";
 
-    // === ПЕРИОДЫ (startUsed / finishUsed) ===
-    if (user.startUsed().isValid() && user.finishUsed().isValid()) {
-        if (user.finishUsed() < user.startUsed())
-            return "Дата окончания не может быть раньше даты начала";
-    }
 
     // === РОЛЬ ===
     if (!user.role().isEmpty())
@@ -760,21 +767,19 @@ QString checkValidForUser(const User& user)
 void MainWindow::on_btnCreateNewUser_pressed() //создаём нового пользователя
 {
 
-    User newUser;
-    newUser.fillFromMap(readFieldsFromForm(m_userFormFields));  // ← ВСЁ!
+    User* newUser;
+    newUser->fillFromMap(readFieldsFromForm(m_userFormFields));  // ← ВСЁ!
 
     // Пароль хэшируем отдельно (безопасность!)
-    newUser.setPasswordHash(hashPasswordSecure(readFieldsFromForm(m_userFormFields)["password"].toString()));
+    newUser->setPasswordHash(hashPasswordSecure(readFieldsFromForm(m_userFormFields)["password"].toString()));
 
     // User → Репозиторий
-    auto result = m_repo->createUser(newUser);
+    auto result = m_repo->createUser(*newUser);
 
     // Обработка результата
-    result.success
-        ? QMessageBox::information(this, "Успех", "ID: " + QString::number(result.data))
-        : QMessageBox::critical(this, "Ошибка", result.errorMessage);
-
-
+    result.isOk
+        ? QMessageBox::information(this, "Успех", "ID: " + QString::number(result.value))
+        : QMessageBox::critical(this, "Ошибка", result.errorMessage());
 
 
 
@@ -808,6 +813,10 @@ void MainWindow::on_btnCreateNewUser_pressed() //создаём нового п�
 //----------------------------------------------
 
 
+
+
+    //далее история пользователей --------------------------------------------------------------------------------------------------
+/*
     QSqlQuery query;
 
     //ячейки
@@ -922,7 +931,8 @@ void MainWindow::on_btnCreateNewUser_pressed() //создаём нового п�
     usersHistoryToTable();
     setupAllUserComboBoxes();
 }
-
+*/
+}
 
 //записываем в историю
 // Функция для добавления записи в историю пользователей
@@ -1044,7 +1054,6 @@ bool MainWindow::addUserHistory(
     }
     return true;
     usersHistoryToTable();
-
 
 
 }
@@ -1785,7 +1794,8 @@ void writeFieldsToForm(const std::vector<FieldRecord>& fields, const QMap<QStrin
 }
 
 // === ЧТЕНИЕ: Виджеты формы → QMap с данными ===
-QMap<QString, QVariant> readFieldsFromForm(const std::vector<FieldRecord>& fields)
+//QMap<QString, QVariant> readFieldsFromForm(const std::vector<FieldRecord>& fields)
+QMap<QString, QVariant> MainWindow::readFieldsFromForm(const std::vector<FieldRecord>& fields)
 {
     QMap<QString, QVariant> data;
 
@@ -8291,7 +8301,7 @@ void MainWindow::setupSearchUserComboBox(QComboBox* comboBox)
 
     // Подсчет количества записей и заполнение данных за один проход
     int rowCount = 0;
-    QList<UserDataSearsh> usersData;
+    QList<UserDataSearch> usersData;
 
     while (query.next()) {
         QString user_id = query.value("user_id").toString();
@@ -8299,7 +8309,8 @@ void MainWindow::setupSearchUserComboBox(QComboBox* comboBox)
         QString firstName = query.value("name_1").toString();
         QString middleName = query.value("name_2").toString();
 
-        UserDataSearsh user;
+        UserDataSearch user;
+
         user.id = user_id;
         user.displayText = QString("%1 - %2 %3 %4").arg(user_id).arg(lastName).arg(firstName).arg(middleName);
         user.searchText = QString("%1 %2 %3 %4").arg(user_id).arg(lastName).arg(firstName).arg(middleName).toLower();
@@ -8326,7 +8337,7 @@ void MainWindow::setupSearchUserComboBox(QComboBox* comboBox)
     comboBox->setProperty("usersData", QVariant::fromValue(usersData));
 
     auto filterUsers = [comboBox]() {
-        QList<UserDataSearsh> usersData = comboBox->property("usersData").value<QList<UserDataSearsh>>();
+        QList<UserDataSearch> usersData = comboBox->property("usersData").value<QList<UserDataSearch>>();
         QString text = comboBox->lineEdit()->text().toLower();
 
         QSignalBlocker blocker(comboBox);

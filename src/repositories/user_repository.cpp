@@ -1,4 +1,3 @@
-#include "result.h"
 #include "user_repository.h"
 
 #include <QSqlRecord>
@@ -44,20 +43,13 @@ void UserRepository::logDatabaseError(const QString& context, const QSqlError& e
 #endif
 }
 
-
-//обновление времени на текущее для любой операции - посмотрим мб в модели
-void UserRepository::updateDateTime()
-{
-    lastUpdate = QDateTime::currentDateTime();//решить проблему
-}
-
 //создать пользователя
-RepoResult<int> UserRepository::createUser(const User& user)
+Result<int> UserRepository::createUser(const User& user)
 {
     QSqlQuery query;
 
     if (loginExists(user.login())) {
-        return RepoResult<int>::err("Логин '" + user.login() + "' уже занят");
+        return Result<int>::err(ErrorInfo::validation("login", "Логин '" + user.login() + "' уже занят"));
     }
 
     int user_id = 1; // Значение по умолчанию, если таблица пуста
@@ -68,9 +60,8 @@ RepoResult<int> UserRepository::createUser(const User& user)
     } else {
         qDebug() << "Ошибка выполнения запроса: не удаётся user_id++ для записи в БД \n" << query.lastError().text();
     }
-    query.close();
 
-    updateDateTime();
+    query.clear();
 
 
     QSqlQuery q(m_db);
@@ -93,11 +84,13 @@ RepoResult<int> UserRepository::createUser(const User& user)
 
     if (!q.exec()) {
         logDatabaseError("UserRepository::createUser", q.lastError());
-        return RepoResult<int>::err("Ошибка БД: " + q.lastError().text());
+        return Result<int>::err(ErrorInfo::validation("БД", "Ошибка БД: " + q.lastError().text()));
     }
 
+    query.clear();
+
     int newId = q.lastInsertId().toInt();
-    return RepoResult<int>::ok(newId > 0 ? newId : -1); //возвращаем id нового пользователя
+    return Result<int>::ok(newId > 0 ? newId : -1); //возвращаем id нового пользователя
 }
 
 
@@ -116,35 +109,38 @@ bool UserRepository::loginExists(const QString& login)
 
 
 // если fromQuery не работает
-User UserRepository::mapQueryToUser(const QSqlQuery& query) const
+User* UserRepository::mapQueryToUser(const QSqlQuery& query) const
 {
-    User user;
+    User* user(nullptr);
     // Используем friend-доступ к private полям
-    user.m_id = query.value("user_id").toInt();
-    user.m_login = query.value("login").toString();
-    user.m_passwordHash = query.value("password").toString();  // Осторожно: не передавай в UI!
-    user.m_firstName = query.value("name_0").toString();
-    user.m_surname = query.value("name_1").toString();
-    user.m_patronymic = query.value("name_2").toString();
-    user.m_snils = query.value("snils").toInt();
-    user.m_gender = query.value("gender").toString();
-    user.m_birthDate = query.value("birthday").toDateTime();
-    user.m_role = query.value("role").toString();
-    user.m_employeeNumber = query.value("tab_num").toInt();
-    user.m_department = query.value("department").toString();
-    user.m_cardId = query.value("card_id").toString();
-    user.m_setId = query.value("set_ID").toInt();
-    user.m_kasId = query.value("kas_ID").toInt();
-    user.m_meshId = query.value("mesh_ID").toInt();
-    user.m_dosimetrTldId = query.value("doz_tld_id").toString();
-    user.m_lastCellUpdate = query.value("cell_date").toDateTime();
-    user.m_annualDose = query.value("dose_year").toFloat();
-    user.m_currentYearDose = query.value("dose_year_now").toFloat();
-    user.m_currentYearDosePPD = query.value("dose_year_now_ppd").toFloat();
-    user.m_accessCode = query.value("code").toString();
-    user.m_blockReason = query.value("block").toString();
-    user.m_lastUpdate = query.value("last_update").toDateTime();
+    user -> m_id = query.value("user_id").toInt();
+    user -> m_login = query.value("login").toString();
+    user -> m_passwordHash = query.value("password").toString();  // Осторожно: не передавай в UI!
+    user -> m_firstName = query.value("name_0").toString();
+    user -> m_surname = query.value("name_1").toString();
+    user -> m_patronymic = query.value("name_2").toString();
+    user -> m_snils = query.value("snils").toInt();
+    user -> m_gender = query.value("gender").toString();
+    user -> m_birthDate = query.value("birthday").toDateTime();
+    user -> m_role = query.value("role").toString();
+    user -> m_employeeNumber = query.value("tab_num").toInt();
+    user -> m_department = query.value("department").toString();
+    user -> m_cardId = query.value("card_id").toString();
+    user -> m_setId = query.value("set_ID").toInt();
+    user -> m_kasId = query.value("kas_ID").toInt();
+    user -> m_meshId = query.value("mesh_ID").toInt();
+    user -> m_dosimetrTldId = query.value("doz_tld_id").toInt();
+    user -> m_lastCellUpdate = query.value("cell_date").toDateTime();
+    user -> m_annualDose = query.value("dose_year").toFloat();
+    user -> m_currentYearDose = query.value("dose_year_now").toFloat();
+    user -> m_currentYearDosePPD = query.value("dose_year_now_ppd").toFloat();
+    user -> m_accessCode = query.value("code").toString();
+    user -> m_blockReason = query.value("block").toString();
+    user -> m_lastUpdate = query.value("last_update").toDateTime();
 
+
+    //query.clear();
+    //delete user; / обязательно при использовании
     return user;
 }
 
