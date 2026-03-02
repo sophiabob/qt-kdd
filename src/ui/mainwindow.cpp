@@ -767,14 +767,25 @@ QString checkValidForUser(const User& user)
 void MainWindow::on_btnCreateNewUser_pressed() //создаём нового пользователя
 {
 
+    qDebug() << "Нажата кнопка on_btnCreateNewUser_pressed";
+
     User* newUser;
+
+    qDebug() << "User* newUser";
+
     newUser->fillFromMap(readFieldsFromForm(m_userFormFields));  // ← ВСЁ!
+
+    qDebug() << "newUser->fillFromMap";
 
     // Пароль хэшируем отдельно (безопасность!)
     newUser->setPasswordHash(hashPasswordSecure(readFieldsFromForm(m_userFormFields)["password"].toString()));
 
+    qDebug() << "newUser->setPasswordHash";
+
     // User → Репозиторий
     auto result = m_repo->createUser(*newUser);
+
+    qDebug() << "m_repo->createUser";
 
     // Обработка результата
     result.isOk

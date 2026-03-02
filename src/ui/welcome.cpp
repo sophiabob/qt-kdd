@@ -87,11 +87,6 @@ bool Welcome::on_btnSignIn_clicked()
 
 
 
-void Welcome::on_btnSignIn_pressed()
-{
-
-}
-
 
 void Welcome::on_pushButton_help_pressed()
 {
@@ -854,9 +849,9 @@ bool Welcome::createConnection()
         QString os = detectOS();
         if (os == "Windows") {
             this->showNormal();
-            dbUser = "postgres_new";
-            dbPassword = "123";
-            dbName = "newdb";
+            dbUser = "postgres";
+            dbPassword = "0";
+            dbName = "postgres";
             dbHost = "localhost";
         } else if (os == "Linux") {
             this->showFullScreen();
@@ -868,7 +863,7 @@ bool Welcome::createConnection()
             qDebug() << "OS не опознана" << os;
         }
         dataSource = "OS-специфичные настройки";
-        qDebug() << "ПЕРВАЯ попытка: Используются OS-специфичные настройки для" << os;
+        qDebug() << "ВТОРАЯ попытка: Используются OS-специфичные настройки для" << os;
     }
 
     // 1.4. Пытаемся подключиться с первыми параметрами

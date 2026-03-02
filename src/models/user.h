@@ -7,6 +7,7 @@
 #include <QMetaType> //регистрация типа
 #include <QSqlQuery>
 #include <QObject>
+#include <QSqlRecord>
 
 class User
     : public QObject {
@@ -50,7 +51,7 @@ class User
     Q_PROPERTY(int employeeNumber READ employeeNumber WRITE setEmployeeNumber)
     Q_PROPERTY(QString department READ department WRITE setDepartment)
     Q_PROPERTY(QString cardId READ cardId WRITE setCardId)
-    Q_PROPERTY(QString dosimetrTldId READ dosimetrTldId WRITE setDosimetrTldId)
+    Q_PROPERTY(int dosimetrTldId READ dosimetrTldId WRITE setDosimetrTldId)
     Q_PROPERTY(int startDoz READ startDoz WRITE setStartDoz)
     Q_PROPERTY(int finishDoz READ finishDoz WRITE setFinishDoz)
     Q_PROPERTY(float annualDose READ annualDose WRITE setAnnualDose)
@@ -92,7 +93,10 @@ public:
         const QString& blockReason = QString(),
         int setId = -1,
         int kasId = -1,
-        int meshId = -1
+        int meshId = -1,
+
+        int startDoz = -1,
+        int finishDoz = -1
     );
 
 
@@ -120,11 +124,15 @@ public:
     const QString& accessCode() const { return m_accessCode; }
     const QString& blockReason() const { return m_blockReason; }
 
+    int startDoz() const { return m_startDoz; }
+    int finishDoz() const { return m_finishDoz; }
+
     int setId() const { return m_setId; }
     int kasId() const { return m_kasId; }
     int meshId() const { return m_meshId; }
     int dosimetrTldId() const { return m_dosimetrTldId; }
     QDateTime lastCellUpdate() const { return m_lastCellUpdate; }
+
 
     float annualDose() const { return m_annualDose; }
     float currentYearDose() const { return m_currentYearDose; }
@@ -153,6 +161,9 @@ public:
     void setCardId(const QString& cardId) { m_cardId = cardId; }
     void setAccessCode(const QString& accessCode) { m_accessCode = accessCode; }
     void setBlockReason(const QString& blockReason) { m_blockReason = blockReason; }
+
+    void setStartDoz(int startDoz) { m_startDoz = startDoz; }
+    void setFinishDoz(int finishDoz) { m_finishDoz = finishDoz; }
 
     void setSetId(int setId) { m_setId = setId; }
     void setKasId(int kasId) { m_kasId = kasId; }
@@ -224,6 +235,9 @@ private:
     int m_meshId;                // ID сетки
     int m_dosimetrTldId;         // ID дозиметра TLD (было doz_tld_id)
     QDateTime m_lastCellUpdate;  // Дата последнего обновления ячейки (было cell_date)
+
+    int m_startDoz;
+    int m_finishDoz;
 
     // --- Дозиметрия (Radiation Dose) ---
     float m_annualDose;          // Доза за год (было dose_year)

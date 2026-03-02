@@ -24,7 +24,9 @@ User::User(
         const QString& blockReason,
         int setId,
         int kasId,
-        int meshId
+        int meshId,
+        int startDoz,
+        int finishDoz
     )
     : m_id(id)
     , m_firstName(firstName)
@@ -49,11 +51,20 @@ User::User(
     , m_setId(setId)
     , m_kasId(kasId)
     , m_meshId(meshId)
+
+    , m_startDoz(startDoz)
+    , m_finishDoz(finishDoz)
 {
     // Тело конструктора (если нужна дополнительная логика)
     // Например, автоматическая нормализация логина:
     m_login = m_login.trimmed().toLower();
 
+}
+
+// В начале user.cpp:
+User::User(QObject *parent) : QObject(parent)
+{
+    // Инициализация полей, если нужна
 }
 
 QMap<QString, QString> User::dbColumnMap() {

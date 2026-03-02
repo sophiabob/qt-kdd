@@ -89,9 +89,6 @@ private slots:
 
     void on_pushButton_pressed();
 
-
-    void on_btnSignIn_pressed();
-
     void on_pushButton_help_pressed();
 
     bool eventFilter(QObject *obj, QEvent *event);
