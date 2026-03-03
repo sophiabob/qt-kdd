@@ -46,22 +46,58 @@ void UserRepository::logDatabaseError(const QString& context, const QSqlError& e
 //создать пользователя
 Result<int> UserRepository::createUser(const User& user)
 {
-    QSqlQuery query;
+    /*QSqlQuery query;
+
+    qDebug() << "1";
+qDebug() << "user.login()" << user.login();
 
     if (loginExists(user.login())) {
+        qDebug() << "0";
         return Result<int>::err(ErrorInfo::validation("login", "Логин '" + user.login() + "' уже занят"));
+    } else {
+        qDebug() << "11";
+        //qDebug() << "user.login()" << user.login();
+    }*/
+
+    QSqlQuery query;
+    qDebug() << "1: start";
+
+    // Проверяем user ДО вызова функции
+    qDebug() << "2: user.login() =" << user.login();
+
+    // Проверяем БД
+    qDebug() << "3: DB isOpen =" << m_db.isOpen();
+
+    // Теперь вызываем loginExists
+    bool exists = loginExists(user.login());
+    qDebug() << "4: loginExists result =" << exists;
+
+    if (exists) {
+        qDebug() << "5: login busy";
+        return Result<int>::err(ErrorInfo::validation("login", "Логин занят"));
+    } else {
+        qDebug() << "6: login free";
     }
+
+    qDebug() << "2";
 
     int user_id = 1; // Значение по умолчанию, если таблица пуста
     if (query.exec("SELECT MAX(user_id) AS max_id FROM users;")) {
+
+        qDebug() << "3";
         if (query.next()) {
             user_id = query.value("max_id").toInt() + 1;
         }
     } else {
+
+        qDebug() << "4";
         qDebug() << "Ошибка выполнения запроса: не удаётся user_id++ для записи в БД \n" << query.lastError().text();
     }
 
     query.clear();
+
+
+    qDebug() << "5";
 
 
     QSqlQuery q(m_db);
@@ -79,12 +115,23 @@ Result<int> UserRepository::createUser(const User& user)
         )
     )");
 
-    user.bindToQuery(q); //query.bindValue(":login", QVariant("admin")) и тд
-    q.bindValue(":last_update", QDateTime::currentDateTime());
+    auto newUser = User::fromQuery(q);  // ← Вся магия в одной строке!
+    if (newUser) {
+        qDebug() << "Loaded:" << newUser->login() << newUser->surname();
+    }
+
+    //user.bindToQuery(q); //query.bindValue(":login", QVariant("admin")) и тд
+    //q.bindValue(":last_update", QDateTime::currentDateTime());
 
     if (!q.exec()) {
         logDatabaseError("UserRepository::createUser", q.lastError());
         return Result<int>::err(ErrorInfo::validation("БД", "Ошибка БД: " + q.lastError().text()));
+    } else {
+        auto user = User::fromQuery(q);  // ← Вся магия в одной строке!
+        q.bindValue(":last_update", QDateTime::currentDateTime());
+        if (user) {
+            qDebug() << "Loaded:" << user->login() << user->surname();
+        }
     }
 
     query.clear();
@@ -98,12 +145,20 @@ Result<int> UserRepository::createUser(const User& user)
 bool UserRepository::loginExists(const QString& login)
 {
     QSqlQuery q(m_db);
+
+    qDebug() << "0_1";
+
     q.prepare("SELECT COUNT(*) FROM users WHERE login = :login");
     q.bindValue(":login", login);
+
+    qDebug() << "0_2";
 
     if (q.exec() && q.next()) {
         return q.value(0).toInt() > 0;
     }
+
+    qDebug() << "0_3";
+
     return false;
 }
 

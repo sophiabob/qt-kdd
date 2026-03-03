@@ -141,7 +141,7 @@ struct UserDataSearch {
 struct FieldRecord {
     QString fieldName;           // Имя поля: "login", "surname"...
     QWidget* widget;             // Указатель на виджет
-    enum Type { Text, Int, Float, Date, ComboBox, Label } type;
+    enum Type { Text, Int, Float, Date, ComboBox, Label, DateTime } type;
 };
 
 // псевдонимы для удобства
@@ -186,6 +186,7 @@ public:
     //void setRepository(UserRepository* repo);
 
 private slots:
+    //User formToUser() const;
     // ==================== основные слоты (обработчики нажатий) ====================
 
     // работа с пользователями
@@ -499,6 +500,11 @@ private slots:
     void showAllPpdRows();
 
 private:
+    void initFieldMaps();
+    std::vector<FieldRecord> m_userFormFields;
+
+
+    QString checkValidForUser(const User& user);
     UserRepository* m_repo;
     // ==================== члены класса ====================
 
@@ -558,12 +564,13 @@ private:
 
 
     // Хэширование с солью и key stretching (защита от перебора)
-    QString hashPasswordSecure(const QString& password);
+    QString hashPasswordSecure(const QString& password) const;
 
     // Проверка пароля против сохранённого хэша
     bool verifyPasswordSecure(const QString& password, const QString& storedHash);
 
     void on_btnUserDutySearch_pressed();
+
 
 
 
@@ -581,7 +588,7 @@ private:
 
     void initFieldMapsUser();
 
-    User formToUser() const;           // Считать все поля из формы в User
+    void formToUser(User& user) const;           // Считать все поля из формы в User
     void userToForm(const User& user); // Записать все поля из User в форму
 
     // работа с одним полем (если нужно точечно)
@@ -589,10 +596,8 @@ private:
     void writeField(const QString& fieldName, const QVariant& value);
 
 
-    QString checkValidForUser(const User& user);
-
     // Вектор полей (заполняется в конструкторе)
-    std::vector<FieldRecord> m_userFormFields;
+   // std::vector<FieldRecord> m_userFormFields;
 
     // Универсальные функции
     void writeFieldsToForm(const std::vector<FieldRecord>& fields, const QMap<QString, QVariant>& data);
@@ -603,7 +608,7 @@ private:
 
     // передача данных из пользователя в форму и обратно
     void userToForm(QWidget *parent);
-    void formToUser(QWidget *parent);
+    //void formToUser(QWidget *parent);
 
 protected:
     // фильтр событий (например, для обработки специальных кликов)

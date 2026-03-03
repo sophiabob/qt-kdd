@@ -38,7 +38,7 @@ class User
     Q_PROPERTY(QDateTime lastUpdate READ lastUpdate WRITE setLastUpdate USER "last_update")
 
 */
-
+/*
     Q_PROPERTY(QString login READ login WRITE setLogin)
     Q_PROPERTY(QString passwordHash READ passwordHash WRITE setPasswordHash)
     Q_PROPERTY(QString surname READ surname WRITE setSurname)
@@ -60,16 +60,22 @@ class User
     Q_PROPERTY(QDateTime lastCellUpdate READ lastCellUpdate WRITE setLastCellUpdate)
     Q_PROPERTY(QString accessCode READ accessCode WRITE setAccessCode)
     Q_PROPERTY(QString blockReason READ blockReason WRITE setBlockReason)
-    Q_PROPERTY(QDateTime lastUpdate READ lastUpdate WRITE setLastUpdate)
+    Q_PROPERTY(QDateTime lastUpdate READ lastUpdate WRITE setLastUpdate)*/
 //проверить
     friend class UserRepository;
 
-public:
+public: //✅
+
    // User() = default;
     //User();
     //explicit User(QObject* parent = nullptr) : QObject(parent) {}
 
-    explicit User(QObject* parent = nullptr);
+
+    //explicit User(QObject* parent = nullptr);
+
+    //explicit User(QObject* parent = nullptr);
+    explicit User(QObject* parent);
+
     User(
         int id = -1,
         const QString& firstName = QString(),
@@ -179,16 +185,47 @@ public:
 
 
     //вспомогательные методы
+    static QMap<QString, QString> dbColumnMap();
+
+
 
     //привязка переменных к полям sql
     void bindToQuery(QSqlQuery& query) const;
     static std::unique_ptr<User> fromQuery(const QSqlQuery& row);
 
 
-    //для взиамодействия форма и юзера
+    /*/для взиамодействия форма и юзера
     void fillFromMap(const QMap<QString, QVariant>& data) {
+        qDebug() << "вошли fillFromMapm";
+
+        if (!this) {
+            qDebug() << "ERROR: this is nullptr!";
+            return;
+        }
+        qDebug() << "движемся";
+
+        //User* u = nullptr; u->metaObject();
+        //qDebug() << " Оч активно движемся";
+
         const QMetaObject* meta = this->metaObject();
+
+        if (!meta) {
+            qDebug() << "ERROR: metaObject() returned nullptr!";
+            qDebug() << "Проверь: 1) Q_OBJECT макрос, 2) наследование QObject, 3) пересборку";
+            return;
+        }
+
+        qDebug() << "const QMetaObject* meta";
+
+
+        int idx = meta->indexOfProperty("login");
+
+        if (idx) {
+            qDebug() << "✓ Q_PROPERTY 'login' зарегистрирован: " << idx;
+        }
+
         for (auto it = data.begin(); it != data.end(); ++it) {
+            qDebug() << "auto it = data.begin(); it != data.end();";
             // Ищем свойство с таким же именем, как ключ в QMap
             int idx = meta->indexOfProperty(it.key().toUtf8().constData());
             if (idx >= 0) {
@@ -199,13 +236,12 @@ public:
                 }
             }
         }
-    }
+    }*/
+
 
 
 private:
    // Q_DISABLE_COPY(User) //защита от случайного копирования
-    static QMap<QString, QString> dbColumnMap();
-
     // --- Основная информация ---
     int m_id;                    // Уникальный ID записи
     QString m_login;             // Логин для входа

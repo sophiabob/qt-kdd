@@ -1,6 +1,7 @@
 #include "user.h"
 #include <memory>
 
+
 User::User(
         int id,
         const QString& firstName,
@@ -28,7 +29,8 @@ User::User(
         int startDoz,
         int finishDoz
     )
-    : m_id(id)
+    : QObject(nullptr)
+    , m_id(id)
     , m_firstName(firstName)
     , m_surname(surname)
     , m_patronymic(patronymic)
@@ -67,20 +69,21 @@ User::User(QObject *parent) : QObject(parent)
     // Инициализация полей, если нужна
 }
 
-QMap<QString, QString> User::dbColumnMap() {
-    return {
-        {"login", "login"}, {"passwordHash", "password"},
-        {"surname", "name_0"}, {"firstName", "name_1"}, {"patronymic", "name_2"},
-        {"snils", "snils"}, {"gender", "gender"}, {"birthDate", "birthday"},
-        {"role", "role"}, {"employeeNumber", "tab_num"},
-        {"department", "department"}, {"cardId", "card_id"},
-        {"dosimetrTldId", "doz_tld_id"}, {"startDoz", "start_doz"},
-        {"finishDoz", "finish_doz"}, {"annualDose", "dose_year"},
-        {"currentYearDose", "dose_year_now"}, {"currentYearDosePPD", "dose_year_now_ppd"},
-        {"lastCellUpdate", "cell_date"}, {"accessCode", "code"},
-        {"blockReason", "block"}, {"lastUpdate", "last_update"},
-        {"setId", "set_ID"}, {"kasId", "kas_ID"}, {"meshId", "mesh_ID"}
+QMap<QString, QString> User::dbColumnMap()
+{
+    static const QMap<QString, QString> map {
+        {"id", "user_id"}, {"login", "login"}, {"passwordHash", "password"},
+        {"firstName", "name_0"}, {"surname", "name_1"}, {"patronymic", "name_2"},
+        {"gender", "gender"}, {"birthDate", "birthday"}, {"snils", "snils"},
+        {"employeeNumber", "tab_num"}, {"role", "role"}, {"department", "department"},
+        {"cardId", "card_id"}, {"accessCode", "code"}, {"blockReason", "block"},
+        {"setId", "set_id"}, {"kasId", "kas_id"}, {"meshId", "mesh_id"},
+        {"dosimetrTldId", "doz_tld_id"}, {"lastCellUpdate", "cell_date"},
+        {"annualDose", "dose_year"}, {"currentYearDose", "dose_year_now"},
+        {"currentYearDosePPD", "dose_year_now_ppd"}, {"startDoz", "start_doz"},
+        {"finishDoz", "finish_doz"}, {"lastUpdate", "last_update"}
     };
+    return map;
 }
 
 
@@ -97,17 +100,99 @@ void User::bindToQuery(QSqlQuery& query) const
 }
 std::unique_ptr<User> User::fromQuery(const QSqlQuery& row)
 {
-    auto user = std::make_unique<User>(nullptr);  // ← Явный конструктор
-    const QMetaObject* meta = user->metaObject();
+    auto user = std::make_unique<User>();
     const auto& map = dbColumnMap();
 
-    for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
-        QMetaProperty prop = meta->property(i);
-        QString dbCol = map.value(prop.name(), prop.name());
+    for (auto it = map.begin(); it != map.end(); ++it) {
+        const QString& fieldName = it.key();   // "login", "surname"...
+        const QString& dbCol = it.value();     // "login", "name_1"...
 
-        if (row.record().contains(dbCol)) {  // ← record().contains()
-            prop.write(user.get(), row.value(dbCol));
+        // Пропускаем, если колонки нет в результате запроса
+        if (!row.record().contains(dbCol)) continue;
+
+        QVariant value = row.value(dbCol);
+
+        // === Dispatch по имени поля (типобезопасно) ===
+        if (fieldName == "id") {
+            user->m_id = value.toInt();
         }
+        else if (fieldName == "login") {
+            user->setLogin(value.toString());
+        }
+        else if (fieldName == "passwordHash") {
+            user->setPasswordHash(value.toString());  // ⚠️ Хэш, не пароль!
+        }
+        else if (fieldName == "firstName") {
+            user->setFirstName(value.toString());
+        }
+        else if (fieldName == "surname") {
+            user->setSurname(value.toString());
+        }
+        else if (fieldName == "patronymic") {
+            user->setPatronymic(value.toString());
+        }
+        else if (fieldName == "gender") {
+            user->setGender(value.toString());
+        }
+        else if (fieldName == "birthDate") {
+            user->setBirthDate(value.toDateTime());
+        }
+        else if (fieldName == "snils") {
+            user->setSnils(value.toInt());
+        }
+        else if (fieldName == "employeeNumber") {
+            user->setEmployeeNumber(value.toInt());
+        }
+        else if (fieldName == "role") {
+            user->setRole(value.toString());
+        }
+        else if (fieldName == "department") {
+            user->setDepartment(value.toString());
+        }
+        else if (fieldName == "cardId") {
+            user->setCardId(value.toString());
+        }
+        else if (fieldName == "accessCode") {
+            user->setAccessCode(value.toString());
+        }
+        else if (fieldName == "blockReason") {
+            user->setBlockReason(value.toString());
+        }
+        else if (fieldName == "setId") {
+            user->setSetId(value.toInt());
+        }
+        else if (fieldName == "kasId") {
+            user->setKasId(value.toInt());
+        }
+        else if (fieldName == "meshId") {
+            user->setMeshId(value.toInt());
+        }
+        else if (fieldName == "dosimetrTldId") {
+            user->setDosimetrTldId(value.toInt());
+        }
+        else if (fieldName == "lastCellUpdate") {
+            user->setLastCellUpdate(value.toDateTime());
+        }
+        else if (fieldName == "annualDose") {
+            user->setAnnualDose(value.toFloat());
+        }
+        else if (fieldName == "currentYearDose") {
+            user->setCurrentYearDose(value.toFloat());
+        }
+        else if (fieldName == "currentYearDosePPD") {
+            user->setCurrentYearDosePPD(value.toFloat());
+        }
+        else if (fieldName == "startDoz") {
+            user->setStartDoz(value.toInt());
+        }
+        else if (fieldName == "finishDoz") {
+            user->setFinishDoz(value.toInt());
+        }
+        else if (fieldName == "lastUpdate") {
+            user->setLastUpdate(value.toDateTime());
+        }
+        // else: неизвестное поле — игнорируем
     }
-    return user;  // ← Авто-move, память удалится сама
+
+    return user;
 }

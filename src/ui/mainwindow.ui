@@ -1320,7 +1320,7 @@ QStatusBar
                    <property name="geometry">
                     <rect>
                      <x>0</x>
-                     <y>-488</y>
+                     <y>-118</y>
                      <width>904</width>
                      <height>896</height>
                     </rect>
