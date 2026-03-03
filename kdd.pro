@@ -38,7 +38,9 @@ SOURCES += \
     src/models/meshmodel.cpp \
     src/models/meshstatusmodel.cpp \
     src/models/user.cpp \
-    src/repositories/user_repository.cpp
+    src/repositories/user_repository.cpp \
+    src/core/database_manager.cpp \
+    src/core/db_config.cpp
 
 HEADERS += \
     src/repositories/result.h \
@@ -48,7 +50,10 @@ HEADERS += \
     src/models/meshmodel.h \
     src/models/meshstatusmodel.h \
     src/models/user.h \
-    src/repositories/user_repository.h
+    src/repositories/user_repository.h \
+    src/core/database_manager.h \
+    src/core/db_config.h
+
 
 FORMS += \
     src/ui/mainwindow.ui \
@@ -57,7 +62,8 @@ FORMS += \
 # Пути для поиска заголовков
 INCLUDEPATH += $$PWD/src/ui \
                $$PWD/src/ui/widgets \
-               $$PWD/src/models
+               $$PWD/src/models \
+               $$PWD/src/core
 
 # Конфигурационный файл
 OTHER_FILES += \

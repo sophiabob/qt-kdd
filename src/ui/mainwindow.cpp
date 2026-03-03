@@ -269,9 +269,9 @@ void MainWindow::initFieldMaps()
         {"finishDoz",      ui->inputUserFinishDoz, FieldRecord::Int},
 
         // === ДОЗИМЕТРИЯ (Float) ===
-        {"annualDose",     ui->spinUserDoseYear,    FieldRecord::Float},
-        {"currentYearDose", ui->spinUserDoseYearNow, FieldRecord::Float},
-        {"currentYearDosePPD", ui->spinUserDoseYearPpd, FieldRecord::Float},
+        {"annualDose",     ui->spinUserDoseYear,    FieldRecord::Float}, //dose_year
+        {"currentYearDose", ui->spinUserDoseYearNow, FieldRecord::Float}, //dose_year_now
+        {"currentYearDosePPD", ui->spinUserDoseYearPpd, FieldRecord::Float}, //dose_year_now_ppd
 
         // === ДАТЫ ===
         {"lastCellUpdate", ui->inputDateCellDate, FieldRecord::Date},
@@ -476,7 +476,7 @@ void MainWindow::on_btnSetChange_pressed(){
     );
 
     if (success) {
-        qDebug() << "Данные успешно сохранены в таблицу set_history";
+       // qDebug() << "Данные успешно сохранены в таблицу set_history";
         setHistoryToTable(); // Обновляем таблицу истории
     } else {
         qDebug() << "Ошибка при сохранении истории комплекта";
@@ -700,9 +700,7 @@ void MainWindow::formToUser(User& user) const
             case FieldRecord::Text:
                 if (auto* line = qobject_cast<QLineEdit*>(field.widget)) {
                     value = line->text(); valueSet = true;
-                } /*else if (auto* combo = qobject_cast<QComboBox*>(field.widget)) {
-                    value = combo->currentText(); valueSet = true;
-                }*/
+                }
                 break;
             case FieldRecord::Int:
                 if (auto* spin = qobject_cast<QSpinBox*>(field.widget)) {
@@ -711,18 +709,22 @@ void MainWindow::formToUser(User& user) const
                     value = line->text().toInt(); valueSet = true;
                 }
                 break;
+
             case FieldRecord::Float:
                 if (auto* dspin = qobject_cast<QDoubleSpinBox*>(field.widget)) {
                     value = dspin->value(); valueSet = true;
                 }
                 break;
+
             case FieldRecord::Date:
                 if (auto* dateEdit = qobject_cast<QDateTimeEdit*>(field.widget)) {
                     value = dateEdit->dateTime(); valueSet = true;  // Или .date() для QDateEdit
                 }
                 break;
             case FieldRecord::ComboBox:
-                if (auto* combo = qobject_cast<QComboBox*>(field.widget)) value = combo->currentText();
+                if (auto* combo = qobject_cast<QComboBox*>(field.widget)){
+                    value = combo->currentText(); valueSet = true;
+                }
                 break;
 
             case FieldRecord::Label:
@@ -861,7 +863,7 @@ QString MainWindow::checkValidForUser(const User& user)
 
 
     // === РОЛЬ ===
-    if (!user.role().isEmpty())
+    if (user.role().isEmpty())
         return "Неверная роль пользователя";
 
     // === ВСЁ ОК ===
@@ -1963,7 +1965,7 @@ QMap<QString, QVariant> MainWindow::readFieldsFromForm(const std::vector<FieldRe
                     value = line->text().toInt();
                 break;
 
-            case FieldRecord::Float:
+            case FieldRecord::Float: //QSpinBox
                 if (auto* dspin = qobject_cast<QDoubleSpinBox*>(field.widget))
                     value = dspin->value();
                 break;

@@ -1217,7 +1217,7 @@ QStatusBar
          </size>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -1320,7 +1320,7 @@ QStatusBar
                    <property name="geometry">
                     <rect>
                      <x>0</x>
-                     <y>-118</y>
+                     <y>-488</y>
                      <width>904</width>
                      <height>896</height>
                     </rect>
@@ -1410,7 +1410,7 @@ QStatusBar
                              </widget>
                             </item>
                             <item>
-                             <widget class="QSpinBox" name="spinUserDoseYearPpd"/>
+                             <widget class="QDoubleSpinBox" name="spinUserDoseYearPpd"/>
                             </item>
                             <item>
                              <widget class="QLabel" name="label_31">
@@ -1460,7 +1460,7 @@ QStatusBar
                              </widget>
                             </item>
                             <item>
-                             <widget class="QSpinBox" name="spinUserDoseYearNow"/>
+                             <widget class="QDoubleSpinBox" name="spinUserDoseYearNow"/>
                             </item>
                             <item>
                              <widget class="QLabel" name="label_38">
@@ -1470,7 +1470,7 @@ QStatusBar
                              </widget>
                             </item>
                             <item>
-                             <widget class="QSpinBox" name="spinUserDoseYear"/>
+                             <widget class="QDoubleSpinBox" name="spinUserDoseYear"/>
                             </item>
                             <item>
                              <widget class="QLabel" name="label_49">

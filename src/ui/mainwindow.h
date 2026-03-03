@@ -141,7 +141,7 @@ struct UserDataSearch {
 struct FieldRecord {
     QString fieldName;           // Имя поля: "login", "surname"...
     QWidget* widget;             // Указатель на виджет
-    enum Type { Text, Int, Float, Date, ComboBox, Label, DateTime } type;
+    enum Type { Text, Int, Float, Date, Label, DateTime, ComboBox } type;
 };
 
 // псевдонимы для удобства

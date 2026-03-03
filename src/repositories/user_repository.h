@@ -13,6 +13,10 @@
 #include "../models/user.h"
 #include "../repositories/result.h"
 
+class Welcome;
+
+#include "../ui/welcome.h"
+
 /*
 // === Результат операции с возможностью ошибки ===
 template<typename T>
@@ -44,6 +48,12 @@ private:
     void logDatabaseError(const QString& context, const QSqlError& error) const;
 
     void logDatabaseError(const QString& context, const QSqlError& error);
+
+    //изменить расположение
+
+    //Ui::MainWindow *ui; // указатель на сгенерированный UI
+    Welcome *welcomeWindow = nullptr; // окно приветствия (может быть nullptr)
+
 };
 
 

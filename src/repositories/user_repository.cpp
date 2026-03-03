@@ -46,18 +46,9 @@ void UserRepository::logDatabaseError(const QString& context, const QSqlError& e
 //создать пользователя
 Result<int> UserRepository::createUser(const User& user)
 {
-    /*QSqlQuery query;
+    Welcome welcome;//db_config.h
+    bool connected = welcome.createConnection();
 
-    qDebug() << "1";
-qDebug() << "user.login()" << user.login();
-
-    if (loginExists(user.login())) {
-        qDebug() << "0";
-        return Result<int>::err(ErrorInfo::validation("login", "Логин '" + user.login() + "' уже занят"));
-    } else {
-        qDebug() << "11";
-        //qDebug() << "user.login()" << user.login();
-    }*/
 
     QSqlQuery query;
     qDebug() << "1: start";
@@ -65,8 +56,9 @@ qDebug() << "user.login()" << user.login();
     // Проверяем user ДО вызова функции
     qDebug() << "2: user.login() =" << user.login();
 
+
     // Проверяем БД
-    qDebug() << "3: DB isOpen =" << m_db.isOpen();
+    qDebug() << "3: DB isOpen =" << m_db.isOpen(); //
 
     // Теперь вызываем loginExists
     bool exists = loginExists(user.login());
