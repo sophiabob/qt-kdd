@@ -46,19 +46,148 @@ void UserRepository::logDatabaseError(const QString& context, const QSqlError& e
 //создать пользователя
 Result<int> UserRepository::createUser(const User& user)
 {
-    Welcome welcome;//db_config.h
-    bool connected = welcome.createConnection();
+
+    qDebug() << "Мы вошли в createUser(const User& user)";
 
 
-    QSqlQuery query;
-    qDebug() << "1: start";
+    return withDbConnection<Result<int>>([&](QSqlDatabase& db) {
 
-    // Проверяем user ДО вызова функции
-    qDebug() << "2: user.login() =" << user.login();
+        /*начало проверки*/
+        // === ПРОВЕРКА 1: Подключение ===
+        qDebug() << "[DB] Connection:" << db.connectionName()
+                 << "| isValid:" << db.isValid()
+                 << "| isOpen:" << db.isOpen();
+
+        if (!db.isValid()) {
+            qCritical() << "[DB] ❌ Database not valid";
+            return Result<int>::err(ErrorInfo::database("Невалидное подключение"));
+        }
+
+        if (!db.isOpen()) {
+            qWarning() << "[DB] ⚠️ DB not open, trying to open...";
+            if (!DatabaseManager::instance().open("path/to/db.sqlite")) {
+                qCritical() << "[DB] ❌ open() failed:" << db.lastError().text();
+                return Result<int>::err(ErrorInfo::database("Не удалось открыть БД"));
+            }
+            qDebug() << "[DB] ✅ open() success";
+        }
+        /*конец проверки*/
 
 
-    // Проверяем БД
-    qDebug() << "3: DB isOpen =" << m_db.isOpen(); //
+        QSqlQuery query(db);
+
+
+        qDebug() << "[SQL] Preparing INSERT query...";
+
+        bool prepareOk = query.prepare(R"(
+            INSERT INTO users (
+                login, password, name_0, name_1, name_2, snils, gender, birthday,
+                role, tab_num, department, card_id, set_ID, kas_ID, mesh_ID,
+                doz_tld_id, cell_date, dose_year, dose_year_now, dose_year_now_ppd,
+                code, block, last_update
+            ) VALUES (
+                :login, :password, :name_0, :name_1, :name_2, :snils, :gender, :birthday,
+                :role, :tab_num, :department, :card_id, :set_ID, :kas_ID, :mesh_ID,
+                :doz_tld_id, :cell_date, :dose_year, :dose_year_now, :dose_year_now_ppd,
+                :code, :block, :last_update
+            )
+        )");
+
+
+        /*начало проверки*/
+        if (!prepareOk) {  // ← Используем ту же переменную
+            qCritical() << "[SQL] ❌ prepare() failed:" << query.lastError().text();
+            return Result<int>::err(ErrorInfo::database("Ошибка подготовки: " + query.lastError().text()));
+        }
+        qDebug() << "[SQL] ✅ prepare() success";
+
+
+
+        // === ПРОВЕРКА 3: Логирование данных пользователя (перед bindToQuery) ===
+        qDebug() << "[USER] Data to insert:";
+        qDebug() << "  login:" << user.login();
+        qDebug() << "  passwordHash:" << (user.passwordHash().isEmpty() ? "(empty)" : "***");
+        qDebug() << "  surname:" << user.surname();
+        qDebug() << "  firstName:" << user.firstName();
+        qDebug() << "  patronymic:" << user.patronymic();
+        qDebug() << "  snils:" << user.snils();
+        qDebug() << "  employeeNumber:" << user.employeeNumber();
+        qDebug() << "  role:" << user.role();
+        qDebug() << "  department:" << user.department();
+        qDebug() << "  cardId:" << user.cardId();
+        qDebug() << "  birthDate:" << user.birthDate().toString("yyyy-MM-dd");
+        qDebug() << "  annualDose:" << user.annualDose();
+        qDebug() << "  lastUpdate:" << user.lastUpdate().toString("yyyy-MM-dd hh:mm:ss");
+
+        // === ПРОВЕРКА 4: Привязка параметров ===
+        qDebug() << "[BIND] Calling user.bindToQuery(query)...";
+        user.bindToQuery(query);  // ← Твой метод привязки
+
+        // Логируем привязанные значения (boundValues() возвращает QMap<QString, QVariant>)
+        qDebug() << "[BIND] login=" << user.login()
+            << "snils=" << user.snils();
+
+
+
+        // === ПРОВЕРКА 5: Выполнение запроса ===
+        qDebug() << "[SQL] Executing query...";
+        bool executed = query.exec();
+
+        if (!executed) {
+            qCritical() << "[SQL] ❌ exec() failed:" << query.lastError().text();
+            qCritical() << "[SQL] Last query:" << query.lastQuery();
+            qCritical() << "[SQL] Bound values:" << query.boundValues();
+            return Result<int>::err(ErrorInfo::database("Ошибка выполнения: " + query.lastError().text()));
+        }
+        qDebug() << "[SQL] ✅ exec() success";
+
+        // === ПРОВЕРКА 6: Результат ===
+        int newId = query.lastInsertId().toInt();
+        int rowsAffected = query.numRowsAffected();
+
+        qDebug() << "[RESULT] lastInsertId:" << newId;
+        qDebug() << "[RESULT] numRowsAffected:" << rowsAffected;
+
+        if (newId <= 0) {
+            qWarning() << "[RESULT] ⚠️ lastInsertId <= 0 (возможно, нет AUTOINCREMENT)";
+        }
+
+
+        /*конец проверки*/
+
+
+
+
+
+
+
+        auto newUser = User::fromQuery(query);  // ← Вся магия в одной строке!
+        if (newUser) {
+            qDebug() << "Loaded:" << newUser->login() << newUser->surname();
+        }
+
+
+
+
+
+        // ... или user.bindToQuery(query);
+
+        if (!query.exec()) {
+            return Result<int>::err(ErrorInfo::database(query.lastError().text()));
+        }
+    });
+}
+
+
+
+
+
+
+
+
+
+
+/*
 
     // Теперь вызываем loginExists
     bool exists = loginExists(user.login());
@@ -73,6 +202,7 @@ Result<int> UserRepository::createUser(const User& user)
 
     qDebug() << "2";
 
+    //до обновления имён таблицы должно быть тут
     int user_id = 1; // Значение по умолчанию, если таблица пуста
     if (query.exec("SELECT MAX(user_id) AS max_id FROM users;")) {
 
@@ -130,7 +260,7 @@ Result<int> UserRepository::createUser(const User& user)
 
     int newId = q.lastInsertId().toInt();
     return Result<int>::ok(newId > 0 ? newId : -1); //возвращаем id нового пользователя
-}
+*/
 
 
 // существует ли логин

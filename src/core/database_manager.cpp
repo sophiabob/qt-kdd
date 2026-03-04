@@ -12,11 +12,12 @@ DatabaseManager::DatabaseManager() {
     m_db.setPassword(DbConfig::password());
     m_db.setConnectOptions("QSQLITE_BUSY_TIMEOUT=5000");  // Для SQLite
 }
-
-DatabaseManager& DatabaseManager::instance() {
+/*
+//DatabaseManager&
+DatabaseManager::instance() {
     static DatabaseManager instance;  // Singleton (ленивая инициализация)
     return instance;
-}
+}*/
 
 bool DatabaseManager::connect() {
     if (m_db.isOpen()) return true;

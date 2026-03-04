@@ -32,6 +32,7 @@ CONFIG += c++11
 
 SOURCES += \
     main.cpp \
+    src/core/database_helper.cpp \
     src/ui/mainwindow.cpp \
     src/ui/welcome.cpp \
     src/ui/doubleclickbutton.cpp \
@@ -43,6 +44,7 @@ SOURCES += \
     src/core/db_config.cpp
 
 HEADERS += \
+    src/core/database_helper.h \
     src/repositories/result.h \
     src/ui/mainwindow.h \
     src/ui/welcome.h \
@@ -67,7 +69,7 @@ INCLUDEPATH += $$PWD/src/ui \
 
 # Конфигурационный файл
 OTHER_FILES += \
-    settings.ini
+    resources/settings.ini
 
 
 

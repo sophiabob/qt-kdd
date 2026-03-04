@@ -1,22 +1,50 @@
-// db_config.h
 #pragma once
+#ifndef DB_CONFIG_H
+#define DB_CONFIG_H
+
 #include <QString>
+#include <QSettings>
+#include <QStandardPaths>
 
-struct DbConfig {
-    enum Env { demoWindows, demoLinux, Ini };  // Среды
+#include <QCoreApplication>  // ← Для applicationDirPath()
+#include <QFileInfo>         // ← Для QFileInfo::exists()
+#include <QDir>              // ← Для QDir::cleanPath()
 
-    // Текущая среда (можно менять в runtime)
-    static Env currentEnv();
-    static void setCurrentEnv(Env env);
+class DbConfig {
+public:
+    // Загрузка конфига (вызвать один раз в main)
+    static bool loadFromIni();
 
-    // Настройки для каждой среды
-    static QString driver() { return "QPSQL"; }
-    static QString databaseName(Env env = currentEnv());
-    static QString host(Env env = currentEnv());
-    static int port(Env env = currentEnv());
-    static QString username(Env env = currentEnv());
-    static QString password(Env env = currentEnv());
+    // Геттеры настроек
+    static QString driver();
+    static QString databaseName();
+    static QString host();
+    static int port();
+    static QString username();
+    static QString password();  // 🔐 + проверка env-переменной
+    static int connectTimeout();
+
+    // Проверка: загружен ли конфиг
+    static bool isLoaded();
+
+    // Очистка (для тестов)
+    static void unload();
 
 private:
-    static Env s_currentEnv;  // Статическое поле
+    static QSettings* s_settings;  // Указатель на настройки
+
+    // Дефолтные значения (если INI не загружен или ключа нет)
+    static QString defaultDriver();
+    static QString defaultDatabase();
+    static QString defaultHost();
+    static int defaultPort();
+    static QString defaultUsername();
+    static QString defaultPassword();
+    static int defaultTimeout();
+
+    // Вспомогательный геттер
+    template<typename T>
+    static T getValue(const QString& key, T defaultValue);
 };
+
+#endif // DB_CONFIG_H

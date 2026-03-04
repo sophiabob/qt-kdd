@@ -681,7 +681,7 @@ void MainWindow::on_btnChangePhoto_pressed(){
 
 void MainWindow::formToUser(User& user) const
 {
-    qDebug() << "=== formToUser start ===";
+    qDebug() << "\n" << "Г === formToUser start === -|";
     qDebug() << "Fields count:" << m_userFormFields.size();
 
     for (const auto& field : m_userFormFields) {
@@ -750,7 +750,7 @@ void MainWindow::formToUser(User& user) const
             continue;  // ← Не вызывай сеттер с пустым value!
         }
 
-        qDebug() << "  Setting" << field.fieldName << "=" << value;
+        //qDebug() << "  Setting" << field.fieldName << "=" << value;
 
 
         // Вызываем сеттер по имени поля (минимум if/else)
@@ -776,6 +776,8 @@ void MainWindow::formToUser(User& user) const
         else if (field.fieldName == "finishDoz") user.setFinishDoz(value.toInt());
         // ID, lastUpdate обычно не читаем из формы при создании
     }
+
+    qDebug() << "L === formToUser finish === _|" << "\n";
 
     //return user;  // Return Value Optimization (RVO) — без копирования
 }

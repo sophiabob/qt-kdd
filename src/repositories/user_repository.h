@@ -9,6 +9,7 @@
 #include <QString>
 #include <QVariant>
 #include <optional>
+#include <QMap>
 
 #include "../models/user.h"
 #include "../repositories/result.h"
@@ -16,6 +17,12 @@
 class Welcome;
 
 #include "../ui/welcome.h"
+
+#include <QApplication>
+#include "../core/db_config.h"
+#include "../core/database_manager.h"
+
+#include "database_helper.h"
 
 /*
 // === Результат операции с возможностью ошибки ===
@@ -42,8 +49,12 @@ public:
 
 
 
+
 private:
     QSqlDatabase m_db;
+   /* QSqlDatabase m_db() const {
+        return DatabaseManager::instance().connection();
+    }*/
 
     void logDatabaseError(const QString& context, const QSqlError& error) const;
 
@@ -55,6 +66,9 @@ private:
     Welcome *welcomeWindow = nullptr; // окно приветствия (может быть nullptr)
 
 };
+
+
+
 
 
 #endif // USER_REPOSITORY_H
