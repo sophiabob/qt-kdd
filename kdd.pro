@@ -69,7 +69,8 @@ INCLUDEPATH += $$PWD/src/ui \
 
 # Конфигурационный файл
 OTHER_FILES += \
-    resources/settings.ini
+    resources/settings.ini\
+    resources/settings_win.ini
 
 
 

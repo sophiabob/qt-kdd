@@ -890,6 +890,9 @@ void MainWindow::on_btnCreateNewUser_pressed() //создаём нового п�
         ? QMessageBox::information(this, "Успех", "ID: " + QString::number(result.value))
         : QMessageBox::critical(this, "Ошибка", result.errorMessage());
 
+
+    setupAllUserComboBoxes();
+
     /*
     //User newUser;
 
@@ -5689,6 +5692,7 @@ void MainWindow::on_comboBox_listOfKas_currentTextChanged(const QString &index)
 
 void MainWindow::on_pushButton_Exit_pressed()
 {
+    qDebug() << "Window count:" << QApplication::topLevelWidgets().size();
     this->close();
 }
 

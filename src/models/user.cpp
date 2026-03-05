@@ -86,17 +86,36 @@ QMap<QString, QString> User::dbColumnMap()
     return map;
 }
 
+inline QString User::clamp(const QString& str, int maxLen) const {
+    return str.length() > maxLen ? str.left(maxLen) : str;
+}
 
-void User::bindToQuery(QSqlQuery& query) const
+void User::bindToQueryUser(QSqlQuery& query) const
 {
-    const QMetaObject* meta = this->metaObject();
-    const auto& map = dbColumnMap();
-
-    for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
-        QMetaProperty prop = meta->property(i);
-        QString dbCol = map.value(prop.name(), prop.name());  // Имя колонки
-        query.bindValue(":" + dbCol, prop.read(this));
-    }
+   // query.bindValue(":user_id", m_id); //убрать
+    query.bindValue(":login", clamp(m_login, 30));
+    query.bindValue(":password", clamp(m_passwordHash, 30));
+    query.bindValue(":name_0", clamp(m_surname, 30));
+    query.bindValue(":name_1", clamp(m_firstName, 30));
+    query.bindValue(":name_2", clamp(m_patronymic, 30));
+    query.bindValue(":snils", m_snils);  // Числа не обрезаем
+    query.bindValue(":gender", clamp(m_gender, 3));
+    query.bindValue(":birthday", m_birthDate);  // QDate не обрезаем
+    query.bindValue(":role", clamp(m_role, 30));
+    query.bindValue(":tab_num", m_employeeNumber);
+    query.bindValue(":department", clamp(m_department, 30));
+    query.bindValue(":card_id", clamp(m_cardId, 30));
+    query.bindValue(":set_ID", m_setId);
+    query.bindValue(":kas_ID", m_kasId);
+    query.bindValue(":mesh_ID", m_meshId);
+    query.bindValue(":doz_tld_id", m_dosimetrTldId);
+    query.bindValue(":cell_date", m_lastCellUpdate);
+    query.bindValue(":dose_year", m_annualDose);
+    query.bindValue(":dose_year_now", m_currentYearDose);
+    query.bindValue(":dose_year_now_ppd", m_currentYearDosePPD);
+    query.bindValue(":code", clamp(m_accessCode, 30));
+    query.bindValue(":block", clamp(m_blockReason, 30));
+    query.bindValue(":last_update", m_lastUpdate);
 }
 std::unique_ptr<User> User::fromQuery(const QSqlQuery& row)
 {

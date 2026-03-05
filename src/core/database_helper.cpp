@@ -17,12 +17,14 @@ public:
     // Метод для получения настроек (если нужно вне helper)
     static QSqlDatabase createConnection(const QString& connName = "DEFAULT") {
         QSqlDatabase db = QSqlDatabase::addDatabase(DbConfig::driver(), connName);
-        db.setDatabaseName(DbConfig::databaseName());
+        //QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
         db.setHostName(DbConfig::host());
         db.setPort(DbConfig::port());
+        db.setDatabaseName(DbConfig::databaseName());
         db.setUserName(DbConfig::username());
         db.setPassword(DbConfig::password());
-        db.setConnectOptions("QSQLITE_BUSY_TIMEOUT=5000");
+        db.setConnectOptions("CONNECT_TIMEOUT=10");  // Таймаут подключения (сек)
+
         return db;
     }
 

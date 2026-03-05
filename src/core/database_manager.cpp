@@ -5,12 +5,13 @@
 
 DatabaseManager::DatabaseManager() {
     m_db = QSqlDatabase::addDatabase(DbConfig::driver(), "MAIN_CONNECTION");
-    m_db.setDatabaseName(DbConfig::databaseName());
+    //QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
     m_db.setHostName(DbConfig::host());
     m_db.setPort(DbConfig::port());
+    m_db.setDatabaseName(DbConfig::databaseName());
     m_db.setUserName(DbConfig::username());
     m_db.setPassword(DbConfig::password());
-    m_db.setConnectOptions("QSQLITE_BUSY_TIMEOUT=5000");  // Для SQLite
+   // m_db.setConnectOptions("CONNECT_TIMEOUT=10");  // Таймаут подключения (сек)
 }
 /*
 //DatabaseManager&

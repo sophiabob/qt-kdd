@@ -24,59 +24,78 @@ public:
 template<typename ResultType>
 ResultType withDbConnection(std::function<ResultType(QSqlDatabase&)> operation)
 {
-    qDebug() << "[HELPER] START withDbConnection";  // ← Отладка
+    qDebug() << "[HELPER.H] START withDbConnection";  // ← Отладка
 
     // Уникальное имя подключения
     QString connName = "TEMP_" + QUuid::createUuid().toString();
+    QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", connName);
 
-    // Создаём и настраиваем подключение
-    QSqlDatabase db = QSqlDatabase::addDatabase(DbConfig::driver(), connName);
-    db.setDatabaseName(DbConfig::databaseName());
     db.setHostName(DbConfig::host());
     db.setPort(DbConfig::port());
+
+    //QString dbName = DbConfig::databaseName();  // Просто имя, например "postgres"
+    //db.setDatabaseName(QString("dbname=%1 options='-c client_encoding=UTF8'").arg(dbName));
+    db.setDatabaseName(DbConfig::databaseName());
+
     db.setUserName(DbConfig::username());
     db.setPassword(DbConfig::password());
-    db.setConnectOptions("QSQLITE_BUSY_TIMEOUT=5000");
 
-    // Открываем
+    //db.setConnectOptions("CONNECT_TIMEOUT=10");
+
+    qDebug() << "=== [DB] CONNECT DEBUG ===";
+    qDebug() << "Host:" << DbConfig::host();
+    qDebug() << "Port:" << DbConfig::port();
+    qDebug() << "User:" << DbConfig::username();
+    qDebug() << "DB Name:" << DbConfig::databaseName();
+    qDebug() << "Password:" << DbConfig::password();  // ← Увидишь реальный пароль
+    qDebug() << "=========================";
+
+
     if (!db.open()) {
-        qCritical() << "[HELPER] ❌ open() failed:" << db.lastError().text();
+        qCritical() << "[HELPER.H] open() failed:" << db.lastError().text();
         QSqlDatabase::removeDatabase(connName);
-        return ResultType{};  // ← Возвращаем пустой результат
+        return ResultType{}; // ← Возвращаем пустой результат
     }
 
-    qDebug() << "[HELPER] ✅ DB opened, calling operation...";
+    qDebug() << "[HELPER.H] DB opened, calling operation...";
 
-    // === ВЫЗОВ ЛЯМБДЫ (ОБЯЗАТЕЛЬНО!) ===
-    ResultType result = operation(db);  // ← ← ← ЗДЕСЬ ВЫПОЛНЯЕТСЯ ТВОЙ КОД!
-
-    qDebug() << "[HELPER] ✅ Operation done, closing DB...";
-
-    // Закрываем и удаляем
+    //operation(db);
+    ResultType result = operation(db);  //тут всё происходит
+    {
+        QSqlQuery cleanup(db);  // Пустой запрос для "очистки" драйвера
+    }
     db.close();
     QSqlDatabase::removeDatabase(connName);
 
-    qDebug() << "[HELPER] END withDbConnection";
+    qDebug() << "[HELPER.H] END withDbConnection";
     return result;
 }
 
 // === Специализация для void ===
 inline void withDbConnection(std::function<void(QSqlDatabase&)> operation)
 {
-    QString connName = "TEMP_" + QUuid::createUuid().toString();
-    QSqlDatabase db = QSqlDatabase::addDatabase(DbConfig::driver(), connName);
-    db.setDatabaseName(DbConfig::databaseName());
+
+    //qDebug() << "withDbConnection(std::function<void(QSqlDatabase&)> operation)";
+
+    QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
+
     db.setHostName(DbConfig::host());
     db.setPort(DbConfig::port());
+    db.setDatabaseName(DbConfig::databaseName());
     db.setUserName(DbConfig::username());
     db.setPassword(DbConfig::password());
-    db.setConnectOptions("QSQLITE_BUSY_TIMEOUT=5000");
+    //db.setConnectOptions("CONNECT_TIMEOUT=10");
 
     if (db.open()) {
         operation(db);  // ← Вызов лямбды
         db.close();
     }
-    QSqlDatabase::removeDatabase(connName);
+    QSqlDatabase::removeDatabase("default");
+
+
+    /*// 2. При переподключении (смена БД)
+    QSqlDatabase::removeDatabase("oldConn");
+    QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", "newConn");*/
 }
 
 

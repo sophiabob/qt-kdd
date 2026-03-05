@@ -10,6 +10,7 @@
 #include <QVariant>
 #include <optional>
 #include <QMap>
+#include <QList>
 
 #include "../models/user.h"
 #include "../repositories/result.h"
@@ -45,7 +46,7 @@ public:
 
     User* mapQueryToUser(const QSqlQuery& query) const;
     bool loginExists(const QString& login);
-    Result<int> createUser(const User& user); // Create → возвращает ID
+    Result<int> createUser(const User& user); // Create → возвращает ID //createUser(const User& user);
 
 
 

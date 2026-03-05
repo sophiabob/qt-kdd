@@ -173,7 +173,7 @@ QString Welcome::findSettingsFile()
     defaultSettings.beginGroup("Database");
     defaultSettings.setValue("UserName", "postgres");
     defaultSettings.setValue("Password", "postgres1");
-    defaultSettings.setValue("Name", "newdb");
+    defaultSettings.setValue("Name", "postgres");
     defaultSettings.setValue("Host", "localhost");
     defaultSettings.setValue("Port", 5432);
     defaultSettings.endGroup();
@@ -219,7 +219,7 @@ void Welcome::readDatabaseSettings(QString &user, QString &password,
     if (database.isEmpty()) {
         database = settings.value("Settings/DatabaseName",
                                   settings.value("Settings/Server_DatabaseName",
-                                                 settings.value("DatabaseName", "newdb"))).toString();
+                                                 settings.value("DatabaseName", "postgres"))).toString();
     }
 
     // Хост читаем только если keepHost = false или host еще не установлен
@@ -299,7 +299,7 @@ void Welcome::on_pushButton_pressed()
         if (os == "Windows") {
             this->showNormal();
             dbUser = "postgres";
-            dbPassword = "postgres";
+            dbPassword = "0";
             dbHost = "localhost";
         } else if (os == "Linux") {
             this->showFullScreen();
@@ -439,10 +439,10 @@ void Welcome::on_pushButton_pressed()
     // ... (ваш существующий код создания таблиц остается без изменений)
 
     // Создаем таблицы заново
-    QStringList sqlCommands = {
+    QStringList sqlCommands = {//user_id SERIAL PRIMARY KEY
         // Таблица users
         R"(CREATE TABLE users(
-        user_id int primary key,
+        user_id SERIAL PRIMARY KEY,,
         login CHARACTER VARYING(30) UNIQUE,
         password CHARACTER VARYING(30),
         name_0 CHARACTER VARYING(30),
@@ -778,9 +778,9 @@ void Welcome::on_pushButton_pressed()
 
     // Создаем администратора
     QSqlQuery insertQuery(db);
-    insertQuery.prepare("INSERT INTO users (user_id, login, password, name_0, name_1, name_2, role, tab_num, card_id, doz_tld_id, set_id, kas_id, mesh_id) "
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    insertQuery.addBindValue("1");
+    insertQuery.prepare("INSERT INTO users (login, password, name_0, name_1, name_2, role, tab_num, card_id, doz_tld_id, set_id, kas_id, mesh_id) "
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    //insertQuery.addBindValue("1");
     insertQuery.addBindValue("admin");
     insertQuery.addBindValue("admin");
     insertQuery.addBindValue("Администратор");
@@ -857,7 +857,7 @@ bool Welcome::createConnection()
             this->showFullScreen();
             dbUser = "postgres";
             dbPassword = "postgres1";
-            dbName = "newdb";
+            dbName = "postgres";
             dbHost = "localhost";
         } else {
             qDebug() << "OS не опознана" << os;

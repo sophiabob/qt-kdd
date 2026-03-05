@@ -150,6 +150,8 @@ public: //✅
 
     //сеттеры - БД
 
+    void setId(int id) { m_id = id; }
+
     void setLogin(const QString& login) { m_login = login; }
     void setPasswordHash(const QString& v) { m_passwordHash = v; }
 
@@ -190,7 +192,7 @@ public: //✅
 
 
     //привязка переменных к полям sql
-    void bindToQuery(QSqlQuery& query) const;
+    void bindToQueryUser(QSqlQuery& query) const;
     static std::unique_ptr<User> fromQuery(const QSqlQuery& row);
 
 
@@ -284,6 +286,7 @@ private:
     QDateTime m_lastUpdate;      // Время последнего обновления (было timestamp)
 
 
+    inline QString clamp(const QString& str, int maxLen)  const;
 
 };
 

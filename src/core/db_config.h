@@ -6,13 +6,12 @@
 #include <QSettings>
 #include <QStandardPaths>
 
-#include <QCoreApplication>  // ← Для applicationDirPath()
-#include <QFileInfo>         // ← Для QFileInfo::exists()
-#include <QDir>              // ← Для QDir::cleanPath()
+#include <QCoreApplication>
+#include <QFileInfo>
+#include <QDir>
 
 class DbConfig {
 public:
-    // Загрузка конфига (вызвать один раз в main)
     static bool loadFromIni();
 
     // Геттеры настроек

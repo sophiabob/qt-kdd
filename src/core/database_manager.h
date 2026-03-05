@@ -26,7 +26,7 @@ public:
     bool open(const QString& dbPath = ":memory:") {
         if (m_db.isOpen()) return true;
 
-        m_db = QSqlDatabase::addDatabase("QSQLITE");  // ← Или "QPSQL", "QMYSQL"
+        m_db = QSqlDatabase::addDatabase("QPSQL");  // ← Или "QPSQL", "QMYSQL"
         m_db.setDatabaseName(dbPath);
 
         if (!m_db.open()) {
