@@ -1320,7 +1320,7 @@ QStatusBar
                    <property name="geometry">
                     <rect>
                      <x>0</x>
-                     <y>-488</y>
+                     <y>-262</y>
                      <width>904</width>
                      <height>896</height>
                     </rect>
@@ -1391,7 +1391,7 @@ QStatusBar
                              <widget class="QLabel" name="label_23">
                               <property name="font">
                                <font>
-                                <bold>true</bold>
+                                <bold>false</bold>
                                </font>
                               </property>
                               <property name="text">
@@ -1653,7 +1653,7 @@ QStatusBar
                          <widget class="QLabel" name="label_40">
                           <property name="font">
                            <font>
-                            <bold>true</bold>
+                            <bold>false</bold>
                            </font>
                           </property>
                           <property name="text">
@@ -1672,7 +1672,7 @@ QStatusBar
                          <widget class="QLabel" name="label_41">
                           <property name="font">
                            <font>
-                            <bold>true</bold>
+                            <bold>false</bold>
                            </font>
                           </property>
                           <property name="text">
@@ -1689,6 +1689,11 @@ QStatusBar
                         </item>
                         <item>
                          <widget class="QLabel" name="label_3">
+                          <property name="font">
+                           <font>
+                            <bold>false</bold>
+                           </font>
+                          </property>
                           <property name="text">
                            <string>Пол:</string>
                           </property>
@@ -1737,7 +1742,7 @@ QStatusBar
                          <widget class="QLabel" name="label_28">
                           <property name="font">
                            <font>
-                            <bold>true</bold>
+                            <bold>false</bold>
                            </font>
                           </property>
                           <property name="text">
@@ -1762,7 +1767,7 @@ QStatusBar
                          <widget class="QLabel" name="label_27">
                           <property name="font">
                            <font>
-                            <bold>true</bold>
+                            <bold>false</bold>
                            </font>
                           </property>
                           <property name="text">
@@ -1793,7 +1798,7 @@ QStatusBar
                          <widget class="QLabel" name="label_26">
                           <property name="font">
                            <font>
-                            <bold>true</bold>
+                            <bold>false</bold>
                            </font>
                           </property>
                           <property name="text">
@@ -1871,7 +1876,7 @@ QStatusBar
                          <widget class="QLabel" name="label_33">
                           <property name="font">
                            <font>
-                            <bold>true</bold>
+                            <bold>false</bold>
                            </font>
                           </property>
                           <property name="text">
@@ -1943,7 +1948,7 @@ QStatusBar
                          <widget class="QLabel" name="label_37">
                           <property name="font">
                            <font>
-                            <bold>true</bold>
+                            <bold>false</bold>
                            </font>
                           </property>
                           <property name="text">
@@ -1999,7 +2004,7 @@ QStatusBar
                          <widget class="QLabel" name="label_19">
                           <property name="font">
                            <font>
-                            <bold>true</bold>
+                            <bold>false</bold>
                            </font>
                           </property>
                           <property name="text">

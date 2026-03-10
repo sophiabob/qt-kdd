@@ -43,14 +43,91 @@ void UserRepository::logDatabaseError(const QString& context, const QSqlError& e
 #endif
 }
 
+
+
+Result<bool> UserRepository::validation(const User& user)
+{
+    if (loginExists(user.login()))
+        return Result<bool>::err(ErrorInfo::validation("login", "Логин уже занят"));
+    \
+    if (tabNumExists(user.employeeNumber()))
+        return Result<bool>::err(ErrorInfo::validation("tabNum", "Табельный номер уже занят"));
+
+    if (cardIdExists(user.cardId()))
+        return Result<bool>::err(ErrorInfo::validation("cardId", "Идентификатор карты уже зарегистрирован"));
+
+    if (codeExists(user.accessCode()))
+        return Result<bool>::err(ErrorInfo::validation("code", "Код пропуска уже занят"));
+
+    return Result<bool>::ok(true);
+}
+
+// === Проверки уникальности в БД ===
+bool UserRepository::loginExists(const QString& login)
+{
+    //if (login.isEmpty()) return false;
+    return withDbConnection<bool>([&](QSqlDatabase& db) -> bool {
+        QSqlQuery q(db);  // ← Используем гарантированно открытый db
+        q.prepare("SELECT COUNT(*) FROM users WHERE login = :login");
+        q.bindValue(":login", login);
+
+        if (!q.exec()) {
+            qCritical() << "Query failed:" << q.lastError().text();
+            return false;
+        }
+        return q.next() && q.value(0).toInt() > 0;
+    });
+}
+
+bool UserRepository::tabNumExists(int tabNum)
+{
+    //if (tabNum <= 0) return false;
+    return withDbConnection<bool>([&](QSqlDatabase& db) -> bool {
+        QSqlQuery q(db);
+        q.prepare("SELECT COUNT(*) FROM users WHERE tab_num = :tab_num");
+        q.bindValue(":tab_num", tabNum);
+        return q.exec() && q.next() && q.value(0).toInt() > 0;
+    });
+}
+
+bool UserRepository::cardIdExists(const QString& cardId)
+{
+    //if (cardId.isEmpty()) return false;
+    return withDbConnection<bool>([&](QSqlDatabase& db) -> bool {
+        QSqlQuery q(db);
+        q.prepare("SELECT COUNT(*) FROM users WHERE card_id = :card_id");
+        q.bindValue(":card_id", cardId);
+        return q.exec() && q.next() && q.value(0).toInt() > 0;
+    });
+}
+
+bool UserRepository::codeExists(const QString& code)
+{
+    //if (code.isEmpty()) return false;
+    return withDbConnection<bool>([&](QSqlDatabase& db) -> bool {
+        QSqlQuery q(db);
+        q.prepare("SELECT COUNT(*) FROM users WHERE code = :code");
+        q.bindValue(":code", code);
+        return q.exec() && q.next() && q.value(0).toInt() > 0;
+    });
+}
+
+
+
 //создать пользователя
 Result<int> UserRepository::createUser(const User& user)
 {
     return withDbConnection<Result<int>>([&](QSqlDatabase& db) -> Result<int> {
         try {
             QSqlQuery(db).exec("SET client_encoding TO 'UTF8'");
-
             QSqlQuery query(db);
+
+            auto validateResult = validation(user);
+            if (!validateResult.isOk){
+                qCritical() << "[validateResult ERROR]:" << validateResult.error.message;
+                //return Result<int>::err(validateResult.error);
+                throw std::runtime_error(validateResult.error.message.toStdString());
+            }
 
             if (!query.prepare(R"(
                 INSERT INTO users (login, password, name_0, name_1, name_2, snils, gender, birthday,
@@ -67,7 +144,7 @@ Result<int> UserRepository::createUser(const User& user)
 
             user.bindToQueryUser(query);  // Привязка данных
 
-            if (!query.exec()) {
+            if (!query.exec()) {//проверка на уникальность
                 throw std::runtime_error("Exec failed: " + query.lastError().text().toStdString());
             }
 
@@ -79,112 +156,6 @@ Result<int> UserRepository::createUser(const User& user)
             return Result<int>::err(ErrorInfo::database(QString::fromStdString(e.what())));
         }
     });
-}
-
-
-
-
-
-
-
-
-
-
-/*
-
-    // Теперь вызываем loginExists
-    bool exists = loginExists(user.login());
-    qDebug() << "4: loginExists result =" << exists;
-
-    if (exists) {
-        qDebug() << "5: login busy";
-        return Result<int>::err(ErrorInfo::validation("login", "Логин занят"));
-    } else {
-        qDebug() << "6: login free";
-    }
-
-    qDebug() << "2";
-
-    //до обновления имён таблицы должно быть тут
-    int user_id = 1; // Значение по умолчанию, если таблица пуста
-    if (query.exec("SELECT MAX(user_id) AS max_id FROM users;")) {
-
-        qDebug() << "3";
-        if (query.next()) {
-            user_id = query.value("max_id").toInt() + 1;
-        }
-    } else {
-
-        qDebug() << "4";
-        qDebug() << "Ошибка выполнения запроса: не удаётся user_id++ для записи в БД \n" << query.lastError().text();
-    }
-
-    query.clear();
-
-
-    qDebug() << "5";
-
-
-    QSqlQuery q(m_db);
-    q.prepare(R"(
-        INSERT INTO users (
-            login, password, name_0, name_1, name_2, snils, gender, birthday,
-            role, tab_num, department, card_id, set_ID, kas_ID, mesh_ID,
-            doz_tld_id, cell_date, dose_year, dose_year_now, dose_year_now_ppd,
-            code, block, last_update
-        ) VALUES (
-            :login, :password, :name_0, :name_1, :name_2, :snils, :gender, :birthday,
-            :role, :tab_num, :department, :card_id, :set_ID, :kas_ID, :mesh_ID,
-            :doz_tld_id, :cell_date, :dose_year, :dose_year_now, :dose_year_now_ppd,
-            :code, :block, :last_update
-        )
-    )");
-
-    auto newUser = User::fromQuery(q);  // ← Вся магия в одной строке!
-    if (newUser) {
-        qDebug() << "Loaded:" << newUser->login() << newUser->surname();
-    }
-
-    //user.bindToQuery(q); //query.bindValue(":login", QVariant("admin")) и тд
-    //q.bindValue(":last_update", QDateTime::currentDateTime());
-
-    if (!q.exec()) {
-        logDatabaseError("UserRepository::createUser", q.lastError());
-        return Result<int>::err(ErrorInfo::validation("БД", "Ошибка БД: " + q.lastError().text()));
-    } else {
-        auto user = User::fromQuery(q);  // ← Вся магия в одной строке!
-        q.bindValue(":last_update", QDateTime::currentDateTime());
-        if (user) {
-            qDebug() << "Loaded:" << user->login() << user->surname();
-        }
-    }
-
-    query.clear();
-
-    int newId = q.lastInsertId().toInt();
-    return Result<int>::ok(newId > 0 ? newId : -1); //возвращаем id нового пользователя
-*/
-
-
-// существует ли логин
-bool UserRepository::loginExists(const QString& login)
-{
-    QSqlQuery q(m_db);
-
-    qDebug() << "0_1";
-
-    q.prepare("SELECT COUNT(*) FROM users WHERE login = :login");
-    q.bindValue(":login", login);
-
-    qDebug() << "0_2";
-
-    if (q.exec() && q.next()) {
-        return q.value(0).toInt() > 0;
-    }
-
-    qDebug() << "0_3";
-
-    return false;
 }
 
 

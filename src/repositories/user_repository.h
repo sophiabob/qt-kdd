@@ -45,9 +45,15 @@ public:
     explicit UserRepository(QSqlDatabase db);
 
     User* mapQueryToUser(const QSqlQuery& query) const;
-    bool loginExists(const QString& login);
     Result<int> createUser(const User& user); // Create → возвращает ID //createUser(const User& user);
 
+
+
+    Result<bool> validation(const User& user);
+    bool loginExists(const QString& login);
+    bool tabNumExists(int tabNum);
+    bool cardIdExists(const QString& cardId);
+    bool codeExists(const QString& code);
 
 
 
@@ -65,6 +71,8 @@ private:
 
     //Ui::MainWindow *ui; // указатель на сгенерированный UI
     Welcome *welcomeWindow = nullptr; // окно приветствия (может быть nullptr)
+
+
 
 };
 

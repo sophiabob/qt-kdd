@@ -503,8 +503,6 @@ private:
     void initFieldMaps();
     std::vector<FieldRecord> m_userFormFields;
 
-
-    QString checkValidForUser(const User& user);
     UserRepository* m_repo;
     // ==================== члены класса ====================
 
@@ -609,6 +607,9 @@ private:
     // передача данных из пользователя в форму и обратно
     void userToForm(QWidget *parent);
     //void formToUser(QWidget *parent);
+
+
+    QString checkValidForUser(const User& user) const;
 
 protected:
     // фильтр событий (например, для обработки специальных кликов)

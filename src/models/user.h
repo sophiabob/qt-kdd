@@ -153,7 +153,7 @@ public: //✅
     void setId(int id) { m_id = id; }
 
     void setLogin(const QString& login) { m_login = login; }
-    void setPasswordHash(const QString& v) { m_passwordHash = v; }
+    void setPasswordHash(const QString& passwordHash) { m_passwordHash = passwordHash; }//void setPasswordHash(const QString& v) { m_passwordHash = v; }
 
     void setFirstName(const QString& firstName) { m_firstName = firstName; }
     void setSurname(const QString& surname) { m_surname = surname; }
