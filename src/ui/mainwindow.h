@@ -1,114 +1,72 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "doubleclickbutton.h"
-#include "../models/meshstatusmodel.h"
-// #include "welcome.h"
 class UserRepository;
 class User;
+
+// ==================== подключаемые библиотеки ====================
 
 #include <QMessageBox>
 #include <QCryptographicHash>
 
-// Основные классы Qt
 #include <QMainWindow>
 #include <QWidget>
 #include <QObject>
-#include <QVariant>
-#include <QProgressDialog>
 
-// Контейнеры и структуры данных Qt
+// ядро Qt
+#include <QtCore>
+#include <QtGlobal>
+#include <QTimer>
+#include <QDate>
+#include <QDateTime>
+#include <QVector>
 #include <QMap>
 #include <QList>
-#include <QVector>
-#include <QPair>
+#include <QVariant>
+#include <QRegularExpression>
 
-// Диалоги и элементы ввода
-#include <QMessageBox>
-#include <QInputDialog>
-#include <QLineEdit>
-#include <QFileDialog>
-#include <QComboBox>
+// интерфейс и виджеты
+#include <QPushButton>
 #include <QCheckBox>
 #include <QRadioButton>
-#include <QPushButton>
+#include <QLabel>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QInputDialog>
 #include <QDateEdit>
 #include <QTableWidget>
 #include <QTableWidgetItem>
-
-// Работа с базой данных
-#include <QtSql/QSqlDatabase>
-#include <QtSql/QSqlQuery>
-#include <QtSql/QSqlError>
-#include <QtSql/QSqlQueryModel>
-#include <QtSql/QSqlTableModel>
-#include <QtSql/QSqlRecord>
-
-// Макеты и интерфейс
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QScrollArea>
-#include <QStatusBar>
-#include <QLabel>
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QGraphicsProxyWidget>
-
-// Работа с файлами и данными
-#include <QFile>
-#include <QTextStream>
-#include <QByteArray>
-#include <QStandardPaths>
-#include <QBuffer>
-
-// Даты и время
-#include <QDate>
-#include <QDateTime>
-#include <QTimer>
-
-// События
-#include <QMouseEvent>
-#include <QEvent>
-
-// Регулярные выражения
-#include <QRegularExpression>
-
-// Мультимедиа
+#include <QScrollArea>
+#include <QStatusBar>
 #include <QMovie>
 
-// Процессы и системные функции
+// компоновка
+#include <QVBoxLayout>
+
+// работа с базами данных
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QSqlQueryModel>
+#include <QSqlTableModel>
+#include <QSqlRecord>
+
+// файлы, диалоги и системные операции
+#include <QFile>
+#include <QFileDialog>
+#include <QTextStream>
+#include <QMessageBox>
 #include <QProcess>
 #include <QDesktopServices>
+#include <QStandardPaths>
+
+// приложение и экран
 #include <QApplication>
 #include <QScreen>
-#include <QtGlobal>
-
-// Отладка
-#include <QDebug>
-#include <QLoggingCategory>
-
-#include <QXmlStreamWriter>    // Для создания XML структуры Excel/Word
-#include <QByteArray>          // Для работы с бинарными данными
-#include <QBuffer>             // Для буферизации данных
-#include <QTextDocument>       // Для форматирования текста
-#include <QTextCursor>         // Для позиционирования в документе
-#include <QTextTable>          // Для создания таблиц в Word
-#include <QException>          // Обработчик ошибок для try
-
-//#include <QAxObject>
-//#include <QAxWidget>
-
-#include <QDateTime>
-//#include <QDomDocument>        // Для работы с XML (альтернатива QXmlStreamWriter)
-#include <QPixmap>
-#include <QBuffer>
-#include <QByteArray>
-#include <QSqlQuery>
-#include <QTimer>
-#include <QMainWindow>
-#include <array>
-
-
+#include <QMouseEvent>
 
 #include <QCryptographicHash>
 #include <QRandomGenerator>
@@ -121,44 +79,57 @@ class User;
 #include <QDateTime>             // Для QDateTime
 #include <QByteArray>            // Для QByteArray
 
+// ==================== новые хелперы (добавлено после слияния) ====================
+#include "src/core/database_helper.h"
+#include "src/core/database_manager.h"
+#include "src/core/db_config.h"
 
+// Если потребуются модели и репозитории в заголовке (иначе они будут включены в .cpp)
+#include "src/models/user.h"
+#include "src/repositories/user_repository.h"
+
+// объявление пространства имён для UI, сгенерированного из .ui файла
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
 }
 QT_END_NAMESPACE
 
-// Вперед объявление класса Welcome
+// предварительное объявление класса Welcome (чтобы избежать циклических включений)
 class Welcome;
 class MeshStatusModel;
 
-// Структуры данных приложения
+// ==================== структуры данных ====================
+
+// данные о кассетнице
 struct KasData {
     int set_id;
     int kas_id;
     QString kas_name;
     double kas_height;
     double kas_width;
-    QString kas_block;
-    QString kas_note;
+    QString kas_block; // статус блокировки
+    QString kas_note;  // примечание
     QString last_update;
 };
 
+// данные о ячейке
 struct MeshData {
     int set_id;
     int kas_id;
     int mesh_id;
-    int user_id;
-    QString doz_tld_id;
+    int user_id;        // кто занял ячейку
+    QString doz_tld_id; // идентификатор дозиметра
     QString mesh_status;
     QString mesh_note;
     QString last_update;
 };
 
+// структуры для поиска (чтобы хранить id и текст для комбобоксов)
 struct DutyDataSearch {
     QString id;
-    QString displayText;
-    QString searchText;
+    QString displayText; // что показываем пользователю
+    QString searchText;  // по чему ищем
 };
 
 struct UsersDutyDataSearch {
@@ -167,20 +138,11 @@ struct UsersDutyDataSearch {
     QString searchText;
 };
 
-struct UserDataSearsh {
+struct UserDataSearch {
     QString id;
     QString displayText;
     QString searchText;
 };
-
-struct FileRecord {
-    QString description;
-    QString path;
-};
-
-// Определение типов для массивов
-using KasArray = QMap<int, KasData>; // Используем QMap для доступа по kas_id
-using MeshArray = QMap<int, MeshData>; // Используем QMap для доступа по kas_id
 
 struct FieldRecord {
     QString fieldName;           // Имя поля: "login", "surname"...
@@ -188,24 +150,31 @@ struct FieldRecord {
     enum Type { Text, Int, Float, Date, Label, DateTime, ComboBox } type;
 };
 
+struct FileRecord {
+    QString description;
+    QString path;
+};
+
+
+
 // псевдонимы для удобства
 using KasArray = QMap<int, KasData>;
 using MeshArray = QMap<int, MeshData>;
 
-
-// Регистрация кастомных типов для QVariant
+// регистрируем наши типы, чтобы их можно было использовать в QVariant
 Q_DECLARE_METATYPE(KasData)
 Q_DECLARE_METATYPE(MeshData)
 Q_DECLARE_METATYPE(DutyDataSearch)
 Q_DECLARE_METATYPE(UsersDutyDataSearch)
-Q_DECLARE_METATYPE(UserDataSearsh)
+Q_DECLARE_METATYPE(UserDataSearch)
 Q_DECLARE_METATYPE(QList<KasData>)
 Q_DECLARE_METATYPE(QList<MeshData>)
 Q_DECLARE_METATYPE(QList<DutyDataSearch>)
 Q_DECLARE_METATYPE(QList<UsersDutyDataSearch>)
-Q_DECLARE_METATYPE(QList<UserDataSearsh>)
+Q_DECLARE_METATYPE(QList<UserDataSearch>)
 
-// Основной класс MainWindow
+// ==================== главное окно приложения ====================
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -214,23 +183,6 @@ public:
     MainWindow(int userId, QWidget *parent = nullptr);
     ~MainWindow();
 
-    QString detectOS() {
-        QString osName;
-#if defined(Q_OS_WIN)
-        osName = "Windows";
-#elif defined(Q_OS_LINUX)
-        osName = "Linux";
-#elif defined(Q_OS_UNIX)
-        osName = "Unix";
-#else
-        osName = "Unknown OS";
-#endif
-        return osName;
-
-
-
-private slots:
-    // Слоты для пользователей
     // маленькая утилита для определения операционной системы
     QString detectOS() {
 #if defined(Q_OS_WIN)
@@ -250,119 +202,77 @@ private slots:
     //User formToUser() const;
     // ==================== основные слоты (обработчики нажатий) ====================
 
+    // работа с пользователями
     void on_btnCreateNewUser_pressed();
-    void on_btnAddPhoto_pressed();
     void on_btnCreateUser_pressed();
     void on_btnChangeUser_pressed();
     void on_btn_userClear_pressed();
     void on_btnSearchUser_pressed();
-    void on_btnChangePhoto_pressed();
-    void on_pushButton_userUpdate_pressed();
-    void updateUsersDatabase();
-    void updateCurrentUserFromDatabase(int userId);
-    void checkRole();
+    void updateUsersDatabase(); // обновляем список пользователей в интерфейсе
+    void checkRole(); // проверяем права текущего пользователя
 
-    // Слоты для наборов (Set)
+    // фотографии пользователей
+    void on_btnAddPhoto_pressed();
+    void on_btnChangePhoto_pressed();
+
+    // управление сетами, кассетницами и ячейками (основное)
     void on_btnSetSave_pressed();
     void on_btnSetChange_pressed();
     void on_btnSetCreateNew_pressed();
-    void loadSetData();
-    void onSetSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
-    // Слоты для наборов (Set) в KID
-    void on_btnSetSave_kid_pressed();
-    void on_btnSetChange_kid_pressed();
-    void on_btnSetCreateNew_kid_pressed();
-    void loadSetData_kid();
-    void onSetSelectionChanged_kid(const QItemSelection &selected, const QItemSelection &deselected);
-
-    // Слоты для кассетниц (Kas)
     void on_btnKasSave_pressed();
     void on_btnKasChange_pressed();
     void on_btnKasCreateNew_pressed();
-    void loadListOfKas();
-    void loadFilteredKasData();
-    void onKasSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
-    void on_comboBox_listOfKas_currentTextChanged(const QString &arg1);
 
-    // Слоты для кассетниц (Kas) в KID
-    void on_btnKasSave_kid_pressed();
-    void on_btnKasChange_kid_pressed();
-    void on_btnKasCreateNew_kid_pressed();
-    void loadListOfKas_kid();
-    void loadFilteredKasData_kid();
-    void onKasSelectionChanged_kid(const QItemSelection &selected, const QItemSelection &deselected);
-    void on_comboBox_listOfKas_kid_currentTextChanged(const QString &index);
-
-    // Слоты для ячеек (Mesh)
     void on_btnMeshSave_pressed();
     void on_btnMeshChange_pressed();
     void on_btnMeshCreateNew_pressed();
-    void loadFilteredMeshData(QString kas_id);
-    void onMeshSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
-    // Слоты для ячеек (Mesh) в KID
+    // управление сетами, кассетницами и ячейками (КИД - история изменений)
+    void on_btnSetSave_kid_pressed();
+    void on_btnSetChange_kid_pressed();
+    void on_btnSetCreateNew_kid_pressed();
+
+    void on_btnKasSave_kid_pressed();
+    void on_btnKasChange_kid_pressed();
+    void on_btnKasCreateNew_kid_pressed();
+
     void on_btnMeshSave_kid_pressed();
     void on_btnMeshChange_kid_pressed();
     void on_btnMeshCreateNew_kid_pressed();
-    void loadFilteredMeshData_kid(QString kas_id);
-    void onMeshSelectionChanged_kid(const QItemSelection &selected, const QItemSelection &deselected);
 
-    // Слоты для дежурств (Duty)
+    // дозы и PPD (персональные дозиметры)
+    void on_pushButton_DoseCleanInput_pressed();
+    void on_pushButton_DoseSaveNew_pressed();
+    void on_pushButton_DoseSaveChange_pressed();
+    void on_pushButton_ppdFilterClean_pressed();
+    void on_btn_ppdSearch_pressed();
+    void on_pushButton_ppdFilter_pressed();
+
+    // дежурства и назначения
     void on_btn_saveNewDuty_pressed();
     void on_btn_saveNewDutyUser_pressed();
+    void on_btn_createNewDuty_pressed();
     void on_btn_saveChangeDuty_pressed();
     void on_btn_saveChangeUserDuty_pressed();
-    void on_btn_createNewDuty_pressed();
-    void on_table_userDuty_cellPressed(int row, int column);
-    void on_tableDuty_cellPressed(int row, int column);
-    void refresh_duty_table();
-    void tableUsersDutyUpd();
+    void refresh_duty_table(); // обновляем таблицу дежурств
+    void tableUsersDutyUpd(); // обновляем таблицу назначений пользователей на дежурства
 
-    // Слоты для пользовательских дежурств
-    void on_btn_userDutySearch_pressed();
-    void on_btn_userDutyClear_pressed();
-    void on_btnUserDutySearch_pressed();
-    void onUserDutySearchTextChanged(const QString &text);
-    void showAllUserDuties();
-    void setupUserDutySearch();
-
-    // Слоты для истории
-    void usersHistoryToTable();
+    // загрузка истории в таблицы
     void setHistoryToTable();
     void kasHistoryToTable();
     void meshHistoryToTable();
-    void loadDutyUsersHistoryToTable();
+    void usersHistoryToTable();
     void loadDutyHistoryToTable();
+    void loadDutyUsersHistoryToTable();
+    void loadDosePpdHistoryToTable();
 
-    // Слоты для истории в KID
+    // история для КИД
     void setHistoryToTable_kid();
     void kasHistoryToTable_kid();
     void meshHistoryToTable_kid();
 
-    // Слоты для доз (Dose)
-    void on_pushButton_DoseCleanInput_pressed();
-    void on_pushButton_DoseSaveNew_pressed();
-    void on_pushButton_DoseSaveChange_pressed();
-    void loadDosePpdToTable();
-    void loadDosePpdHistoryToTable();
-    void on_tableWidget_Dose_cellPressed(int row, int column);
-
-    // Слоты для поиска PPD
-    void on_pushButton_ppdFilterClean_pressed();
-    void on_btn_ppdSearch_pressed();
-    void on_pushButton_ppdFilter_pressed();
-    void setupPpdSearch();
-    void onPpdSearchTextChanged(const QString &text);
-    void showAllPpdRows();
-
-    // Слоты для фильтров истории
-    void on_btnUserFilterGo_2_pressed();
-    void on_btnUserFilterStop_2_pressed();
-    void on_btn_dutyUsersFilterGo_pressed();
-    void on_btn_dutyUsersFilterStop_pressed();
-    void on_btn_dutyFilterGo_pressed();
-    void on_btn_dutyFilterStop_pressed();
+    // кнопки фильтрации истории (включить/выключить)
     void on_btn_SetFilterGo_pressed();
     void on_btn_SetFilterStop_pressed();
     void on_btn_KasFilterGo_pressed();
@@ -371,8 +281,14 @@ private slots:
     void on_btn_MeshFilterStop_pressed();
     void on_btn_DoseHistoryFilterGo_pressed();
     void on_btn_DoseHistoryFilterStop_pressed();
+    void on_btn_dutyFilterGo_pressed();
+    void on_btn_dutyFilterStop_pressed();
+    void on_btn_dutyUsersFilterGo_pressed();
+    void on_btn_dutyUsersFilterStop_pressed();
+    void on_btnUserFilterGo_2_pressed();
+    void on_btnUserFilterStop_2_pressed();
 
-    // Слоты для фильтров истории в KID
+    // фильтрация для истории КИД
     void on_btn_SetFilterGo_kid_pressed();
     void on_btn_SetFilterStop_kid_pressed();
     void on_btn_KasFilterGo_kid_pressed();
@@ -380,78 +296,83 @@ private slots:
     void on_btn_MeshFilterGo_kid_pressed();
     void on_btn_MeshFilterStop_kid_pressed();
 
-    // Слоты для экспорта в файл
-    void on_pushButton_usersHistoryFile_pressed();
-    void on_pushButton_dutyUsersFile_2_pressed();
-    void on_pushButton_dutyHistoryFile_pressed();
+    // экспорт истории в файлы (например, CSV)
     void on_pushButton_SetHistoryFile_pressed();
     void on_pushButton_KasHistoryFile_pressed();
     void on_pushButton_MeshHistoryFile_pressed();
+    void on_pushButton_dutyHistoryFile_pressed();
+    void on_pushButton_dutyUsersFile_2_pressed();
+    void on_pushButton_usersHistoryFile_pressed();
     void on_pushButton_DoseHistoryFile_pressed();
 
-    // Слоты для экспорта в файл в KID
+    // экспорт для КИД
     void on_pushButton_SetHistoryFile_kid_pressed();
     void on_pushButton_KasHistoryFile_kid_pressed();
     void on_pushButton_MeshHistoryFile_kid_pressed();
 
-    // Слоты для фильтров KDD
-    void on_btnKddFilterGo_clicked();
-
-    // Слоты для отчетов
-    void on_btn_createReport_pressed();
-
-    // Слоты для навигации и управления
-    void on_pushButton_2_pressed();
-    void on_pushButton_3_clicked();
+    // навигация и общие действия
     void on_pushButton_Exit_pressed();
     void on_pushButton_Back_pressed();
     void on_pushButton_help_pressed();
     void on_pushButton_onSet_pressed();
     void on_pushButton_onKas_pressed();
+    void on_pushButton_2_pressed();
+    void on_pushButton_3_clicked();
 
-    // Слоты для поиска пользователей
+    // отчёты
+    void on_btn_createReport_pressed();
+
+    // загрузка и отображение данных
+    void loadSetData();
+    void loadSetData_kid();
+    void loadListOfKas();
+    void loadListOfKas_kid();
+    void loadFilteredKasData();
+    void loadFilteredKasData_kid();
+    void loadFilteredMeshData(QString kas_id);
+    void loadFilteredMeshData_kid(QString kas_id);
+    void loadDosePpdToTable();
+    void updateDataFromDatabase(); // обновляем различные данные из БД
+
+    // обработка выбора строк в таблицах
+    void onSetSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void onKasSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void onMeshSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void on_tableWidget_Dose_cellPressed(int row, int column);
+    void on_tableDuty_cellPressed(int row, int column);
+    void on_table_userDuty_cellPressed(int row, int column);
+
+    // обработка выбора для КИД
+    void onSetSelectionChanged_kid(const QItemSelection &selected, const QItemSelection &deselected);
+    void onKasSelectionChanged_kid(const QItemSelection &selected, const QItemSelection &deselected);
+    void onMeshSelectionChanged_kid(const QItemSelection &selected, const QItemSelection &deselected);
+
+    // изменение выбора в комбобоксах
+    void on_comboBox_listOfKas_currentTextChanged(const QString &arg1);
+    void on_comboBox_listOfKas_kid_currentTextChanged(const QString &index);
+
+    // поиск и фильтрация данных
+    void on_btnKddFilterGo_clicked();
+    void on_btn_userDutySearch_pressed();
+    void on_btn_userDutyClear_pressed();
     void onSearchTextChanged(const QString &text);
-    void showAllUsers();
-    void setupSearch();
+    void onUserDutySearchTextChanged(const QString &text);
+    void onPpdSearchTextChanged(const QString &text);
 
-    // Слоты для обновления данных
-    void updateDataFromDatabase();
-    void comboboxUpdateAll();
+    // ==================== добавление записей в историю ====================
 
-    // Слоты для обновления комбобоксов
-    void updateSetComboBox(QComboBox* comboBox);
-    void updateSetComboBox(QComboBox* comboBox1, QComboBox* comboBox2);
-    void updateSetComboBox(QComboBox* comboBox1, QComboBox* comboBox2, QComboBox* comboBox3);
-    void updateSetKidComboBox(QComboBox* comboBox);
-    void updateSetKidComboBox(QComboBox* comboBox1, QComboBox* comboBox2);
-    void updateSetKidComboBox(QComboBox* comboBox1, QComboBox* comboBox2, QComboBox* comboBox3);
-    void onSetComboBoxChanged();
-    void onKasComboBoxChanged();
-    void onSetKidComboBoxChanged();
-    void onKasKidComboBoxChanged();
-
-    // Вспомогательные слоты
-    void updateListSetForHistory();
-    void updateListSetForHistory_kid();
-
-    // Методы экспорта
-    bool saveTableToCSV(QTableWidget *table, const QString &filePath);
-    bool saveTableToExcel(QTableWidget *table, const QString &filePath);
-    bool saveTableToWord(QTableWidget *table, const QString &filePath);
-
-
-    // Методы для добавления истории
+    // добавить запись об изменении пользователя
     bool addUserHistory(
         int userId,
         const QString &login,
         const QString &password,
-        const QString &name0,
-        const QString &name1,
-        const QString &name2,
+        const QString &name0, // фамилия
+        const QString &name1, // имя
+        const QString &name2, // отчество
         const QString &gender,
         const QDate &birthday,
         const QString &role,
-        int tabNum,
+        int tabNum, // табельный номер
         const QString &department,
         const QString &cardId,
         int setId,
@@ -464,10 +385,11 @@ private slots:
         double doseYearNowPpd,
         const QString &code,
         const QString &block,
-        const QString &changing_user_id,
-        const QString &type_edit
+        const QString &changing_user_id, // кто внёс изменение
+        const QString &type_edit // тип изменения: create, update, delete
         );
 
+    // добавить запись об изменении назначения на дежурство
     bool addUserDutyHistory(
         int users_duty_id,
         int user_id,
@@ -480,6 +402,7 @@ private slots:
         const QString &type_edit
         );
 
+    // добавить запись об изменении дежурства
     bool addDutyHistory(
         const QString& duty_id,
         int type_duty,
@@ -496,18 +419,22 @@ private slots:
         const QString &type_edit
         );
 
+    // добавить запись об изменении сета
     bool addSetHistory(int setId, const QString &setName, const QString &ipSet,
                        int setQuantity, const QString &setBlock, const QString &setNote,
                        const QString &changing_user_id, const QString &type_edit);
 
+    // добавить запись об изменении кассетницы
     bool addKasHistory(int setId, int kasId, const QString &kasName, int kasHeight,
                        int kasWidth, const QString &kasBlock, const QString &kasNote,
                        const QString &changing_user_id, const QString &type_edit);
 
+    // добавить запись об изменении ячейки
     bool addMeshHistory(int setId, int kasId, int meshId, int userId,
                         const QString &dozTldId, int meshStatus, const QString &meshNote,
                         const QString &changing_user_id, const QString &type_edit);
 
+    // аналогичные методы для истории КИД
     bool addSetHistory_kid(int setId, const QString &setName, const QString &ipSet,
                            int setQuantity, const QString &setBlock, const QString &setNote,
                            const QString &changing_user_id, const QString &type_edit);
@@ -520,6 +447,7 @@ private slots:
                             const QString &dozTldId, int meshStatus, const QString &meshNote,
                             const QString &changing_user_id, const QString &type_edit);
 
+    // добавить запись об изменении дозы PPD
     bool addDosePpdHistory(
         int dosePpdId,
         int userId,
@@ -535,25 +463,58 @@ private slots:
         const QDateTime &finishWork,
         const QString &lastUpdate,
         const QString userIdChange,
-        const QString type_edit);
+        const QString type_edit
+        );
 
-    // Вспомогательные методы
-    int extractIdFromComboBox(const QString& text);
-    void setComboBoxValue(QComboBox* comboBox, int value);
+    // ==================== работа с комбобоксами ====================
+
+    // обновление комбобоксов для сетов (основное)
+    void updateSetComboBox(QComboBox* comboBox);
+    void updateSetComboBox(QComboBox* comboBox1, QComboBox* comboBox2);
+    void updateSetComboBox(QComboBox* comboBox1, QComboBox* comboBox2, QComboBox* comboBox3);
+    void onSetComboBoxChanged();
+    void onKasComboBoxChanged();
+
+    // обновление комбобоксов для сетов (КИД)
+    void updateSetKidComboBox(QComboBox* comboBox);
+    void updateSetKidComboBox(QComboBox* comboBox1, QComboBox* comboBox2);
+    void updateSetKidComboBox(QComboBox* comboBox1, QComboBox* comboBox2, QComboBox* comboBox3);
+    void onSetKidComboBoxChanged();
+    void onKasKidComboBoxChanged();
+
+    // вспомогательные методы для работы с комбобоксами
+    void comboboxUpdateAll(); // обновить все комбобоксы разом
+    void updateListSetForHistory(); // обновить список сетов для истории
+    void updateListSetForHistory_kid(); // то же для КИД
+    void setComboBoxValue(QComboBox* comboBox, int value); // установить значение в комбобокс
+    int extractIdFromComboBox(const QString& text); // извлечь ID из текста комбобокса
+
+    // общие методы обновления комбобоксов
     void updateComboBox(QComboBox* combo, const QString& queryText,
-                        const QString& bindValue1 = "", const QString& bindValue2 = "");
+                        const QString& bindValue1 = QString(),
+                        const QString& bindValue2 = QString());
+
     void updateComboBox_kid(QComboBox* combo, const QString& queryText,
                             const QString& bindValue1 = QString(),
                             const QString& bindValue2 = QString());
-    void setupAllUserComboBoxes();
+
+    // настройка комбобоксов с поиском
+    void setupSearch();
+    void setupUserDutySearch();
+    void setupPpdSearch();
     void setupSearchUserComboBox(QComboBox* comboBox);
     void setupSearchDutyComboBox(QComboBox* comboBox);
     void setupSearchUsersDutyComboBox(QComboBox* comboBox);
+    void setupAllUserComboBoxes();
 
-    //эксплуатация
-    void comboboxExploitation();
+    // вспомогательные методы для поиска
+    void showAllUsers();
+    void showAllUserDuties();
+    void showAllPpdRows();
+
+    void updateCurrentUserFromDatabase(int userId);
+    void on_pushButton_userUpdate_pressed();
     void on_btn_createReport_clicked();
-
 
 private:
     void initFieldMaps();
@@ -561,29 +522,26 @@ private:
 
     UserRepository* m_repo;
     // ==================== члены класса ====================
->>>>>>> new-architecture:src/ui/mainwindow.h
 
-private:
-    // UI и окна
-    Welcome *welcomeWindow;
-    Ui::MainWindow *ui;
+    // интерфейс и окна
+    Ui::MainWindow *ui; // указатель на сгенерированный UI
+    Welcome *welcomeWindow = nullptr; // окно приветствия (может быть nullptr)
 
-    // Данные пользователя
-    int currentUserId;
-    QByteArray photoData;
+    // данные текущего пользователя
+    int currentUserId; // ID пользователя, который вошёл в систему
+    QByteArray photoData; // фотография пользователя в бинарном виде
 
-    // База данных
+    // подключение к базе данных
     QSqlDatabase db;
 
-    // Таймеры и флаги
-    QTimer m_doubleClickTimer;
-    bool m_waitingForSecondClick = false;
+    // модели данных для отображения
+    MeshStatusModel* m_currentMeshModel = nullptr;
 
-    // Структуры данных
+    // данные для поиска (кешируем, чтобы не ходить в БД каждый раз)
     struct UserData {
         QString id;
-        QString displayText;
-        QString searchText;
+        QString displayText; // что показываем в комбобоксе
+        QString searchText;  // по чему фильтруем
     };
     QVector<UserData> m_usersData;
 
@@ -594,21 +552,13 @@ private:
     };
     QVector<DutyData> m_dutiesData;
 
-    // Модели и данные
-    MeshStatusModel* m_currentMeshModel = nullptr;
-
-    // Настройки подключения к БД
+    // конфигурация подключения к БД (возможно для работы с ячейками)
     QString G_ip_database_cell;
     QString G_DatabaseName_cell;
     QString G_UserName_cell;
     QString G_Password_cell;
 
-    // Элементы поиска
-    QPushButton *clearSearchButton;
-    QPushButton *clearUserDutySearchButton;
-    QPushButton *clearPpdSearchButton;
-
-    // Комбобоксы для выбора
+    // указатели на комбобоксы для связи между ними
     QComboBox* m_setComboBox = nullptr;
     QComboBox* m_kasComboBox = nullptr;
     QComboBox* m_meshComboBox = nullptr;
@@ -617,13 +567,14 @@ private:
     QComboBox* m_kasKidComboBox = nullptr;
     QComboBox* m_meshKidComboBox = nullptr;
 
+    // кнопки очистки поиска
+    QPushButton *clearSearchButton = nullptr;
+    QPushButton *clearUserDutySearchButton = nullptr;
+    QPushButton *clearPpdSearchButton = nullptr;
 
-
-    // Диалоговые окна (указатели для управления)
-    QDialog *exportFormatDialog;
-    QComboBox *formatComboBox;
-
-
+    // для обработки двойного клика
+    QTimer m_doubleClickTimer;
+    bool m_waitingForSecondClick = false;
 
     // Хэширование с солью и key stretching (защита от перебора)
     QString hashPasswordSecure(const QString& password) const;
@@ -633,21 +584,6 @@ private:
 
     void on_btnUserDutySearch_pressed();
 
-
-
-
-/*
-    // структура привязки для виджетов
-    struct FieldRecord {
-        QString fieldName;    // Имя поля в БД: "login", "name_0"...
-        QString dbColumn;     // Имя колонки в таблице: "login", "name_0"...
-        QWidget* widget;      // Указатель на виджет
-        enum Type { Text, Int, Float, Date, DateTime, ComboBox, Label } type;
-        bool writable;        // Можно ли записывать в это поле (для INSERT/UPDATE)
-        bool readable;        // Можно ли читать из этого поля (для SELECT)
-    };
-   // QVector<FieldMap> m_fieldMaps;*/
-
     void initFieldMapsUser();
 
     void formToUser(User& user) const;           // Считать все поля из формы в User
@@ -656,10 +592,6 @@ private:
     // работа с одним полем (если нужно точечно)
     QVariant readField(const QString& fieldName) const;
     void writeField(const QString& fieldName, const QVariant& value);
-
-
-    // Вектор полей (заполняется в конструкторе)
-   // std::vector<FieldRecord> m_userFormFields;
 
     // Универсальные функции
     void writeFieldsToForm(const std::vector<FieldRecord>& fields, const QMap<QString, QVariant>& data);
@@ -672,10 +604,16 @@ private:
     void userToForm(QWidget *parent);
     //void formToUser(QWidget *parent);
 
-
     QString checkValidForUser(const User& user) const;
+    void comboboxExploitation();
+    //void MainWindow::on_btn_createReport_clicked()
+
+    bool saveTableToCSV(QTableWidget *table, const QString &filePath);
+    bool saveTableToExcel(QTableWidget *table, const QString &filePath);
+    bool saveTableToWord(QTableWidget *table, const QString &filePath);
 
 protected:
+    // фильтр событий (например, для обработки специальных кликов)
     bool eventFilter(QObject *obj, QEvent *event) override;
 };
 

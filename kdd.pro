@@ -40,7 +40,6 @@ CONFIG += utf8_source
 
 
 SOURCES += \
-    doubleclickbutton.cpp \
     helpers.cpp \
     main.cpp \
     src/core/database_helper.cpp \

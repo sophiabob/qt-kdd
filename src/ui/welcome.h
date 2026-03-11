@@ -76,15 +76,15 @@ private slots:
     void on_btnCencel_pressed();
     bool on_btnSignIn_clicked();
     void on_pushButton_pressed();
-    void on_btnSignIn_pressed();
+    //void on_btnSignIn_pressed();
     void on_pushButton_help_pressed();
-    void on_pushButton_syncBD_pressed();
+    //void on_pushButton_syncBD_pressed();
 
     bool eventFilter(QObject *obj, QEvent *event);
 
 private:
     Ui::Welcome *ui;
-    MainWindow *window;
+    QMainWindow *window;
 
 
     // Основные функции управления БД
