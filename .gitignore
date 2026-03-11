@@ -1,29 +1,30 @@
-# Большой GIF файл (основная проблема)
-img/help.gif
-
-# Файлы Qt
+# User-specific files
 *.pro.user
 *.pro.user.*
-*.qmake.stash
-build-*/
-release/
-debug/
+
+# Build files
+Makefile
+Makefile.*
+.qmake.stash
+build/
+*.o
+*.obj
 *.exe
-*.app
 *.dll
+*.so
+*.dylib
 
-# Сгенерированные файлы
-moc_*.cpp
-moc_*.h
-qrc_*.cpp
-ui_*.h
+# Qt Creator
+*.autosave
+*.creator
+*.creator.user
+*.qmljs*
+*.qmlproject
+*.workspace
 
-# Системные файлы
+# OS
 .DS_Store
 Thumbs.db
 
-# Настройки IDE
-.vscode/
-.idea/
-*.swp
-*.swo
+
+img/help.gif

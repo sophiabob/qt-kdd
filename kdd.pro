@@ -38,24 +38,57 @@ CONFIG += utf8_source
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+
 SOURCES += \
     doubleclickbutton.cpp \
     helpers.cpp \
     main.cpp \
-    mainwindow.cpp \
-    meshstatusmodel.cpp \
-    welcome.cpp
+    src/core/database_helper.cpp \
+    src/ui/mainwindow.cpp \
+    src/ui/welcome.cpp \
+    src/ui/doubleclickbutton.cpp \
+    src/models/meshmodel.cpp \
+    src/models/meshstatusmodel.cpp \
+    src/models/user.cpp \
+    src/repositories/user_repository.cpp \
+    src/core/database_manager.cpp \
+    src/core/db_config.cpp
 
 HEADERS += \
-    doubleclickbutton.h \
     helpers.h \
     mainwindow.h \
-    meshstatusmodel.h \
-    welcome.h
+    src/core/database_helper.h \
+    src/repositories/result.h \
+    src/ui/mainwindow.h \
+    src/ui/welcome.h \
+    src/ui/doubleclickbutton.h \
+    src/models/meshmodel.h \
+    src/models/meshstatusmodel.h \
+    src/models/user.h \
+    src/repositories/user_repository.h \
+    src/core/database_manager.h \
+    src/core/db_config.h
 
 FORMS += \
-    mainwindow.ui \
-    welcome.ui
+    src/ui/mainwindow.ui \
+    src/ui/welcome.ui
+
+# Пути для поиска заголовков
+INCLUDEPATH += $$PWD/src/ui \
+               $$PWD/src/ui/widgets \
+               $$PWD/src/models \
+               $$PWD/src/core
+
+# Конфигурационный файл
+OTHER_FILES += \
+    resources/settings.ini\
+    resources/settings_win.ini
+
+
+
+
+
+
 
 # PostgreSQL подключение (только для Windows)
 win32 {
